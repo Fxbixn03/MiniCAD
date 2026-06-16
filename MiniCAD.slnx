@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MiniCAD.App/MiniCAD.App.csproj" />
+    <Project Path="src/MiniCAD.Core/MiniCAD.Core.csproj" />
+    <Project Path="src/MiniCAD.Renderer/MiniCAD.Renderer.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MiniCAD.Core.Tests/MiniCAD.Core.Tests.csproj" />
+  </Folder>
+</Solution>
