@@ -1,0 +1,104 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CAD - build",
+            "detail": "Baut die gesamte Solution (MiniCAD.slnx).",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/MiniCAD.slnx",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "silent",
+                "clear": true
+            }
+        },
+        {
+            "label": "CAD - rebuild",
+            "detail": "Clean + Build der gesamten Solution.",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/MiniCAD.slnx",
+                "--no-incremental",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "group": "build",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "CAD - clean",
+            "detail": "Entfernt die Build-Artefakte der Solution.",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "${workspaceFolder}/MiniCAD.slnx"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "CAD - restore",
+            "detail": "Stellt die NuGet-Pakete wieder her.",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "restore",
+                "${workspaceFolder}/MiniCAD.slnx"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "CAD - run app",
+            "detail": "Startet die Avalonia-Desktop-App (MiniCAD.App).",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/src/MiniCAD.App/MiniCAD.App.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "CAD - watch app",
+            "detail": "Startet die App mit Hot Reload (dotnet watch).",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "--project",
+                "${workspaceFolder}/src/MiniCAD.App/MiniCAD.App.csproj",
+                "run"
+            ],
+            "problemMatcher": "$msCompile",
+            "isBackground": true
+        },
+        {
+            "label": "CAD - test",
+            "detail": "Führt alle Tests aus.",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "${workspaceFolder}/MiniCAD.slnx"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

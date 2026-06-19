@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch MiniCAD.App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/MiniCAD.App/bin/Debug/net10.0/MiniCAD.App.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/MiniCAD.App",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Attach to process",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}
