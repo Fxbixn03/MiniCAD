@@ -427,3 +427,10 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# AI Agents
+.claude
+CLAUDE.md
+.codex
+.gemini
+lancedb/
