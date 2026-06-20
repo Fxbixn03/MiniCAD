@@ -16,6 +16,7 @@ public enum ShortcutAction
     Spline,
     Point,
     Text,
+    Leader,
     Delete,
     Undo,
     Redo,

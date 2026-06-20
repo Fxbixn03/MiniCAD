@@ -6,13 +6,6 @@ using MiniCAD.Core.Rendering;
 namespace MiniCAD.Core.Tools;
 
 /// <summary>
-/// Request raised by the <see cref="TextTool"/> when an inline editor should open: the host
-/// shows a text field anchored at <see cref="AnchorWorld"/>, seeds it with
-/// <see cref="InitialText"/> and, on confirm, calls <see cref="TextTool.Commit"/>.
-/// </summary>
-public readonly record struct TextEditRequest(Point2D AnchorWorld, string InitialText, bool Multiline);
-
-/// <summary>
 /// Places and edits annotation text. A left click on empty space starts a new text at the
 /// snapped cursor; a click on an existing <see cref="TextEntity"/>/<see cref="MTextEntity"/>
 /// edits it. The actual typing happens in a host-provided inline editor (the tool stays
@@ -73,7 +66,8 @@ public sealed class TextTool : ToolBase
             _editBefore = ((IEditableEntity)existing).CaptureState();
             _pendingPosition = TextPosition(existing);
             _sessionActive = true;
-            EditRequested?.Invoke(new TextEditRequest(_pendingPosition, TextContent(existing), existing is MTextEntity));
+            EditRequested?.Invoke(new TextEditRequest(
+                _pendingPosition, TextContent(existing), existing is MTextEntity, text => Commit(text), CancelEdit));
         }
         else
         {
@@ -81,7 +75,8 @@ public sealed class TextTool : ToolBase
             _editBefore = null;
             _pendingPosition = world;
             _sessionActive = true;
-            EditRequested?.Invoke(new TextEditRequest(world, string.Empty, Multiline));
+            EditRequested?.Invoke(new TextEditRequest(
+                world, string.Empty, Multiline, text => Commit(text), CancelEdit));
         }
 
         Context.RequestRedraw();

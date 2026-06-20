@@ -128,6 +128,7 @@ public sealed class PointDto
 [JsonDerivedType(typeof(SplineDto), "spline")]
 [JsonDerivedType(typeof(TextDto), "text")]
 [JsonDerivedType(typeof(MTextDto), "mtext")]
+[JsonDerivedType(typeof(LeaderDto), "leader")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -220,4 +221,12 @@ public sealed class MTextDto : EntityDto
 
     /// <summary>Vertical alignment (Top / Middle / Baseline / Bottom).</summary>
     public string VAlign { get; set; } = "Top";
+}
+
+public sealed class LeaderDto : EntityDto
+{
+    public List<PointDto> Points { get; set; } = new();
+    public string Text { get; set; } = string.Empty;
+    public double TextHeight { get; set; } = 12.0;
+    public double ArrowSize { get; set; } = 12.0;
 }

@@ -34,6 +34,9 @@
     <!-- Text: a serifed capital "T". -->
     <StreamGeometry x:Key="Icon.Text">M5,5 H19 M12,5 V19 M9.5,19 H14.5 M6.5,5 V7 M17.5,5 V7</StreamGeometry>
 
+    <!-- Leader: an arrow with a knee line ending under a text baseline. -->
+    <StreamGeometry x:Key="Icon.Leader">M3,18 L9,12 L13,12 M3,18 L6,17.5 M3,18 L3.5,15 M13,8 H21 M13,12 H21</StreamGeometry>
+
     <!-- Ellipse: a wide oval outline. -->
     <StreamGeometry x:Key="Icon.Ellipse">M21,12 A9,5.5 0 1 1 3,12 A9,5.5 0 1 1 21,12 Z</StreamGeometry>
 

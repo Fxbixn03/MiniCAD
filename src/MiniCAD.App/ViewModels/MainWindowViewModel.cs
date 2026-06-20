@@ -33,6 +33,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly SplineTool _splineTool = new();
     private readonly PointTool _pointTool = new();
     private readonly TextTool _textTool = new();
+    private readonly LeaderTool _leaderTool = new();
     private readonly SetNullPointTool _setNullPointTool = new();
 
     // Editing tools operating on the current selection (Epic: Bearbeitungswerkzeuge).
@@ -64,9 +65,12 @@ public partial class MainWindowViewModel : ViewModelBase
         ArcOptions = new ArcOptionsViewModel(_arcTool);
         PointOptions = new PointOptionsViewModel(_pointTool);
         TextOptions = new TextOptionsViewModel(_textTool);
+        LeaderOptions = new LeaderOptionsViewModel(_leaderTool);
 
-        // The text tool can't open a UI field itself; re-raise its request so the view can.
+        // Text and leader tools can't open a UI field themselves; re-raise their requests so the
+        // view can show the shared inline editor.
         _textTool.EditRequested += request => TextEditRequested?.Invoke(request);
+        _leaderTool.EditRequested += request => TextEditRequested?.Invoke(request);
 
         Document.Changed += OnDocumentChanged;
         Document.CoordinateSystem.Changed += OnOriginChanged;
@@ -112,6 +116,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<PointEntity>(_pointTool);
         Tools.RegisterQuickSelectTool<TextEntity>(_textTool);
         Tools.RegisterQuickSelectTool<MTextEntity>(_textTool);
+        Tools.RegisterQuickSelectTool<LeaderEntity>(_leaderTool);
 
         Tools.SetActiveTool(_selectTool);
     }
@@ -164,6 +169,9 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Inline cap height/alignment, shown while the text tool is active.</summary>
     public TextOptionsViewModel TextOptions { get; }
 
+    /// <summary>Inline label height, shown while the leader tool is active.</summary>
+    public LeaderOptionsViewModel LeaderOptions { get; }
+
     /// <summary>Raised when the text tool wants the view to open its inline editor.</summary>
     public event Action<TextEditRequest>? TextEditRequested;
 
@@ -171,7 +179,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool IsCoordinateTool(ITool? tool)
         => tool == _lineTool || tool == _rectangleTool || tool == _circleTool
         || tool == _arcTool || tool == _ellipseTool || tool == _polylineTool || tool == _splineTool
-        || tool == _pointTool || tool == _textTool || tool == _setNullPointTool
+        || tool == _pointTool || tool == _textTool || tool == _leaderTool || tool == _setNullPointTool
         || tool == _moveTool || tool == _copyTool || tool == _rotateTool
         || tool == _mirrorTool || tool == _scaleTool || tool == _offsetTool;
 
@@ -264,6 +272,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsSplineActive => Tools.ActiveTool == _splineTool;
     public bool IsPointActive => Tools.ActiveTool == _pointTool;
     public bool IsTextActive => Tools.ActiveTool == _textTool;
+    public bool IsLeaderActive => Tools.ActiveTool == _leaderTool;
     public bool IsSetNullPointActive => Tools.ActiveTool == _setNullPointTool;
     public bool IsMoveActive => Tools.ActiveTool == _moveTool;
     public bool IsCopyActive => Tools.ActiveTool == _copyTool;
@@ -289,6 +298,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsSplineActive));
         OnPropertyChanged(nameof(IsPointActive));
         OnPropertyChanged(nameof(IsTextActive));
+        OnPropertyChanged(nameof(IsLeaderActive));
         OnPropertyChanged(nameof(IsSetNullPointActive));
         OnPropertyChanged(nameof(IsMoveActive));
         OnPropertyChanged(nameof(IsCopyActive));
@@ -415,11 +425,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ActivateText() => ActivateDrawingTool(_textTool);
 
-    /// <summary>Commits the inline editor's content to the pending text-tool edit session.</summary>
-    public void CommitText(string text) => _textTool.Commit(text);
-
-    /// <summary>Aborts the pending text-tool edit session without changing the document.</summary>
-    public void CancelTextEdit() => _textTool.CancelEdit();
+    [RelayCommand]
+    private void ActivateLeader() => ActivateDrawingTool(_leaderTool);
 
     /// <summary>
     /// Double-click handler: if a text entity sits under <paramref name="world"/>, switch to the
@@ -591,6 +598,7 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Spline: ActivateSpline(); return true;
             case ShortcutAction.Point: ActivatePoint(); return true;
             case ShortcutAction.Text: ActivateText(); return true;
+            case ShortcutAction.Leader: ActivateLeader(); return true;
             case ShortcutAction.Move: ActivateMoveCommand.Execute(null); return true;
             case ShortcutAction.Copy: ActivateCopyCommand.Execute(null); return true;
             case ShortcutAction.Rotate: ActivateRotateCommand.Execute(null); return true;

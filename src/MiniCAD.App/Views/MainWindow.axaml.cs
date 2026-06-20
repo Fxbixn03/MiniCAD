@@ -18,7 +18,7 @@ public partial class MainWindow : Window
         new("MiniCAD Projekt") { Patterns = new[] { "*.mcad" } };
 
     private MainWindowViewModel? _boundViewModel;
-    private bool _editorActive;
+    private TextEditRequest? _activeEdit;
 
     public MainWindow()
     {
@@ -54,11 +54,11 @@ public partial class MainWindow : Window
         Point2D device = viewModel.Viewport.WorldToScreenPoint(request.AnchorWorld);
         double scaling = TopLevel.GetTopLevel(Canvas)?.RenderScaling ?? 1.0;
 
+        _activeEdit = request;
         InlineTextEditor.AcceptsReturn = request.Multiline;
         InlineTextEditor.Text = request.InitialText;
         InlineTextEditor.Margin = new Thickness(device.X / scaling, device.Y / scaling, 0, 0);
         InlineTextEditor.IsVisible = true;
-        _editorActive = true;
         InlineTextEditor.Focus();
         InlineTextEditor.SelectAll();
     }
@@ -83,23 +83,23 @@ public partial class MainWindow : Window
 
     private void CommitInlineEditor()
     {
-        if (!_editorActive)
+        if (_activeEdit is not { } request)
             return;
 
-        _editorActive = false;
+        _activeEdit = null;
         string text = InlineTextEditor.Text ?? string.Empty;
         InlineTextEditor.IsVisible = false;
-        ViewModel?.CommitText(text);
+        request.Commit(text);
     }
 
     private void CancelInlineEditor()
     {
-        if (!_editorActive)
+        if (_activeEdit is not { } request)
             return;
 
-        _editorActive = false;
+        _activeEdit = null;
         InlineTextEditor.IsVisible = false;
-        ViewModel?.CancelTextEdit();
+        request.Cancel();
         Canvas.Focus();
     }
 

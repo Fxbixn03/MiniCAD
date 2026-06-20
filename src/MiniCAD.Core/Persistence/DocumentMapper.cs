@@ -221,6 +221,13 @@ public static class DocumentMapper
                 HAlign = mtext.HorizontalAlignment.ToString(),
                 VAlign = mtext.VerticalAlignment.ToString(),
             },
+            LeaderEntity leader => new LeaderDto
+            {
+                Points = leader.Points.Select(ToDto).ToList(),
+                Text = leader.Text,
+                TextHeight = leader.TextHeight,
+                ArrowSize = leader.ArrowSize,
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -252,6 +259,8 @@ public static class DocumentMapper
             MTextDto mtext => new MTextEntity(
                 FromDto(mtext.Position), mtext.Text, mtext.Height, mtext.Width, mtext.Rotation,
                 ParseHAlign(mtext.HAlign), ParseVAlign(mtext.VAlign)),
+            LeaderDto leader => new LeaderEntity(
+                leader.Points.Select(FromDto), leader.Text, leader.TextHeight, leader.ArrowSize),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

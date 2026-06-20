@@ -79,6 +79,7 @@
                         </MenuItem>
                         <MenuItem Header="_Werkzeuge">
                             <MenuItem Header="_Text / Beschriftung" Command="{Binding ActivateTextCommand}" InputGesture="X" />
+                        <MenuItem Header="_Führungslinie / Callout" Command="{Binding ActivateLeaderCommand}" InputGesture="G" />
                         <Separator />
                         <MenuItem Header="_Nullpunkt setzen" Command="{Binding ActivateSetNullPointCommand}" />
                             <MenuItem Header="Nullpunkt zu_rücksetzen" Command="{Binding ResetNullPointCommand}" />
@@ -207,6 +208,20 @@
             </StackPanel>
         </Border>
 
+        <!-- Inline leader options (label height), shown while the leader tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsLeaderActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding LeaderOptions}" x:DataType="vm:LeaderOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="FÜHRUNG" VerticalAlignment="Center" />
+                <TextBlock Text="Texthöhe" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                <TextBox Width="60" Text="{Binding HeightText}" FontFamily="{StaticResource Font.Mono}" />
+                <TextBlock Text="Pfeilspitze klicken, Knickpunkte setzen, ⏎/Rechtsklick beendet, dann Text tippen"
+                           Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
+        </Border>
+
         <!-- Inline arc-mode selector, shown while the arc tool is active. -->
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
                 BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
@@ -300,6 +315,10 @@
                 <Button Classes="rail" Classes.active="{Binding IsTextActive}"
                         Command="{Binding ActivateTextCommand}" ToolTip.Tip="Text / Beschriftung  ·  X">
                     <Path Classes="ico" Data="{StaticResource Icon.Text}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsLeaderActive}"
+                        Command="{Binding ActivateLeaderCommand}" ToolTip.Tip="Führungslinie / Callout  ·  G">
+                    <Path Classes="ico" Data="{StaticResource Icon.Leader}" />
                 </Button>
 
                 <Border Classes="raildiv" />

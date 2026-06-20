@@ -190,8 +190,8 @@ public class TextTests
         tool.PointerDown(new ToolPointerInput { World = new Point2D(5, 6), Button = ToolButton.Left });
 
         request.Should().NotBeNull();
-        request!.Value.AnchorWorld.Should().Be(new Point2D(5, 6));
-        request.Value.InitialText.Should().BeEmpty();
+        request!.AnchorWorld.Should().Be(new Point2D(5, 6));
+        request.InitialText.Should().BeEmpty();
         doc.Entities.Should().BeEmpty(); // nothing committed yet
     }
 
@@ -259,7 +259,7 @@ public class TextTests
 
         // Click on the existing text's insertion point edits it instead of creating a new one.
         tool.PointerDown(new ToolPointerInput { World = new Point2D(0, 0), Button = ToolButton.Left });
-        request!.Value.InitialText.Should().Be("alt");
+        request!.InitialText.Should().Be("alt");
 
         tool.Commit("neu");
 
