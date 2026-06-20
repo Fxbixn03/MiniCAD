@@ -19,6 +19,13 @@ public sealed record DocumentContents(
     /// <summary>Project-specific hatch patterns (the global library is always available too).</summary>
     public IReadOnlyList<HatchPattern> Patterns { get; init; } = Array.Empty<HatchPattern>();
 
+    /// <summary>The document's named text styles.</summary>
+    public IReadOnlyList<TextStyle> TextStyles { get; init; } = Array.Empty<TextStyle>();
+
+    public Guid DefaultTextStyleId { get; init; }
+
+    public Guid ActiveTextStyleId { get; init; }
+
     /// <summary>The user-defined origin (Nullpunkt) in absolute world coordinates.</summary>
     public Point3D Origin { get; init; } = Point3D.Origin;
 }

@@ -34,6 +34,14 @@ public interface ICadDocument
     /// <summary>The hatch patterns defined for this project (in addition to the global library).</summary>
     IReadOnlyList<HatchPattern> Patterns { get; }
 
+    /// <summary>The named text styles defined for this document.</summary>
+    IReadOnlyList<TextStyle> TextStyles { get; }
+
+    /// <summary>The text style applied to newly created text.</summary>
+    TextStyle ActiveTextStyle { get; set; }
+
+    TextStyle? FindTextStyle(Guid id);
+
     /// <summary>Looks up a pattern by id across the project patterns and the global library.</summary>
     HatchPattern? FindPattern(Guid id);
 

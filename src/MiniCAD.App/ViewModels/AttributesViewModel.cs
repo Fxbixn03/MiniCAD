@@ -43,6 +43,8 @@ public partial class AttributesViewModel : ViewModelBase
 
     public ObservableCollection<PatternOptionViewModel> FillOptions { get; } = new();
 
+    public ObservableCollection<TextStyle> TextStyleOptions { get; } = new();
+
     [ObservableProperty]
     private bool _hasSelection;
 
@@ -76,6 +78,12 @@ public partial class AttributesViewModel : ViewModelBase
     [ObservableProperty]
     private PatternOptionViewModel? _selectedFill;
 
+    [ObservableProperty]
+    private bool _canSetTextStyle;
+
+    [ObservableProperty]
+    private TextStyle? _selectedTextStyle;
+
     public IBrush StrokeBrush => new SolidColorBrush(Color.FromRgb((byte)StrokeRed, (byte)StrokeGreen, (byte)StrokeBlue));
 
     private void OnDocumentChanged(object? sender, DocumentChangedEventArgs e)
@@ -86,7 +94,8 @@ public partial class AttributesViewModel : ViewModelBase
         // Structural changes can add/remove layers, Teilbilder or patterns shown in the combos.
         if (e.Kind is DocumentChangeKind.LayerAdded or DocumentChangeKind.LayerRemoved
             or DocumentChangeKind.PartialDrawingAdded or DocumentChangeKind.PartialDrawingRemoved
-            or DocumentChangeKind.PatternsChanged or DocumentChangeKind.Reloaded)
+            or DocumentChangeKind.PatternsChanged or DocumentChangeKind.TextStylesChanged
+            or DocumentChangeKind.Reloaded)
         {
             Reload();
         }
@@ -110,6 +119,8 @@ public partial class AttributesViewModel : ViewModelBase
             UseStrokeOverride = false;
             CanFill = false;
             SelectedFill = null;
+            CanSetTextStyle = false;
+            SelectedTextStyle = null;
             _suppress = false;
             return;
         }
@@ -146,6 +157,12 @@ public partial class AttributesViewModel : ViewModelBase
               ?? FillOptions[0]
             : null;
 
+        // Text style assignment is offered for a single text/MText entity.
+        CanSetTextStyle = items.Count == 1 && items[0] is ITextEntity;
+        SelectedTextStyle = items[0] is ITextEntity text
+            ? TextStyleOptions.FirstOrDefault(s => s.Id == text.TextStyleId)
+            : null;
+
         _suppress = false;
     }
 
@@ -165,6 +182,10 @@ public partial class AttributesViewModel : ViewModelBase
             FillOptions.Add(new PatternOptionViewModel(pattern, pattern.Name));
         foreach (var pattern in _document.Patterns)
             FillOptions.Add(new PatternOptionViewModel(pattern, pattern.Name + " (Projekt)"));
+
+        TextStyleOptions.Clear();
+        foreach (TextStyle style in _document.TextStyles)
+            TextStyleOptions.Add(style);
     }
 
     partial void OnSelectedLayerChanged(Layer? value)
@@ -215,6 +236,30 @@ public partial class AttributesViewModel : ViewModelBase
 
         _commands.Execute(new SetEntityPropertyCommand("Füllung ändern", _document, poly,
             () => poly.Fill = next, () => poly.Fill = old));
+    }
+
+    partial void OnSelectedTextStyleChanged(TextStyle? value)
+    {
+        if (_suppress || value is null)
+            return;
+        if (_selection.Items.Count != 1 || _selection.Items[0] is not ITextEntity)
+            return;
+
+        ApplyToSelection("Textstil ändern", entity =>
+        {
+            var text = (ITextEntity)entity;
+            (Guid oldId, string oldFont, double oldHeight, double oldWidth) =
+                (text.TextStyleId, text.FontFamily, text.Height, text.WidthFactor);
+            return (
+                () => CadDocument.ApplyTextStyle(text, value),
+                () =>
+                {
+                    text.TextStyleId = oldId;
+                    text.FontFamily = oldFont;
+                    text.Height = oldHeight;
+                    text.WidthFactor = oldWidth;
+                });
+        });
     }
 
     private void ApplyStrokeOverride()

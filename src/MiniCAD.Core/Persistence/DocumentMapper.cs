@@ -23,6 +23,8 @@ public static class DocumentMapper
             DefaultLayerId = document.DefaultLayer.Id,
             ActiveLayerId = document.ActiveLayer.Id,
             ActivePartialDrawingId = document.ActivePartialDrawing.Id,
+            DefaultTextStyleId = document.DefaultTextStyle.Id,
+            ActiveTextStyleId = document.ActiveTextStyle.Id,
             OriginX = document.CoordinateSystem.Origin.X,
             OriginY = document.CoordinateSystem.Origin.Y,
             OriginZ = document.CoordinateSystem.Origin.Z,
@@ -30,6 +32,9 @@ public static class DocumentMapper
 
         foreach (Layer layer in document.Layers)
             dto.Layers.Add(ToDto(layer));
+
+        foreach (TextStyle style in document.TextStyles)
+            dto.TextStyles.Add(ToDto(style));
 
         foreach (PartialDrawing partialDrawing in document.PartialDrawings)
             dto.PartialDrawings.Add(ToDto(partialDrawing));
@@ -61,6 +66,8 @@ public static class DocumentMapper
 
         List<HatchPattern> patterns = dto.Patterns.Select(FromDto).ToList();
 
+        List<TextStyle> textStyles = dto.TextStyles.Select(FromDto).ToList();
+
         List<IEntity> entities = dto.Entities.Select(FromDto).ToList();
         foreach (IEntity entity in entities)
         {
@@ -80,6 +87,9 @@ public static class DocumentMapper
             partialDrawings, activePartialDrawingId, entities)
         {
             Patterns = patterns,
+            TextStyles = textStyles,
+            DefaultTextStyleId = dto.DefaultTextStyleId,
+            ActiveTextStyleId = dto.ActiveTextStyleId,
             Origin = new Point3D(dto.OriginX, dto.OriginY, dto.OriginZ),
         });
     }
@@ -115,6 +125,18 @@ public static class DocumentMapper
         dto.Lines.Select(l => new HatchLineDefinition(l.AngleDegrees, l.Spacing, l.Offset)).ToList(),
         FromDto(dto.Color),
         dto.LineWidth);
+
+    private static TextStyleDto ToDto(TextStyle style) => new()
+    {
+        Id = style.Id,
+        Name = style.Name,
+        FontFamily = style.FontFamily,
+        Height = style.Height,
+        WidthFactor = style.WidthFactor,
+    };
+
+    private static TextStyle FromDto(TextStyleDto dto)
+        => new(dto.Id, dto.Name, dto.FontFamily, dto.Height, dto.WidthFactor);
 
     private static LayerDto ToDto(Layer layer) => new()
     {
@@ -210,6 +232,9 @@ public static class DocumentMapper
                 Rotation = text.Rotation,
                 HAlign = text.HorizontalAlignment.ToString(),
                 VAlign = text.VerticalAlignment.ToString(),
+                TextStyleId = text.TextStyleId,
+                FontFamily = text.FontFamily,
+                WidthFactor = text.WidthFactor,
             },
             MTextEntity mtext => new MTextDto
             {
@@ -220,6 +245,9 @@ public static class DocumentMapper
                 Rotation = mtext.Rotation,
                 HAlign = mtext.HorizontalAlignment.ToString(),
                 VAlign = mtext.VerticalAlignment.ToString(),
+                TextStyleId = mtext.TextStyleId,
+                FontFamily = mtext.FontFamily,
+                WidthFactor = mtext.WidthFactor,
             },
             LeaderEntity leader => new LeaderDto
             {
@@ -255,10 +283,20 @@ public static class DocumentMapper
             SplineDto spline => new SplineEntity(spline.Points.Select(FromDto)),
             TextDto text => new TextEntity(
                 FromDto(text.Position), text.Text, text.Height, text.Rotation,
-                ParseHAlign(text.HAlign), ParseVAlign(text.VAlign)),
+                ParseHAlign(text.HAlign), ParseVAlign(text.VAlign))
+            {
+                TextStyleId = text.TextStyleId,
+                FontFamily = text.FontFamily,
+                WidthFactor = text.WidthFactor,
+            },
             MTextDto mtext => new MTextEntity(
                 FromDto(mtext.Position), mtext.Text, mtext.Height, mtext.Width, mtext.Rotation,
-                ParseHAlign(mtext.HAlign), ParseVAlign(mtext.VAlign)),
+                ParseHAlign(mtext.HAlign), ParseVAlign(mtext.VAlign))
+            {
+                TextStyleId = mtext.TextStyleId,
+                FontFamily = mtext.FontFamily,
+                WidthFactor = mtext.WidthFactor,
+            },
             LeaderDto leader => new LeaderEntity(
                 leader.Points.Select(FromDto), leader.Text, leader.TextHeight, leader.ArrowSize),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),

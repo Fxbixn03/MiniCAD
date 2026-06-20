@@ -114,6 +114,16 @@ public sealed class TextTool : ToolBase
             ? new MTextEntity(position, text, Height, 0.0, 0.0, HorizontalAlignment, TextVAlign.Top)
             : new TextEntity(position, text, Height, 0.0, HorizontalAlignment, VerticalAlignment);
 
+        // Adopt the active text style's font and width factor (the cap height stays the
+        // per-text value entered in the tool's options bar).
+        if (created is ITextEntity styled)
+        {
+            Documents.TextStyle active = Context.Document.ActiveTextStyle;
+            styled.TextStyleId = active.Id;
+            styled.FontFamily = active.FontFamily;
+            styled.WidthFactor = active.WidthFactor;
+        }
+
         created = ApplyDefaultStyle(created);
         Context.Execute(new AddEntityCommand(Context.Document, created));
         EndSession();

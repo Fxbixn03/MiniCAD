@@ -47,7 +47,7 @@ public class TextTests
     /// <summary>Captures DrawText calls so entity rendering can be asserted without SkiaSharp.</summary>
     private sealed class RecordingSurface : IRenderSurface
     {
-        public List<(string Text, Point2D Position, double Height, double Rotation, TextHAlign H, TextVAlign V)> Texts { get; } = new();
+        public List<(string Text, Point2D Position, double Height, double Rotation, TextHAlign H, TextVAlign V, string? Font, double WidthFactor)> Texts { get; } = new();
 
         public void DrawLine(Point2D a, Point2D b, in StrokeStyle stroke) { }
         public void DrawPolyline(IReadOnlyList<Point2D> points, bool closed, in StrokeStyle stroke) { }
@@ -55,8 +55,8 @@ public class TextTests
         public void DrawArc(Point2D center, double radius, double startAngle, double sweepAngle, in StrokeStyle stroke) { }
 
         public void DrawText(string text, Point2D position, double height, double rotation,
-            TextHAlign horizontalAlignment, TextVAlign verticalAlignment, in StrokeStyle stroke)
-            => Texts.Add((text, position, height, rotation, horizontalAlignment, verticalAlignment));
+            TextHAlign horizontalAlignment, TextVAlign verticalAlignment, string? fontFamily, double widthFactor, in StrokeStyle stroke)
+            => Texts.Add((text, position, height, rotation, horizontalAlignment, verticalAlignment, fontFamily, widthFactor));
     }
 
     // ----- TextEntity -----
@@ -88,6 +88,18 @@ public class TextTests
         call.Rotation.Should().Be(0.5);
         call.H.Should().Be(TextHAlign.Center);
         call.V.Should().Be(TextVAlign.Middle);
+    }
+
+    [Fact]
+    public void TextEntity_Render_PassesFontFamilyAndWidthFactor()
+    {
+        var text = new TextEntity(new Point2D(0, 0), "Abc", 10) { FontFamily = "Consolas", WidthFactor = 0.8 };
+        var surface = new RecordingSurface();
+
+        text.Render(surface, StrokeStyle.Default);
+
+        surface.Texts[0].Font.Should().Be("Consolas");
+        surface.Texts[0].WidthFactor.Should().Be(0.8);
     }
 
     [Fact]

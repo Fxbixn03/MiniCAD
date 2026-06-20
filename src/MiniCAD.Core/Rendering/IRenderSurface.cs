@@ -35,7 +35,9 @@ public interface IRenderSurface
     /// coordinates and <paramref name="height"/> the cap height in world units, so the text
     /// scales with zoom. <paramref name="rotation"/> is the baseline angle in radians, CCW from
     /// the world X axis (text stays upright/readable, never mirrored, despite the Y-flip). The
-    /// alignment arguments anchor the run around <paramref name="position"/>.
+    /// alignment arguments anchor the run around <paramref name="position"/>. A null/empty
+    /// <paramref name="fontFamily"/> uses the backend default; <paramref name="widthFactor"/>
+    /// scales the glyphs horizontally (1.0 = normal).
     /// </summary>
     void DrawText(
         string text,
@@ -44,5 +46,7 @@ public interface IRenderSurface
         double rotation,
         TextHAlign horizontalAlignment,
         TextVAlign verticalAlignment,
+        string? fontFamily,
+        double widthFactor,
         in StrokeStyle stroke);
 }

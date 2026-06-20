@@ -11,13 +11,14 @@ namespace MiniCAD.Core.Entities;
 /// (estimated from the cap height, so Core needs no font metrics). Each resolved line is drawn
 /// top-down through <see cref="IRenderSurface.DrawText"/>.
 /// </summary>
-public sealed class MTextEntity : Entity, IEditableEntity
+public sealed class MTextEntity : Entity, IEditableEntity, ITextEntity
 {
     /// <summary>Line advance as a multiple of the cap height.</summary>
     internal const double LineSpacing = 1.35;
 
     private double _height;
     private double _width;
+    private double _widthFactor = 1.0;
 
     public MTextEntity(Point2D position, string text, double height = 12.0, double width = 0.0,
         double rotation = 0.0, TextHAlign horizontalAlignment = TextHAlign.Left,
@@ -41,6 +42,9 @@ public sealed class MTextEntity : Entity, IEditableEntity
         Rotation = source.Rotation;
         HorizontalAlignment = source.HorizontalAlignment;
         VerticalAlignment = source.VerticalAlignment;
+        TextStyleId = source.TextStyleId;
+        FontFamily = source.FontFamily;
+        _widthFactor = source._widthFactor;
     }
 
     /// <summary>The insertion (anchor) point in world coordinates.</summary>
@@ -68,6 +72,19 @@ public sealed class MTextEntity : Entity, IEditableEntity
     public TextHAlign HorizontalAlignment { get; set; }
 
     public TextVAlign VerticalAlignment { get; set; }
+
+    /// <summary>Id of the assigned text style (<see cref="Guid.Empty"/> = none); see <c>TextStyle</c>.</summary>
+    public Guid TextStyleId { get; set; }
+
+    /// <summary>Font family; empty means the renderer default. Driven by the assigned text style.</summary>
+    public string FontFamily { get; set; } = string.Empty;
+
+    /// <summary>Horizontal glyph scale (1.0 = normal); always positive.</summary>
+    public double WidthFactor
+    {
+        get => _widthFactor;
+        set => _widthFactor = value <= 0.0 ? 1.0 : value;
+    }
 
     private double LineHeight => _height * LineSpacing;
 
@@ -112,7 +129,7 @@ public sealed class MTextEntity : Entity, IEditableEntity
         lines.Add(current);
     }
 
-    private double EstimateWidth(string text) => text.Length * _height * TextEntity.GlyphAspect;
+    private double EstimateWidth(string text) => text.Length * _height * TextEntity.GlyphAspect * _widthFactor;
 
     private double BoxWidth
     {
@@ -167,7 +184,8 @@ public sealed class MTextEntity : Entity, IEditableEntity
         for (int i = 0; i < lines.Count; i++)
         {
             Point2D insertion = toWorld.Transform(new Point2D(0.0, topY - i * lineHeight));
-            surface.DrawText(lines[i], insertion, Height, Rotation, HorizontalAlignment, TextVAlign.Top, stroke);
+            surface.DrawText(lines[i], insertion, Height, Rotation, HorizontalAlignment, TextVAlign.Top,
+                FontFamily, WidthFactor, stroke);
         }
     }
 
@@ -180,9 +198,11 @@ public sealed class MTextEntity : Entity, IEditableEntity
     public void MoveGrip(Grip grip, Point2D newPosition) => Position = newPosition;
 
     public object CaptureState()
-        => (Position, Text, Height, Width, Rotation, HorizontalAlignment, VerticalAlignment);
+        => (Position, Text, Height, Width, Rotation, HorizontalAlignment, VerticalAlignment,
+            TextStyleId, FontFamily, WidthFactor);
 
     public void RestoreState(object state)
-        => (Position, Text, Height, Width, Rotation, HorizontalAlignment, VerticalAlignment)
-            = ((Point2D, string, double, double, double, TextHAlign, TextVAlign))state;
+        => (Position, Text, Height, Width, Rotation, HorizontalAlignment, VerticalAlignment,
+            TextStyleId, FontFamily, WidthFactor)
+            = ((Point2D, string, double, double, double, TextHAlign, TextVAlign, Guid, string, double))state;
 }

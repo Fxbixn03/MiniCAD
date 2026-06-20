@@ -32,6 +32,13 @@ public sealed class DocumentDto
     /// <summary>Project-specific hatch patterns (Muster); the global library is implicit.</summary>
     public List<PatternDto> Patterns { get; set; } = new();
 
+    /// <summary>Named text styles defined for the document.</summary>
+    public List<TextStyleDto> TextStyles { get; set; } = new();
+
+    public Guid DefaultTextStyleId { get; set; }
+
+    public Guid ActiveTextStyleId { get; set; }
+
     public List<EntityDto> Entities { get; set; } = new();
 
     /// <summary>The user-defined origin (Nullpunkt) in absolute world coordinates.</summary>
@@ -58,6 +65,15 @@ public sealed class HatchLineDto
     public double AngleDegrees { get; set; }
     public double Spacing { get; set; } = 10.0;
     public double Offset { get; set; }
+}
+
+public sealed class TextStyleDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = "Standard";
+    public string FontFamily { get; set; } = string.Empty;
+    public double Height { get; set; } = 12.0;
+    public double WidthFactor { get; set; } = 1.0;
 }
 
 public sealed class PartialDrawingDto
@@ -204,6 +220,10 @@ public sealed class TextDto : EntityDto
 
     /// <summary>Vertical alignment (Top / Middle / Baseline / Bottom).</summary>
     public string VAlign { get; set; } = "Baseline";
+
+    public Guid TextStyleId { get; set; }
+    public string FontFamily { get; set; } = string.Empty;
+    public double WidthFactor { get; set; } = 1.0;
 }
 
 public sealed class MTextDto : EntityDto
@@ -221,6 +241,10 @@ public sealed class MTextDto : EntityDto
 
     /// <summary>Vertical alignment (Top / Middle / Baseline / Bottom).</summary>
     public string VAlign { get; set; } = "Top";
+
+    public Guid TextStyleId { get; set; }
+    public string FontFamily { get; set; } = string.Empty;
+    public double WidthFactor { get; set; } = 1.0;
 }
 
 public sealed class LeaderDto : EntityDto

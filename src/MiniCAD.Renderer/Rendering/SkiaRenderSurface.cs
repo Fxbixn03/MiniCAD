@@ -95,6 +95,8 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
         double rotation,
         TextHAlign horizontalAlignment,
         TextVAlign verticalAlignment,
+        string? fontFamily,
+        double widthFactor,
         in StrokeStyle stroke)
     {
         if (string.IsNullOrEmpty(text))
@@ -104,7 +106,9 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
         if (deviceHeight <= 0f)
             return;
 
+        ApplyTypeface(fontFamily);
         _font.Size = deviceHeight;
+        _font.ScaleX = widthFactor > 0 ? (float)widthFactor : 1f;
         Color c = stroke.Color;
         _textPaint.Color = new SKColor(c.R, c.G, c.B, c.A);
 
@@ -135,6 +139,36 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
         _canvas.RotateDegrees((float)-GeometryMath.RadiansToDegrees(rotation));
         _canvas.DrawText(text, dx, dy, _font, _textPaint);
         _canvas.Restore();
+    }
+
+    // Typefaces are process-lifetime and meant to be cached/shared, so resolved families are
+    // kept in a static cache rather than recreated (and disposed) per draw call.
+    private static readonly Dictionary<string, SKTypeface> TypefaceCache = new();
+
+    private string? _currentFamily; // family currently set on _font (null = default typeface)
+
+    private void ApplyTypeface(string? fontFamily)
+    {
+        string? family = string.IsNullOrEmpty(fontFamily) ? null : fontFamily;
+        if (family == _currentFamily)
+            return;
+
+        _currentFamily = family;
+        _font.Typeface = ResolveTypeface(family);
+    }
+
+    private static SKTypeface ResolveTypeface(string? family)
+    {
+        if (family is null)
+            return SKTypeface.Default;
+
+        if (!TypefaceCache.TryGetValue(family, out SKTypeface? typeface))
+        {
+            typeface = SKTypeface.FromFamilyName(family) ?? SKTypeface.Default;
+            TypefaceCache[family] = typeface;
+        }
+
+        return typeface;
     }
 
     private void ApplyStroke(in StrokeStyle stroke)

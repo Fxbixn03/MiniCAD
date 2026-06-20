@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:MiniCAD.App.ViewModels"
+        xmlns:documents="using:MiniCAD.Core.Documents"
         xmlns:controls="using:MiniCAD.App.Controls"
         xmlns:converters="using:Avalonia.Data.Converters"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -197,6 +198,9 @@
             <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
                         DataContext="{Binding TextOptions}" x:DataType="vm:TextOptionsViewModel">
                 <TextBlock Classes="eyebrow" Text="TEXT" VerticalAlignment="Center" />
+                <TextBlock Text="Stil" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                <ComboBox MinWidth="110" ItemsSource="{Binding Styles}" SelectedItem="{Binding ActiveStyle}"
+                          ToolTip.Tip="Aktiver Textstil (Schriftart/Breitenfaktor)" />
                 <TextBlock Text="Höhe" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
                 <TextBox Width="60" Text="{Binding HeightText}" FontFamily="{StaticResource Font.Mono}" />
                 <TextBlock Text="H" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
@@ -488,6 +492,13 @@
                                         <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding FillOptions}"
                                                   SelectedItem="{Binding SelectedFill}" />
                                     </StackPanel>
+
+                                    <StackPanel Spacing="4" IsVisible="{Binding CanSetTextStyle}">
+                                        <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
+                                        <TextBlock Classes="eyebrow" Text="TEXTSTIL" />
+                                        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding TextStyleOptions}"
+                                                  SelectedItem="{Binding SelectedTextStyle}" />
+                                    </StackPanel>
                                 </StackPanel>
                             </StackPanel>
                         </ScrollViewer>
@@ -662,6 +673,59 @@
                                 </Border>
                             </StackPanel>
                         </ScrollViewer>
+                    </TabItem>
+
+                    <!-- ===== Textstile ===== -->
+                    <TabItem ToolTip.Tip="Textstile">
+                        <TabItem.Header>
+                            <Border Classes="tabicon">
+                                <Path Classes="icotab" Width="22" Height="22" Data="{StaticResource Icon.Text}" />
+                            </Border>
+                        </TabItem.Header>
+                        <DockPanel Margin="10" DataContext="{Binding TextStyles}" x:DataType="vm:TextStylesViewModel">
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="0,0,0,8">
+                                <Button Content="Neu" Command="{Binding AddStyleCommand}" />
+                                <Button Content="Entfernen" Command="{Binding RemoveStyleCommand}" />
+                            </StackPanel>
+
+                            <Border DockPanel.Dock="Bottom" Margin="0,10,0,0" Padding="10" CornerRadius="6"
+                                    Background="{DynamicResource Brush.SurfaceSunken}" BorderBrush="{DynamicResource Brush.BorderDefault}" BorderThickness="1"
+                                    IsVisible="{Binding CanEdit}">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Classes="eyebrow" Text="STIL BEARBEITEN" />
+                                    <StackPanel Spacing="3">
+                                        <TextBlock Text="Name" Foreground="{DynamicResource Brush.TextMuted}" />
+                                        <TextBox Text="{Binding Name}" />
+                                    </StackPanel>
+                                    <StackPanel Spacing="3">
+                                        <TextBlock Text="Schriftart (leer = Standard)" Foreground="{DynamicResource Brush.TextMuted}" />
+                                        <TextBox Text="{Binding FontFamily}" PlaceholderText="Standard" />
+                                    </StackPanel>
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                        <StackPanel Grid.Column="0" Spacing="3">
+                                            <TextBlock Text="Höhe" Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding HeightText}" FontFamily="{StaticResource Font.Mono}" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Spacing="3">
+                                            <TextBlock Text="Breitenfaktor" Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding WidthFactorText}" FontFamily="{StaticResource Font.Mono}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <ListBox ItemsSource="{Binding Styles}" SelectedItem="{Binding SelectedStyle}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="documents:TextStyle">
+                                        <DockPanel>
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding FontFamily}"
+                                                       Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="8,0,0,0" />
+                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DockPanel>
                     </TabItem>
 
                     <!-- ===== Assistent ===== -->

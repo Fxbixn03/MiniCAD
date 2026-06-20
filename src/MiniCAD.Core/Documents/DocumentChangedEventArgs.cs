@@ -18,6 +18,9 @@ public enum DocumentChangeKind
     /// <summary>The project's hatch pattern set changed.</summary>
     PatternsChanged,
 
+    /// <summary>The document's text styles changed (added/removed/edited).</summary>
+    TextStylesChanged,
+
     /// <summary>The whole document was replaced (e.g. a project was loaded).</summary>
     Reloaded,
 }

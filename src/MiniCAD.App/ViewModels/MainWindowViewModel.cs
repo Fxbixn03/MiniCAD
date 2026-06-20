@@ -64,8 +64,9 @@ public partial class MainWindowViewModel : ViewModelBase
         ArrayOptions = new ArrayOptionsViewModel(_arrayTool);
         ArcOptions = new ArcOptionsViewModel(_arcTool);
         PointOptions = new PointOptionsViewModel(_pointTool);
-        TextOptions = new TextOptionsViewModel(_textTool);
+        TextOptions = new TextOptionsViewModel(_textTool, Document);
         LeaderOptions = new LeaderOptionsViewModel(_leaderTool);
+        TextStyles = new TextStylesViewModel(Document);
 
         // Text and leader tools can't open a UI field themselves; re-raise their requests so the
         // view can show the shared inline editor.
@@ -171,6 +172,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>Inline label height, shown while the leader tool is active.</summary>
     public LeaderOptionsViewModel LeaderOptions { get; }
+
+    /// <summary>The text-style management panel (Textstile tab).</summary>
+    public TextStylesViewModel TextStyles { get; }
 
     /// <summary>Raised when the text tool wants the view to open its inline editor.</summary>
     public event Action<TextEditRequest>? TextEditRequested;

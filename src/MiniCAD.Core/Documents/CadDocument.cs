@@ -19,6 +19,8 @@ public sealed class CadDocument : ICadDocument
     private readonly Dictionary<Guid, PartialDrawing> _partialDrawingsById = new();
     private readonly List<IEntity> _entities = new();
     private readonly List<HatchPattern> _patterns = new();
+    private readonly List<TextStyle> _textStyles = new();
+    private readonly Dictionary<Guid, TextStyle> _textStylesById = new();
 
     public CadDocument()
     {
@@ -29,6 +31,10 @@ public sealed class CadDocument : ICadDocument
         DefaultPartialDrawing = new PartialDrawing("Teilbild 1");
         RegisterPartialDrawing(DefaultPartialDrawing);
         ActivePartialDrawing = DefaultPartialDrawing;
+
+        DefaultTextStyle = new TextStyle("Standard");
+        RegisterTextStyle(DefaultTextStyle);
+        ActiveTextStyle = DefaultTextStyle;
     }
 
     public IReadOnlyList<Layer> Layers => _layers;
@@ -48,6 +54,12 @@ public sealed class CadDocument : ICadDocument
     public CoordinateSystem CoordinateSystem { get; } = new();
 
     public IReadOnlyList<HatchPattern> Patterns => _patterns;
+
+    public IReadOnlyList<TextStyle> TextStyles => _textStyles;
+
+    public TextStyle DefaultTextStyle { get; private set; }
+
+    public TextStyle ActiveTextStyle { get; set; }
 
     public event EventHandler<DocumentChangedEventArgs>? Changed;
 
@@ -239,6 +251,89 @@ public sealed class CadDocument : ICadDocument
         Raise(DocumentChangedEventArgs.ForPartialDrawing(DocumentChangeKind.PartialDrawingModified, partialDrawing));
     }
 
+    // ----- Text styles -----
+
+    public TextStyle AddTextStyle(string name, string fontFamily = "", double height = 12.0, double widthFactor = 1.0)
+    {
+        var style = new TextStyle(name, fontFamily, height, widthFactor);
+        RegisterTextStyle(style);
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.TextStylesChanged));
+        return style;
+    }
+
+    public bool RemoveTextStyle(TextStyle style)
+    {
+        if (style == DefaultTextStyle || !_textStyles.Remove(style))
+            return false;
+
+        _textStylesById.Remove(style.Id);
+
+        // Re-home texts that used the removed style onto the default style.
+        foreach (IEntity entity in _entities)
+        {
+            if (entity is ITextEntity text && text.TextStyleId == style.Id)
+                ApplyTextStyle(text, DefaultTextStyle);
+        }
+
+        if (ActiveTextStyle == style)
+            ActiveTextStyle = DefaultTextStyle;
+
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.TextStylesChanged));
+        return true;
+    }
+
+    public TextStyle? FindTextStyle(Guid id) => _textStylesById.GetValueOrDefault(id);
+
+    public void RenameTextStyle(TextStyle style, string name)
+    {
+        style.Name = name;
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.TextStylesChanged));
+    }
+
+    /// <summary>
+    /// Updates a style's font/height/width factor and re-applies them to every text assigned to
+    /// it, so edits propagate to the drawing (the Allplan/AutoCAD text-style behaviour).
+    /// </summary>
+    public void UpdateTextStyle(TextStyle style, string fontFamily, double height, double widthFactor)
+    {
+        style.FontFamily = fontFamily ?? string.Empty;
+        style.Height = height <= 0.0 ? 1.0 : height;
+        style.WidthFactor = widthFactor <= 0.0 ? 1.0 : widthFactor;
+
+        foreach (IEntity entity in _entities)
+        {
+            if (entity is ITextEntity text && text.TextStyleId == style.Id)
+                ApplyTextStyle(text, style);
+        }
+
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.TextStylesChanged));
+    }
+
+    /// <summary>Assigns <paramref name="style"/> to a text entity (adopting its look) and notifies.</summary>
+    public void AssignTextStyle(IEntity entity, TextStyle style)
+    {
+        if (entity is not ITextEntity text)
+            return;
+
+        ApplyTextStyle(text, style);
+        Raise(DocumentChangedEventArgs.ForEntity(DocumentChangeKind.EntityModified, entity));
+    }
+
+    /// <summary>Copies a style's appearance (font, height, width factor) and link onto a text entity.</summary>
+    public static void ApplyTextStyle(ITextEntity text, TextStyle style)
+    {
+        text.TextStyleId = style.Id;
+        text.FontFamily = style.FontFamily;
+        text.Height = style.Height;
+        text.WidthFactor = style.WidthFactor;
+    }
+
+    private void RegisterTextStyle(TextStyle style)
+    {
+        _textStyles.Add(style);
+        _textStylesById[style.Id] = style;
+    }
+
     // ----- Patterns (Muster) -----
 
     /// <summary>Adds a project-specific hatch pattern.</summary>
@@ -359,6 +454,15 @@ public sealed class CadDocument : ICadDocument
 
         _patterns.Clear();
         _patterns.AddRange(contents.Patterns);
+
+        _textStyles.Clear();
+        _textStylesById.Clear();
+        foreach (TextStyle style in contents.TextStyles)
+            RegisterTextStyle(style);
+        if (_textStyles.Count == 0)
+            RegisterTextStyle(new TextStyle("Standard"));
+        DefaultTextStyle = FindTextStyle(contents.DefaultTextStyleId) ?? _textStyles[0];
+        ActiveTextStyle = FindTextStyle(contents.ActiveTextStyleId) ?? DefaultTextStyle;
 
         _entities.Clear();
         foreach (IEntity entity in contents.Entities)
