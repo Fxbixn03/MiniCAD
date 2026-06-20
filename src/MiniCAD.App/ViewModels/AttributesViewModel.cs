@@ -10,6 +10,7 @@ using MiniCAD.Core.Entities;
 using MiniCAD.Core.Tools;
 using CoreColor = MiniCAD.Core.Styling.Color;
 using CoreStroke = MiniCAD.Core.Styling.StrokeStyle;
+using CoreFill = MiniCAD.Core.Styling.FillStyle;
 using LineType = MiniCAD.Core.Styling.LineType;
 
 namespace MiniCAD.App.ViewModels;
@@ -95,7 +96,41 @@ public partial class AttributesViewModel : ViewModelBase
     [ObservableProperty]
     private TextStyle? _selectedTextStyle;
 
+    // ----- Area fill (solid/gradient) for a closed polyline -----
+
+    [ObservableProperty]
+    private bool _useAreaFill;
+
+    [ObservableProperty]
+    private double _areaRed;
+
+    [ObservableProperty]
+    private double _areaGreen;
+
+    [ObservableProperty]
+    private double _areaBlue;
+
+    [ObservableProperty]
+    private double _areaAlpha = 255;
+
+    [ObservableProperty]
+    private bool _areaGradient;
+
+    [ObservableProperty]
+    private double _area2Red;
+
+    [ObservableProperty]
+    private double _area2Green;
+
+    [ObservableProperty]
+    private double _area2Blue;
+
+    [ObservableProperty]
+    private double _areaAngle;
+
     public IBrush StrokeBrush => new SolidColorBrush(Color.FromRgb((byte)StrokeRed, (byte)StrokeGreen, (byte)StrokeBlue));
+
+    public IBrush AreaBrush => new SolidColorBrush(Color.FromArgb((byte)AreaAlpha, (byte)AreaRed, (byte)AreaGreen, (byte)AreaBlue));
 
     private void OnDocumentChanged(object? sender, DocumentChangedEventArgs e)
     {
@@ -175,6 +210,25 @@ public partial class AttributesViewModel : ViewModelBase
         SelectedTextStyle = items[0] is ITextEntity text
             ? TextStyleOptions.FirstOrDefault(s => s.Id == text.TextStyleId)
             : null;
+
+        // Area fill: a single closed polyline (same condition as the hatch fill).
+        if (CanFill && items[0] is PolylineEntity { SolidFill: { } areaFill })
+        {
+            UseAreaFill = true;
+            AreaRed = areaFill.Color.R;
+            AreaGreen = areaFill.Color.G;
+            AreaBlue = areaFill.Color.B;
+            AreaAlpha = areaFill.Color.A;
+            AreaGradient = areaFill.IsGradient;
+            Area2Red = areaFill.SecondColor.R;
+            Area2Green = areaFill.SecondColor.G;
+            Area2Blue = areaFill.SecondColor.B;
+            AreaAngle = areaFill.AngleDegrees;
+        }
+        else
+        {
+            UseAreaFill = false;
+        }
 
         _suppress = false;
     }
@@ -277,6 +331,40 @@ public partial class AttributesViewModel : ViewModelBase
                     text.WidthFactor = oldWidth;
                 });
         });
+    }
+
+    partial void OnUseAreaFillChanged(bool value) => ApplyAreaFill();
+    partial void OnAreaRedChanged(double value) => ApplyAreaFill();
+    partial void OnAreaGreenChanged(double value) => ApplyAreaFill();
+    partial void OnAreaBlueChanged(double value) => ApplyAreaFill();
+    partial void OnAreaAlphaChanged(double value) => ApplyAreaFill();
+    partial void OnAreaGradientChanged(bool value) => ApplyAreaFill();
+    partial void OnArea2RedChanged(double value) => ApplyAreaFill();
+    partial void OnArea2GreenChanged(double value) => ApplyAreaFill();
+    partial void OnArea2BlueChanged(double value) => ApplyAreaFill();
+    partial void OnAreaAngleChanged(double value) => ApplyAreaFill();
+
+    private void ApplyAreaFill()
+    {
+        OnPropertyChanged(nameof(AreaBrush));
+        if (_suppress)
+            return;
+        if (_selection.Items.Count != 1 || _selection.Items[0] is not PolylineEntity poly)
+            return;
+
+        CoreFill? next = UseAreaFill
+            ? new CoreFill(
+                new CoreColor((byte)AreaRed, (byte)AreaGreen, (byte)AreaBlue, (byte)AreaAlpha),
+                new CoreColor((byte)Area2Red, (byte)Area2Green, (byte)Area2Blue),
+                AreaGradient, AreaAngle)
+            : null;
+
+        CoreFill? old = poly.SolidFill;
+        if (Nullable.Equals(old, next))
+            return;
+
+        _commands.Execute(new SetEntityPropertyCommand("Flächenfüllung ändern", _document, poly,
+            () => poly.SolidFill = next, () => poly.SolidFill = old));
     }
 
     private void ApplyStrokeOverride()

@@ -9,6 +9,27 @@ public static class GeometryMath
     /// <summary>Default tolerance used for geometric equality comparisons.</summary>
     public const double Epsilon = 1e-9;
 
+    /// <summary>
+    /// Even-odd point-in-polygon test for the ring <paramref name="polygon"/> (implicitly closed).
+    /// </summary>
+    public static bool PointInPolygon(IReadOnlyList<Point2D> polygon, Point2D p)
+    {
+        bool inside = false;
+        int count = polygon.Count;
+        for (int i = 0, j = count - 1; i < count; j = i++)
+        {
+            Point2D a = polygon[i];
+            Point2D b = polygon[j];
+            if (a.Y > p.Y != b.Y > p.Y &&
+                p.X < (b.X - a.X) * (p.Y - a.Y) / (b.Y - a.Y) + a.X)
+            {
+                inside = !inside;
+            }
+        }
+
+        return inside;
+    }
+
     /// <summary>Returns <c>true</c> if two values are equal within <paramref name="tolerance"/>.</summary>
     public static bool AreClose(double a, double b, double tolerance = Epsilon)
         => Math.Abs(a - b) <= tolerance;

@@ -168,7 +168,7 @@ public static class TrimGeometry
         var polyline = source is PolylineEntity p
             ? (PolylineEntity)p.Clone()
             : CopyStyle(source, new PolylineEntity(points));
-        polyline.RestoreState((new List<Point2D>(points), false));
+        polyline.RestoreState((new List<Point2D>(points), false, (MiniCAD.Core.Styling.FillStyle?)null));
         return polyline;
     }
 

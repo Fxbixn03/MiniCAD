@@ -25,6 +25,12 @@ public interface IRenderSurface
     void DrawCircle(Point2D center, double radius, in StrokeStyle stroke);
 
     /// <summary>
+    /// Fills a closed polygon with a solid color or linear gradient (separate from the outline
+    /// stroke). Backends that don't support fills inherit this no-op default.
+    /// </summary>
+    void DrawFilledPolygon(IReadOnlyList<Point2D> points, in FillStyle fill) { }
+
+    /// <summary>
     /// Draws a circular arc. Angles are in radians, measured counter-clockwise from the
     /// positive X axis; <paramref name="sweepAngle"/> may be negative for clockwise arcs.
     /// </summary>

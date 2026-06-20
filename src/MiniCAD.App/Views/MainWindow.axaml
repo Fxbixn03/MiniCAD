@@ -507,6 +507,41 @@
                                                   SelectedItem="{Binding SelectedFill}" />
                                     </StackPanel>
 
+                                    <StackPanel Spacing="6" IsVisible="{Binding CanFill}">
+                                        <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
+                                        <CheckBox Content="Fläche füllen (Vollton/Verlauf)" IsChecked="{Binding UseAreaFill}" />
+                                        <StackPanel Spacing="6" IsEnabled="{Binding UseAreaFill}">
+                                            <Grid ColumnDefinitions="16,*" ColumnSpacing="8" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6">
+                                                <TextBlock Grid.Row="0" Grid.Column="0" Text="R" VerticalAlignment="Center" />
+                                                <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding AreaRed}" />
+                                                <TextBlock Grid.Row="1" Grid.Column="0" Text="G" VerticalAlignment="Center" />
+                                                <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding AreaGreen}" />
+                                                <TextBlock Grid.Row="2" Grid.Column="0" Text="B" VerticalAlignment="Center" />
+                                                <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding AreaBlue}" />
+                                                <TextBlock Grid.Row="3" Grid.Column="0" Text="α" VerticalAlignment="Center" />
+                                                <Slider Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding AreaAlpha}" />
+                                            </Grid>
+                                            <Border Height="18" CornerRadius="4" BorderBrush="{DynamicResource Brush.BorderDefault}" BorderThickness="1"
+                                                    Background="{Binding AreaBrush}" />
+                                            <CheckBox Content="Verlauf (2. Farbe)" IsChecked="{Binding AreaGradient}" />
+                                            <StackPanel Spacing="6" IsVisible="{Binding AreaGradient}">
+                                                <Grid ColumnDefinitions="16,*" ColumnSpacing="8" RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+                                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="R" VerticalAlignment="Center" />
+                                                    <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding Area2Red}" />
+                                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="G" VerticalAlignment="Center" />
+                                                    <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding Area2Green}" />
+                                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="B" VerticalAlignment="Center" />
+                                                    <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding Area2Blue}" />
+                                                </Grid>
+                                                <DockPanel>
+                                                    <TextBlock Text="Winkel" Foreground="{DynamicResource Brush.TextMuted}" DockPanel.Dock="Left" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding AreaAngle, StringFormat='{}{0:0}°'}" Classes="mono" HorizontalAlignment="Right" Foreground="{DynamicResource Brush.TextMuted}" />
+                                                </DockPanel>
+                                                <Slider Minimum="0" Maximum="180" Value="{Binding AreaAngle}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </StackPanel>
+
                                     <StackPanel Spacing="4" IsVisible="{Binding CanSetTextStyle}">
                                         <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
                                         <TextBlock Classes="eyebrow" Text="TEXTSTIL" />

@@ -17,6 +17,7 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
     private readonly Matrix2D _worldToScreen;
     private readonly SKPaint _paint;
     private readonly SKPaint _textPaint;
+    private readonly SKPaint _fillPaint;
     private readonly SKFont _font;
 
     public SkiaRenderSurface(SKCanvas canvas, in Matrix2D worldToScreen)
@@ -32,6 +33,7 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
         };
         // Text is filled (not stroked) so glyphs read cleanly at any size.
         _textPaint = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Fill };
+        _fillPaint = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Fill };
         _font = new SKFont(SKTypeface.Default);
     }
 
@@ -66,6 +68,48 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
         SKPoint deviceCenter = ToDevice(center);
         _canvas.DrawCircle(deviceCenter, DeviceLength(radius), _paint);
     }
+
+    public void DrawFilledPolygon(IReadOnlyList<Point2D> points, in FillStyle fill)
+    {
+        if (points.Count < 3)
+            return;
+
+        using var path = new SKPath();
+        path.MoveTo(ToDevice(points[0]));
+        for (int i = 1; i < points.Count; i++)
+            path.LineTo(ToDevice(points[i]));
+        path.Close();
+
+        SKColor color = ToSkColor(fill.Color);
+        if (fill.IsGradient)
+        {
+            SKRect bounds = path.Bounds;
+            var center = new SKPoint(bounds.MidX, bounds.MidY);
+            // World angle is CCW with Y up; device space is Y-down, so the Y component is negated.
+            double angle = GeometryMath.DegreesToRadians(fill.AngleDegrees);
+            var dir = new SKPoint((float)Math.Cos(angle), (float)-Math.Sin(angle));
+            float half = Math.Max(bounds.Width, bounds.Height) * 0.5f;
+            var start = new SKPoint(center.X - dir.X * half, center.Y - dir.Y * half);
+            var end = new SKPoint(center.X + dir.X * half, center.Y + dir.Y * half);
+
+            using SKShader shader = SKShader.CreateLinearGradient(
+                start, end,
+                new[] { color, ToSkColor(fill.SecondColor) },
+                null,
+                SKShaderTileMode.Clamp);
+            _fillPaint.Shader = shader;
+            _fillPaint.Color = color;
+            _canvas.DrawPath(path, _fillPaint);
+            _fillPaint.Shader = null;
+        }
+        else
+        {
+            _fillPaint.Color = color;
+            _canvas.DrawPath(path, _fillPaint);
+        }
+    }
+
+    private static SKColor ToSkColor(Color c) => new(c.R, c.G, c.B, c.A);
 
     public void DrawArc(Point2D center, double radius, double startAngle, double sweepAngle, in StrokeStyle stroke)
     {
@@ -226,6 +270,7 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
     {
         _paint.Dispose();
         _textPaint.Dispose();
+        _fillPaint.Dispose();
         _font.Dispose();
     }
 }

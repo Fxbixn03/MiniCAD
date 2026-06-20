@@ -188,6 +188,13 @@ public sealed class PolylineDto : EntityDto
 
     /// <summary>Id of the hatch pattern filling the region, or <c>null</c> for no fill.</summary>
     public Guid? FillPatternId { get; set; }
+
+    /// <summary>Solid/gradient area fill of a closed region.</summary>
+    public bool Filled { get; set; }
+    public ColorDto FillColor { get; set; } = new();
+    public ColorDto FillColor2 { get; set; } = new();
+    public bool FillGradient { get; set; }
+    public double FillAngle { get; set; }
 }
 
 public sealed class PointMarkerDto : EntityDto

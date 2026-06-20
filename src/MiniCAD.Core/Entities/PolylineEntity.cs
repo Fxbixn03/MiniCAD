@@ -20,6 +20,7 @@ public sealed class PolylineEntity : Entity, IEditableEntity
         _points = new List<Point2D>(source._points);
         IsClosed = source.IsClosed;
         Fill = source.Fill;
+        SolidFill = source.SolidFill;
     }
 
     public IReadOnlyList<Point2D> Points => _points;
@@ -31,6 +32,12 @@ public sealed class PolylineEntity : Entity, IEditableEntity
     /// polyline (a "Wand" or any closed object); ignored otherwise.
     /// </summary>
     public HatchPattern? Fill { get; set; }
+
+    /// <summary>
+    /// An optional solid/gradient area fill painted inside a closed region (separate from the
+    /// hatch <see cref="Fill"/> and from the outline stroke); ignored when the polyline is open.
+    /// </summary>
+    public FillStyle? SolidFill { get; set; }
 
     public void AddPoint(Point2D point) => _points.Add(point);
 
@@ -77,6 +84,10 @@ public sealed class PolylineEntity : Entity, IEditableEntity
         if (IsClosed && GeometryMath.DistancePointToSegment(point, _points[^1], _points[0], out _) <= tolerance)
             return true;
 
+        // A filled region is also pickable anywhere inside it, not just on the outline.
+        if (IsClosed && SolidFill is not null && _points.Count >= 3 && GeometryMath.PointInPolygon(_points, point))
+            return true;
+
         return false;
     }
 
@@ -104,6 +115,10 @@ public sealed class PolylineEntity : Entity, IEditableEntity
 
     public override void Render(IRenderSurface surface, in StrokeStyle stroke)
     {
+        // Area fill first (under the hatch and outline), then hatch, then the outline on top.
+        if (IsClosed && SolidFill is { } solid && _points.Count >= 3)
+            surface.DrawFilledPolygon(_points, solid);
+
         if (IsClosed && Fill is { } fill && _points.Count >= 3)
         {
             StrokeStyle hatchStroke = fill.Stroke;
@@ -161,13 +176,14 @@ public sealed class PolylineEntity : Entity, IEditableEntity
         _points[j] += delta;
     }
 
-    public object CaptureState() => (new List<Point2D>(_points), IsClosed);
+    public object CaptureState() => (new List<Point2D>(_points), IsClosed, SolidFill);
 
     public void RestoreState(object state)
     {
-        var (points, closed) = ((List<Point2D>, bool))state;
+        var (points, closed, solidFill) = ((List<Point2D>, bool, FillStyle?))state;
         _points.Clear();
         _points.AddRange(points);
         IsClosed = closed;
+        SolidFill = solidFill;
     }
 }

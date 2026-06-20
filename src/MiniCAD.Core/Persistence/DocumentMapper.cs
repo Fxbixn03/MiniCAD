@@ -213,6 +213,11 @@ public static class DocumentMapper
                 Points = poly.Points.Select(ToDto).ToList(),
                 Closed = poly.IsClosed,
                 FillPatternId = poly.Fill?.Id,
+                Filled = poly.SolidFill.HasValue,
+                FillColor = ToDto((poly.SolidFill ?? default).Color),
+                FillColor2 = ToDto((poly.SolidFill ?? default).SecondColor),
+                FillGradient = poly.SolidFill?.IsGradient ?? false,
+                FillAngle = poly.SolidFill?.AngleDegrees ?? 0.0,
             },
             PointEntity point => new PointMarkerDto
             {
@@ -278,7 +283,12 @@ public static class DocumentMapper
             LineDto line => new LineEntity(FromDto(line.Start), FromDto(line.End)),
             CircleDto circle => new CircleEntity(FromDto(circle.Center), circle.Radius),
             ArcDto arc => new ArcEntity(FromDto(arc.Center), arc.Radius, arc.StartAngle, arc.SweepAngle),
-            PolylineDto poly => new PolylineEntity(poly.Points.Select(FromDto), poly.Closed),
+            PolylineDto poly => new PolylineEntity(poly.Points.Select(FromDto), poly.Closed)
+            {
+                SolidFill = poly.Filled
+                    ? new FillStyle(FromDto(poly.FillColor), FromDto(poly.FillColor2), poly.FillGradient, poly.FillAngle)
+                    : null,
+            },
             PointMarkerDto point => new PointEntity(
                 FromDto(point.Position),
                 point.Size,
