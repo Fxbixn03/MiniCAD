@@ -143,6 +143,32 @@ public static class GeometryMath
     }
 
     /// <summary>
+    /// The circle through three points (circumcircle). Returns <c>false</c> when the points are
+    /// collinear, in which case no finite circle exists.
+    /// </summary>
+    public static bool TryCircumcircle(Point2D a, Point2D b, Point2D c, out Point2D center, out double radius)
+    {
+        double d = 2.0 * (a.X * (b.Y - c.Y) + b.X * (c.Y - a.Y) + c.X * (a.Y - b.Y));
+        if (Math.Abs(d) <= Epsilon)
+        {
+            center = default;
+            radius = 0;
+            return false;
+        }
+
+        double aSq = a.X * a.X + a.Y * a.Y;
+        double bSq = b.X * b.X + b.Y * b.Y;
+        double cSq = c.X * c.X + c.Y * c.Y;
+
+        double ux = (aSq * (b.Y - c.Y) + bSq * (c.Y - a.Y) + cSq * (a.Y - b.Y)) / d;
+        double uy = (aSq * (c.X - b.X) + bSq * (a.X - c.X) + cSq * (b.X - a.X)) / d;
+
+        center = new Point2D(ux, uy);
+        radius = center.DistanceTo(a);
+        return true;
+    }
+
+    /// <summary>
     /// Intersection of the two segments [<paramref name="a"/>, <paramref name="b"/>] and
     /// [<paramref name="c"/>, <paramref name="d"/>] if they actually cross within both spans.
     /// Parallel/collinear segments report no single point.

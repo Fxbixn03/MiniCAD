@@ -28,6 +28,37 @@ public sealed class ArcEntity : Entity
         SweepAngle = source.SweepAngle;
     }
 
+    /// <summary>
+    /// Builds the arc through three points (start → through → end), or <c>null</c> if they are
+    /// collinear. The sweep direction is chosen so the arc actually passes through the middle point.
+    /// </summary>
+    public static ArcEntity? FromThreePoints(Point2D start, Point2D through, Point2D end)
+    {
+        if (!GeometryMath.TryCircumcircle(start, through, end, out Point2D center, out double radius))
+            return null;
+
+        double startAngle = Angle(center, start);
+        double sweepCcw = GeometryMath.NormalizeAngle(Angle(center, end) - startAngle);
+        double throughRel = GeometryMath.NormalizeAngle(Angle(center, through) - startAngle);
+        double sweep = throughRel <= sweepCcw ? sweepCcw : sweepCcw - Math.PI * 2.0;
+        return new ArcEntity(center, radius, startAngle, sweep);
+    }
+
+    /// <summary>Builds the arc from a centre, a start point (sets radius/start) and an end direction (CCW).</summary>
+    public static ArcEntity? FromCenterStartEnd(Point2D center, Point2D start, Point2D end)
+    {
+        double radius = center.DistanceTo(start);
+        if (radius <= GeometryMath.Epsilon)
+            return null;
+
+        double startAngle = Angle(center, start);
+        double sweep = GeometryMath.NormalizeAngle(Angle(center, end) - startAngle);
+        return new ArcEntity(center, radius, startAngle, sweep);
+    }
+
+    private static double Angle(Point2D center, Point2D point)
+        => Math.Atan2(point.Y - center.Y, point.X - center.X);
+
     public Point2D Center { get; set; }
 
     public double Radius

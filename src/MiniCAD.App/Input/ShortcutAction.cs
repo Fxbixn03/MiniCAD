@@ -10,6 +10,7 @@ public enum ShortcutAction
     Line,
     Rectangle,
     Circle,
+    Arc,
     Polyline,
     Delete,
     Undo,

@@ -173,6 +173,19 @@
             </StackPanel>
         </Border>
 
+        <!-- Inline arc-mode selector, shown while the arc tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsArcActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding ArcOptions}" x:DataType="vm:ArcOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="BOGEN" VerticalAlignment="Center" />
+                <ToggleButton IsChecked="{Binding IsCenterMode}" Content="{Binding ModeLabel}" MinWidth="100"
+                              ToolTip.Tip="3-Punkt ⟷ Mittelpunkt/Start/Ende" />
+                <TextBlock Text="{Binding Hint}" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
+        </Border>
+
         <!-- Inline fillet/chamfer parameters, shown while that tool is active. -->
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
                 BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
@@ -229,6 +242,10 @@
                 <Button Classes="rail" Classes.active="{Binding IsCircleActive}"
                         Command="{Binding ActivateCircleCommand}" ToolTip.Tip="Kreis  ·  C">
                     <Path Classes="ico" Data="{StaticResource Icon.Circle}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsArcActive}"
+                        Command="{Binding ActivateArcCommand}" ToolTip.Tip="Bogen  ·  A">
+                    <Path Classes="ico" Data="{StaticResource Icon.Arc}" />
                 </Button>
                 <Button Classes="rail" Classes.active="{Binding IsPolylineActive}"
                         Command="{Binding ActivatePolylineCommand}" ToolTip.Tip="Polylinie  ·  P">
