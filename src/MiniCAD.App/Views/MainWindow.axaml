@@ -73,6 +73,7 @@
                             <MenuItem Header="S_tutzen / Dehnen" Command="{Binding ActivateTrimCommand}" InputGesture="T" />
                             <MenuItem Header="_Dehnen (Fenster)" Command="{Binding ActivateStretchCommand}" InputGesture="S" />
                             <MenuItem Header="_Abrundung / Fase" Command="{Binding ActivateFilletCommand}" InputGesture="Shift+F" />
+                            <MenuItem Header="_Array (Raster / polar)" Command="{Binding ActivateArrayCommand}" InputGesture="Shift+A" />
                             <Separator />
                             <MenuItem Header="_Löschen" Command="{Binding DeleteSelectionCommand}" InputGesture="Delete" />
                         </MenuItem>
@@ -131,6 +132,40 @@
                 <TextBlock DockPanel.Dock="Right" Classes="mono" Margin="12,0" Foreground="{DynamicResource Brush.TextFaint}"
                            Text="MMT = verschieben · Rad = zoom · Esc = abbrechen · Entf = löschen" />
             </DockPanel>
+        </Border>
+
+        <!-- Inline array parameters (rectangular / polar), shown while that tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsArrayActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding ArrayOptions}" x:DataType="vm:ArrayOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="ARRAY" VerticalAlignment="Center" />
+                <ToggleButton IsChecked="{Binding IsPolar}" Content="{Binding ModeLabel}" MinWidth="92"
+                              ToolTip.Tip="Rechteckig (Raster) ⟷ Polar (um Mittelpunkt)" />
+
+                <!-- Rectangular fields -->
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" IsVisible="{Binding !IsPolar}">
+                    <TextBlock Text="Reihen" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                    <TextBox Width="48" Text="{Binding RowsText}" FontFamily="{StaticResource Font.Mono}" />
+                    <TextBlock Text="Spalten" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                    <TextBox Width="48" Text="{Binding ColumnsText}" FontFamily="{StaticResource Font.Mono}" />
+                    <TextBlock Text="dX" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                    <TextBox Width="60" Text="{Binding SpacingXText}" FontFamily="{StaticResource Font.Mono}" />
+                    <TextBlock Text="dY" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                    <TextBox Width="60" Text="{Binding SpacingYText}" FontFamily="{StaticResource Font.Mono}" />
+                    <TextBlock Text="Klick oder ⏎ bestätigt" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+                </StackPanel>
+
+                <!-- Polar fields -->
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" IsVisible="{Binding IsPolar}">
+                    <TextBlock Text="Anzahl" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                    <TextBox Width="48" Text="{Binding CountText}" FontFamily="{StaticResource Font.Mono}" />
+                    <TextBlock Text="Winkel°" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                    <TextBox Width="60" Text="{Binding AngleText}" FontFamily="{StaticResource Font.Mono}" />
+                    <TextBlock Text="Mittelpunkt klicken" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+                </StackPanel>
+            </StackPanel>
         </Border>
 
         <!-- Inline fillet/chamfer parameters, shown while that tool is active. -->
@@ -233,6 +268,10 @@
                 <Button Classes="rail" Classes.active="{Binding IsFilletActive}"
                         Command="{Binding ActivateFilletCommand}" ToolTip.Tip="Abrundung / Fase  ·  Shift+F">
                     <Path Classes="ico" Data="{StaticResource Icon.Fillet}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsArrayActive}"
+                        Command="{Binding ActivateArrayCommand}" ToolTip.Tip="Array (rechteckig / polar)  ·  Shift+A">
+                    <Path Classes="ico" Data="{StaticResource Icon.Array}" />
                 </Button>
 
                 <Border Classes="raildiv" />

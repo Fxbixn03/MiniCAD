@@ -38,6 +38,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly TrimExtendTool _trimTool = new();
     private readonly StretchTool _stretchTool = new();
     private readonly FilletTool _filletTool = new();
+    private readonly ArrayTool _arrayTool = new();
 
     private string? _filePath;
 
@@ -52,6 +53,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Assistant = new AssistantViewModel();
         CoordinateInput = new CoordinateInputViewModel(Tools, Document);
         FilletOptions = new FilletOptionsViewModel(_filletTool);
+        ArrayOptions = new ArrayOptionsViewModel(_arrayTool);
 
         Document.Changed += OnDocumentChanged;
         Document.CoordinateSystem.Changed += OnOriginChanged;
@@ -65,6 +67,7 @@ public partial class MainWindowViewModel : ViewModelBase
             ActivateRotateCommand.NotifyCanExecuteChanged();
             ActivateMirrorCommand.NotifyCanExecuteChanged();
             ActivateScaleCommand.NotifyCanExecuteChanged();
+            ActivateArrayCommand.NotifyCanExecuteChanged();
         };
         Tools.ActiveToolChanged += (_, _) =>
         {
@@ -129,6 +132,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>Inline radius/chamfer parameters, shown while the fillet tool is active.</summary>
     public FilletOptionsViewModel FilletOptions { get; }
+
+    /// <summary>Inline rectangular/polar array parameters, shown while the array tool is active.</summary>
+    public ArrayOptionsViewModel ArrayOptions { get; }
 
     /// <summary>True for tools that place points, where typed coordinate entry is meaningful.</summary>
     private bool IsCoordinateTool(ITool? tool)
@@ -202,6 +208,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsTrimActive => Tools.ActiveTool == _trimTool;
     public bool IsStretchActive => Tools.ActiveTool == _stretchTool;
     public bool IsFilletActive => Tools.ActiveTool == _filletTool;
+    public bool IsArrayActive => Tools.ActiveTool == _arrayTool;
 
     private void RaiseActiveToolFlags()
     {
@@ -221,6 +228,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsTrimActive));
         OnPropertyChanged(nameof(IsStretchActive));
         OnPropertyChanged(nameof(IsFilletActive));
+        OnPropertyChanged(nameof(IsArrayActive));
     }
 
     partial void OnProjectNameChanged(string value) => OnPropertyChanged(nameof(Title));
@@ -347,6 +355,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ActivateFillet() => Tools.SetActiveTool(_filletTool);
 
+    /// <summary>Array repeats the current selection; needs something selected first.</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ActivateArray() => Tools.SetActiveTool(_arrayTool);
+
     /// <summary>True while at least one entity is selected (gates the editing tools).</summary>
     private bool HasSelection => !Tools.Selection.IsEmpty;
 
@@ -448,6 +460,7 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Trim: ActivateTrimCommand.Execute(null); return true;
             case ShortcutAction.Stretch: ActivateStretchCommand.Execute(null); return true;
             case ShortcutAction.Fillet: ActivateFilletCommand.Execute(null); return true;
+            case ShortcutAction.Array: ActivateArrayCommand.Execute(null); return true;
             case ShortcutAction.Delete: DeleteSelectionCommand.Execute(null); return true;
             case ShortcutAction.Undo: UndoCommand.Execute(null); return true;
             case ShortcutAction.Redo: RedoCommand.Execute(null); return true;
