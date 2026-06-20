@@ -35,6 +35,8 @@ public abstract class Entity : IEntity
 
     public abstract bool HitTest(Point2D point, double tolerance);
 
+    public abstract bool IntersectsRect(Rect2D rect);
+
     public abstract void Transform(in Matrix2D matrix);
 
     public abstract void Render(IRenderSurface surface, in StrokeStyle stroke);

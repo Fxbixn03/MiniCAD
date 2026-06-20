@@ -26,9 +26,14 @@ public sealed class SelectTool : ToolBase
     private Grip _activeGrip;
     private object? _gripBefore;
 
+    // Rubber-band box selection (started on empty space).
+    private bool _boxing;
+    private Point2D _boxStart;
+    private Point2D _boxCurrent;
+
     public override string Name => "Auswahl";
 
-    protected override bool HasActiveOperation => _dragging || _gripEntity is not null;
+    protected override bool HasActiveOperation => _dragging || _gripEntity is not null || _boxing;
 
     public override void PointerDown(in ToolPointerInput input)
     {
@@ -43,8 +48,11 @@ public sealed class SelectTool : ToolBase
         IEntity? hit = PickTopmost(input.World);
         if (hit is null)
         {
-            if (!input.HasShift)
-                Context.Selection.Clear();
+            // Empty space: begin a rubber-band box. A drag selects by window/crossing; a click
+            // without a drag clears the selection (resolved on release).
+            _boxing = true;
+            _boxStart = input.World;
+            _boxCurrent = input.World;
             return;
         }
 
@@ -64,6 +72,13 @@ public sealed class SelectTool : ToolBase
 
     public override void PointerMove(in ToolPointerInput input)
     {
+        if (_boxing)
+        {
+            _boxCurrent = input.World;
+            Context.RequestRedraw();
+            return;
+        }
+
         if (_gripEntity is { } gripEntity)
         {
             gripEntity.MoveGrip(_activeGrip, Snap(input));
@@ -92,6 +107,12 @@ public sealed class SelectTool : ToolBase
 
     public override void PointerUp(in ToolPointerInput input)
     {
+        if (_boxing)
+        {
+            FinishBox(input.HasShift);
+            return;
+        }
+
         if (_gripEntity is { } gripEntity)
         {
             object after = gripEntity.CaptureState();
@@ -145,6 +166,7 @@ public sealed class SelectTool : ToolBase
         _gripEntity = null;
         _gripBefore = null;
         _dragging = false;
+        _boxing = false;
         _dragTargets = new List<IEntity>();
         ClearSnap();
     }
@@ -152,6 +174,14 @@ public sealed class SelectTool : ToolBase
     public override IReadOnlyList<OverlayItem> GetOverlay()
     {
         var items = new List<OverlayItem>();
+
+        if (_boxing)
+        {
+            Rect2D box = Rect2D.FromPoints(_boxStart, _boxCurrent);
+            var marker = PolylineEntity.Rectangle(box.Min, box.Max);
+            items.Add(new OverlayItem(marker, IsCrossingDrag ? ToolStyle.CrossingBox : ToolStyle.WindowBox));
+        }
+
         if (SingleEditableSelection() is { } editable)
         {
             foreach (Grip grip in editable.GetGrips())
@@ -160,6 +190,43 @@ public sealed class SelectTool : ToolBase
 
         AddSnapMarker(items);
         return items;
+    }
+
+    /// <summary>True while the box is dragged right→left, i.e. a crossing (intersecting) selection.</summary>
+    private bool IsCrossingDrag => _boxCurrent.X < _boxStart.X;
+
+    private void FinishBox(bool additive)
+    {
+        _boxing = false;
+
+        // A box smaller than the pick tolerance is really a click on empty space.
+        double slack = Context.PickTolerance;
+        if (Math.Abs(_boxCurrent.X - _boxStart.X) < slack && Math.Abs(_boxCurrent.Y - _boxStart.Y) < slack)
+        {
+            if (!additive)
+                Context.Selection.Clear();
+            Context.RequestRedraw();
+            return;
+        }
+
+        bool crossing = IsCrossingDrag;
+        Rect2D box = Rect2D.FromPoints(_boxStart, _boxCurrent);
+
+        if (!additive)
+            Context.Selection.Clear();
+
+        foreach (IEntity entity in Context.Document.Entities)
+        {
+            if (!Context.Document.IsEntityEditable(entity))
+                continue;
+
+            // Window (left→right): only fully enclosed objects. Crossing (right→left): also cut.
+            bool selected = crossing ? entity.IntersectsRect(box) : box.Contains(entity.Bounds);
+            if (selected)
+                Context.Selection.Add(entity);
+        }
+
+        Context.RequestRedraw();
     }
 
     private bool TryStartGripDrag(Point2D world)

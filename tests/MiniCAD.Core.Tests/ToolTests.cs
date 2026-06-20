@@ -360,4 +360,86 @@ public class ToolTests
         manager.LastPoint.Should().Be(new Point2D(7, 9));
         manager.SnapSettings.Enabled.Should().BeTrue(); // snapping restored afterwards
     }
+
+    private static void BoxSelect(SelectTool tool, Point2D from, Point2D to, bool shift = false)
+    {
+        var modifiers = shift ? ToolModifiers.Shift : ToolModifiers.None;
+        tool.PointerDown(Click(from.X, from.Y) with { Modifiers = modifiers });
+        tool.PointerMove(Click(to.X, to.Y, ToolButton.None));
+        tool.PointerUp(Click(to.X, to.Y, ToolButton.None) with { Modifiers = modifiers });
+    }
+
+    [Fact]
+    public void WindowSelection_LeftToRight_SelectsOnlyFullyEnclosed()
+    {
+        (CadDocument doc, TestToolContext ctx) = Setup<SelectTool>(out SelectTool tool);
+        var inside = new LineEntity(new Point2D(1, 1), new Point2D(3, 3));
+        var sticksOut = new LineEntity(new Point2D(4, 4), new Point2D(20, 20));
+        doc.AddEntity(inside);
+        doc.AddEntity(sticksOut);
+
+        BoxSelect(tool, new Point2D(0, 0), new Point2D(10, 10)); // left -> right = window
+
+        ctx.Selection.Items.Should().ContainSingle().Which.Should().BeSameAs(inside);
+    }
+
+    [Fact]
+    public void CrossingSelection_RightToLeft_SelectsIntersected()
+    {
+        (CadDocument doc, TestToolContext ctx) = Setup<SelectTool>(out SelectTool tool);
+        var inside = new LineEntity(new Point2D(1, 1), new Point2D(3, 3));
+        var sticksOut = new LineEntity(new Point2D(4, 4), new Point2D(20, 20));
+        doc.AddEntity(inside);
+        doc.AddEntity(sticksOut);
+
+        // Start corner kept clear of the diagonal line so it begins a box (not a pick).
+        BoxSelect(tool, new Point2D(15, 10), new Point2D(0, 0)); // right -> left = crossing
+
+        ctx.Selection.Items.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public void BoxSelection_WithShift_ExtendsSelection()
+    {
+        (CadDocument doc, TestToolContext ctx) = Setup<SelectTool>(out SelectTool tool);
+        var a = new LineEntity(new Point2D(0, 0), new Point2D(2, 0));
+        var b = new LineEntity(new Point2D(0, 5), new Point2D(2, 5));
+        doc.AddEntity(a);
+        doc.AddEntity(b);
+
+        BoxSelect(tool, new Point2D(-1, -1), new Point2D(3, 1));            // window-select a
+        BoxSelect(tool, new Point2D(-1, 4), new Point2D(3, 6), shift: true); // shift-add b
+
+        ctx.Selection.Items.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public void BoxSelection_SkipsEntitiesOnLockedLayer()
+    {
+        (CadDocument doc, TestToolContext ctx) = Setup<SelectTool>(out SelectTool tool);
+        Layer layer = doc.AddLayer("Referenz", StrokeStyle.Default);
+        var line = new LineEntity(new Point2D(1, 1), new Point2D(3, 3)) { LayerId = layer.Id };
+        doc.AddEntity(line);
+        doc.SetLayerState(layer, ElementState.Locked);
+
+        BoxSelect(tool, new Point2D(0, 0), new Point2D(10, 10));
+
+        ctx.Selection.IsEmpty.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ClickOnEmptySpace_ClearsSelection()
+    {
+        (CadDocument doc, TestToolContext ctx) = Setup<SelectTool>(out SelectTool tool);
+        var line = new LineEntity(new Point2D(0, 0), new Point2D(10, 0));
+        doc.AddEntity(line);
+
+        tool.PointerDown(Click(5, 0));            // select
+        tool.PointerUp(Click(5, 0, ToolButton.None));
+        ctx.Selection.Count.Should().Be(1);
+
+        tool.PointerDown(Click(50, 50));          // empty space -> rubber band
+        tool.PointerUp(Click(50, 50, ToolButton.None)); // no drag -> treated as a click
+        ctx.Selection.IsEmpty.Should().BeTrue();
+    }
 }

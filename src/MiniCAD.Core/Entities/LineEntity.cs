@@ -38,6 +38,9 @@ public sealed class LineEntity : Entity, IEditableEntity
     public override bool HitTest(Point2D point, double tolerance)
         => GeometryMath.DistancePointToSegment(point, Start, End, out _) <= tolerance;
 
+    public override bool IntersectsRect(Rect2D rect)
+        => GeometryMath.SegmentIntersectsRect(Start, End, rect);
+
     public override void Transform(in Matrix2D matrix)
     {
         Start = matrix.Transform(Start);

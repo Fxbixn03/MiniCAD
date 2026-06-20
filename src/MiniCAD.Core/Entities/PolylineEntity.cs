@@ -80,6 +80,22 @@ public sealed class PolylineEntity : Entity, IEditableEntity
         return false;
     }
 
+    public override bool IntersectsRect(Rect2D rect)
+    {
+        if (_points.Count == 0)
+            return false;
+        if (_points.Count == 1)
+            return rect.Contains(_points[0]);
+
+        for (int i = 0; i < _points.Count - 1; i++)
+        {
+            if (GeometryMath.SegmentIntersectsRect(_points[i], _points[i + 1], rect))
+                return true;
+        }
+
+        return IsClosed && GeometryMath.SegmentIntersectsRect(_points[^1], _points[0], rect);
+    }
+
     public override void Transform(in Matrix2D matrix)
     {
         for (int i = 0; i < _points.Count; i++)

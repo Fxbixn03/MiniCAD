@@ -67,4 +67,57 @@ public static class GeometryMath
         closest = a + ab * t;
         return point.DistanceTo(closest);
     }
+
+    /// <summary>
+    /// True if the segments [<paramref name="a"/>, <paramref name="b"/>] and
+    /// [<paramref name="c"/>, <paramref name="d"/>] cross or touch. Collinear overlap is treated
+    /// conservatively as an intersection.
+    /// </summary>
+    public static bool SegmentsIntersect(Point2D a, Point2D b, Point2D c, Point2D d)
+    {
+        Vector2D ab = b - a;
+        Vector2D cd = d - c;
+        double denominator = ab.Cross(cd);
+
+        if (Math.Abs(denominator) <= Epsilon)
+        {
+            // Parallel: count it as touching only when collinear and the projections overlap.
+            if (Math.Abs((c - a).Cross(ab)) > Epsilon)
+                return false;
+
+            double abLengthSquared = ab.LengthSquared;
+            if (abLengthSquared <= Epsilon)
+                return DistancePointToSegment(a, c, d, out _) <= Epsilon;
+
+            double tc = (c - a).Dot(ab) / abLengthSquared;
+            double td = (d - a).Dot(ab) / abLengthSquared;
+            double lo = Math.Min(tc, td);
+            double hi = Math.Max(tc, td);
+            return hi >= 0.0 && lo <= 1.0;
+        }
+
+        double t = (c - a).Cross(cd) / denominator;
+        double u = (c - a).Cross(ab) / denominator;
+        return t >= 0.0 && t <= 1.0 && u >= 0.0 && u <= 1.0;
+    }
+
+    /// <summary>
+    /// True if the segment [<paramref name="a"/>, <paramref name="b"/>] touches the axis-aligned
+    /// <paramref name="rect"/> — either an endpoint lies inside it or the segment crosses an edge.
+    /// </summary>
+    public static bool SegmentIntersectsRect(Point2D a, Point2D b, Rect2D rect)
+    {
+        if (rect.Contains(a) || rect.Contains(b))
+            return true;
+
+        var bottomLeft = new Point2D(rect.MinX, rect.MinY);
+        var bottomRight = new Point2D(rect.MaxX, rect.MinY);
+        var topRight = new Point2D(rect.MaxX, rect.MaxY);
+        var topLeft = new Point2D(rect.MinX, rect.MaxY);
+
+        return SegmentsIntersect(a, b, bottomLeft, bottomRight)
+            || SegmentsIntersect(a, b, bottomRight, topRight)
+            || SegmentsIntersect(a, b, topRight, topLeft)
+            || SegmentsIntersect(a, b, topLeft, bottomLeft);
+    }
 }

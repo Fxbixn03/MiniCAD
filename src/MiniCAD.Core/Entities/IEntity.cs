@@ -35,6 +35,13 @@ public interface IEntity
     /// <summary>Returns <c>true</c> if <paramref name="point"/> lies within <paramref name="tolerance"/> world units of the geometry.</summary>
     bool HitTest(Point2D point, double tolerance);
 
+    /// <summary>
+    /// Returns <c>true</c> if the geometry crosses or lies within <paramref name="rect"/>. This is
+    /// the "crossing" box-selection test (left→right window selection uses <see cref="Bounds"/>
+    /// containment instead).
+    /// </summary>
+    bool IntersectsRect(Rect2D rect);
+
     /// <summary>Applies an affine transform to the entity in place.</summary>
     void Transform(in Matrix2D matrix);
 

@@ -141,4 +141,29 @@ public class GeometryTests
         double beyond = GeometryMath.DistancePointToSegment(new Point2D(-4, 0), a, b, out _);
         beyond.Should().BeApproximately(4, Tolerance);
     }
+
+    [Fact]
+    public void SegmentsIntersect_DetectsCrossingAndMiss()
+    {
+        GeometryMath.SegmentsIntersect(
+            new Point2D(0, 0), new Point2D(10, 10),
+            new Point2D(0, 10), new Point2D(10, 0)).Should().BeTrue();   // an X crossing
+
+        GeometryMath.SegmentsIntersect(
+            new Point2D(0, 0), new Point2D(1, 0),
+            new Point2D(0, 5), new Point2D(1, 5)).Should().BeFalse();    // parallel, apart
+    }
+
+    [Fact]
+    public void SegmentIntersectsRect_TrueWhenCrossingEdgeOrInside()
+    {
+        var rect = new Rect2D(0, 0, 10, 10);
+
+        // Passes straight through the box.
+        GeometryMath.SegmentIntersectsRect(new Point2D(-5, 5), new Point2D(15, 5), rect).Should().BeTrue();
+        // Fully inside.
+        GeometryMath.SegmentIntersectsRect(new Point2D(2, 2), new Point2D(8, 8), rect).Should().BeTrue();
+        // Entirely outside, no crossing.
+        GeometryMath.SegmentIntersectsRect(new Point2D(-5, -5), new Point2D(-5, 15), rect).Should().BeFalse();
+    }
 }

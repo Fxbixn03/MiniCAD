@@ -94,4 +94,28 @@ public class EntityTests
         arc.HitTest(new Point2D(0, 5), 0.01).Should().BeTrue();   // 90°, inside sweep
         arc.HitTest(new Point2D(-5, 0), 0.01).Should().BeFalse(); // 180°, outside sweep
     }
+
+    [Fact]
+    public void Circle_IntersectsRect_OnlyWhenOutlineMeetsBox()
+    {
+        var circle = new CircleEntity(new Point2D(10, 10), 5);
+
+        circle.IntersectsRect(new Rect2D(0, 8, 7, 12)).Should().BeTrue();     // box overlaps the ring
+        circle.IntersectsRect(new Rect2D(9, 9, 11, 11)).Should().BeFalse();   // small box deep inside the disk
+        circle.IntersectsRect(new Rect2D(40, 40, 50, 50)).Should().BeFalse(); // far away
+    }
+
+    [Fact]
+    public void Polyline_IntersectsRect_WhenAnySegmentCrossesBox()
+    {
+        var poly = new PolylineEntity(new[]
+        {
+            new Point2D(0, 0),
+            new Point2D(20, 0),
+            new Point2D(20, 20),
+        });
+
+        poly.IntersectsRect(new Rect2D(8, -2, 12, 2)).Should().BeTrue();   // straddles the first segment
+        poly.IntersectsRect(new Rect2D(-5, 5, -1, 9)).Should().BeFalse();  // clear of every segment
+    }
 }

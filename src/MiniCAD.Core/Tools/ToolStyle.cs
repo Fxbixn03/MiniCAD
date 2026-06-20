@@ -19,4 +19,10 @@ public static class ToolStyle
 
     /// <summary>Edge / resize grip handle on the selected entity (segment midpoints, radius).</summary>
     public static readonly StrokeStyle EdgeGrip = new(new Color(90, 200, 255, 255), 1.5);
+
+    /// <summary>Window box (left→right drag): selects only fully enclosed objects.</summary>
+    public static readonly StrokeStyle WindowBox = new(new Color(80, 160, 255, 230), 1.2);
+
+    /// <summary>Crossing box (right→left drag): also selects intersected objects.</summary>
+    public static readonly StrokeStyle CrossingBox = new(new Color(110, 220, 130, 230), 1.2);
 }

@@ -42,8 +42,28 @@ public readonly struct Rect2D : IEquatable<Rect2D>
 
     public bool Contains(Point2D p) => p.X >= MinX && p.X <= MaxX && p.Y >= MinY && p.Y <= MaxY;
 
+    /// <summary>True if <paramref name="other"/> lies entirely within this box.</summary>
+    public bool Contains(Rect2D other)
+        => other.MinX >= MinX && other.MaxX <= MaxX && other.MinY >= MinY && other.MaxY <= MaxY;
+
     public bool Intersects(Rect2D other)
         => MinX <= other.MaxX && MaxX >= other.MinX && MinY <= other.MaxY && MaxY >= other.MinY;
+
+    /// <summary>Shortest distance from <paramref name="p"/> to this box (0 if inside).</summary>
+    public double DistanceTo(Point2D p)
+    {
+        double dx = Math.Max(Math.Max(MinX - p.X, p.X - MaxX), 0.0);
+        double dy = Math.Max(Math.Max(MinY - p.Y, p.Y - MaxY), 0.0);
+        return Math.Sqrt(dx * dx + dy * dy);
+    }
+
+    /// <summary>Distance from <paramref name="p"/> to the farthest corner of this box.</summary>
+    public double MaxCornerDistance(Point2D p)
+    {
+        double dx = Math.Max(Math.Abs(p.X - MinX), Math.Abs(p.X - MaxX));
+        double dy = Math.Max(Math.Abs(p.Y - MinY), Math.Abs(p.Y - MaxY));
+        return Math.Sqrt(dx * dx + dy * dy);
+    }
 
     /// <summary>The smallest box containing both this box and <paramref name="other"/>.</summary>
     public Rect2D Union(Rect2D other) => new(

@@ -67,6 +67,13 @@ public sealed class ArcEntity : Entity
         return ContainsAngle(angle);
     }
 
+    public override bool IntersectsRect(Rect2D rect)
+    {
+        // Approximated by the full circle through the arc (the swept range is ignored), which is
+        // inclusive enough for crossing selection.
+        return rect.DistanceTo(Center) <= Radius && Radius <= rect.MaxCornerDistance(Center);
+    }
+
     private bool ContainsAngle(double angle)
     {
         if (SweepAngle >= 0)

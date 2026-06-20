@@ -47,6 +47,14 @@ public sealed class CircleEntity : Entity, IEditableEntity
     public override bool HitTest(Point2D point, double tolerance)
         => Math.Abs(Center.DistanceTo(point) - Radius) <= tolerance;
 
+    public override bool IntersectsRect(Rect2D rect)
+    {
+        // The outline meets the rect iff some rect point is exactly the radius away — i.e. the
+        // radius falls between the nearest and farthest distances from the centre to the box.
+        // (A box fully inside the disk, or a disk fully inside the box, are both "crossing".)
+        return rect.DistanceTo(Center) <= Radius && Radius <= rect.MaxCornerDistance(Center);
+    }
+
     public override void Transform(in Matrix2D matrix)
     {
         Center = matrix.Transform(Center);
