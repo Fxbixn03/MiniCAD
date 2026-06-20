@@ -176,6 +176,35 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
         Color c = stroke.Color;
         _paint.Color = new SKColor(c.R, c.G, c.B, c.A);
         _paint.StrokeWidth = (float)stroke.Width;
+        _paint.PathEffect = DashEffect(stroke.LineType);
+    }
+
+    // Dash intervals are expressed in device pixels so a line type stays zoom-stable, and the
+    // (immutable) effects are cached for the process lifetime rather than rebuilt per draw.
+    private static readonly Dictionary<LineType, SKPathEffect?> DashCache = new();
+
+    private static SKPathEffect? DashEffect(LineType lineType)
+    {
+        if (lineType == LineType.Solid)
+            return null;
+
+        if (!DashCache.TryGetValue(lineType, out SKPathEffect? effect))
+        {
+            float[] intervals = lineType switch
+            {
+                LineType.Dashed => new[] { 10f, 6f },
+                LineType.Dotted => new[] { 1f, 5f },
+                LineType.DashDot => new[] { 12f, 5f, 1f, 5f },
+                LineType.DashDotDot => new[] { 12f, 5f, 1f, 5f, 1f, 5f },
+                LineType.Center => new[] { 18f, 5f, 5f, 5f },
+                LineType.Hidden => new[] { 6f, 4f },
+                _ => new[] { 1f },
+            };
+            effect = SKPathEffect.CreateDash(intervals, 0f);
+            DashCache[lineType] = effect;
+        }
+
+        return effect;
     }
 
     private SKPoint ToDevice(Point2D world)

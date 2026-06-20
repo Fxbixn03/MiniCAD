@@ -484,6 +484,9 @@
                                         <Slider Minimum="0.25" Maximum="8" Value="{Binding StrokeWidth}" />
                                         <Border Height="20" CornerRadius="4" BorderBrush="{DynamicResource Brush.BorderDefault}" BorderThickness="1"
                                                 Background="{Binding StrokeBrush}" />
+                                        <TextBlock Classes="eyebrow" Text="LINIENTYP" Margin="0,4,0,0" />
+                                        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding StrokeLineTypeOptions}"
+                                                  SelectedItem="{Binding StrokeLineType}" />
                                     </StackPanel>
 
                                     <StackPanel Spacing="4" IsVisible="{Binding CanFill}">
@@ -585,6 +588,9 @@
                                     </Grid>
                                     <Border Height="22" CornerRadius="4" BorderBrush="{DynamicResource Brush.BorderDefault}" BorderThickness="1"
                                             Background="{Binding SelectedLayer.ColorBrush}" />
+                                    <TextBlock Classes="eyebrow" Text="LINIENTYP" Margin="0,4,0,0" />
+                                    <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SelectedLayer.LineTypeOptions}"
+                                              SelectedItem="{Binding SelectedLayer.LineType}" />
                                 </StackPanel>
                             </Border>
 

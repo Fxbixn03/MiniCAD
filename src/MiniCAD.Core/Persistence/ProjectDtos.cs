@@ -117,6 +117,9 @@ public sealed class StrokeDto
     public ColorDto Color { get; set; } = new();
 
     public double Width { get; set; } = 1.0;
+
+    /// <summary>Line type / dash pattern (Solid / Dashed / Dotted / DashDot / …).</summary>
+    public string LineType { get; set; } = "Solid";
 }
 
 public sealed class ColorDto

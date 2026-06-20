@@ -1,7 +1,9 @@
+using System;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MiniCAD.Core.Documents;
 using CoreColor = MiniCAD.Core.Styling.Color;
+using LineType = MiniCAD.Core.Styling.LineType;
 
 namespace MiniCAD.App.ViewModels;
 
@@ -21,9 +23,17 @@ public partial class LayerItemViewModel : ViewModelBase
         _colorRed = color.R;
         _colorGreen = color.G;
         _colorBlue = color.B;
+        _lineType = model.Stroke.LineType;
     }
 
     public Layer Model { get; }
+
+    public LineType[] LineTypeOptions { get; } = Enum.GetValues<LineType>();
+
+    [ObservableProperty]
+    private LineType _lineType;
+
+    partial void OnLineTypeChanged(LineType value) => _document.SetLayerLineType(Model, value);
 
     [ObservableProperty]
     private string _name;

@@ -168,6 +168,16 @@ public sealed class CadDocument : ICadDocument
         Raise(DocumentChangedEventArgs.ForLayer(DocumentChangeKind.LayerModified, layer));
     }
 
+    /// <summary>Sets a layer's default line type; entities using the layer restyle.</summary>
+    public void SetLayerLineType(Layer layer, LineType lineType)
+    {
+        if (layer.Stroke.LineType == lineType)
+            return;
+
+        layer.Stroke = layer.Stroke.WithLineType(lineType);
+        Raise(DocumentChangedEventArgs.ForLayer(DocumentChangeKind.LayerModified, layer));
+    }
+
     // ----- Partial drawings (Teilbilder) -----
 
     public PartialDrawing AddPartialDrawing(string name)

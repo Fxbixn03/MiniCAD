@@ -10,6 +10,7 @@ using MiniCAD.Core.Entities;
 using MiniCAD.Core.Tools;
 using CoreColor = MiniCAD.Core.Styling.Color;
 using CoreStroke = MiniCAD.Core.Styling.StrokeStyle;
+using LineType = MiniCAD.Core.Styling.LineType;
 
 namespace MiniCAD.App.ViewModels;
 
@@ -71,6 +72,11 @@ public partial class AttributesViewModel : ViewModelBase
 
     [ObservableProperty]
     private double _strokeWidth = 1.0;
+
+    [ObservableProperty]
+    private LineType _strokeLineType;
+
+    public LineType[] StrokeLineTypeOptions { get; } = Enum.GetValues<LineType>();
 
     [ObservableProperty]
     private bool _canFill;
@@ -144,6 +150,7 @@ public partial class AttributesViewModel : ViewModelBase
             StrokeGreen = stroke.Color.G;
             StrokeBlue = stroke.Color.B;
             StrokeWidth = stroke.Width;
+            StrokeLineType = stroke.LineType;
         }
         else
         {
@@ -222,6 +229,8 @@ public partial class AttributesViewModel : ViewModelBase
 
     partial void OnStrokeWidthChanged(double value) => ApplyStrokeOverride();
 
+    partial void OnStrokeLineTypeChanged(LineType value) => ApplyStrokeOverride();
+
     partial void OnSelectedFillChanged(PatternOptionViewModel? value)
     {
         if (_suppress || value is null)
@@ -271,7 +280,7 @@ public partial class AttributesViewModel : ViewModelBase
             return;
 
         CoreStroke? next = UseStrokeOverride
-            ? new CoreStroke(new CoreColor((byte)StrokeRed, (byte)StrokeGreen, (byte)StrokeBlue), StrokeWidth)
+            ? new CoreStroke(new CoreColor((byte)StrokeRed, (byte)StrokeGreen, (byte)StrokeBlue), StrokeWidth, StrokeLineType)
             : null;
 
         ApplyToSelection("Linienstil ändern", entity =>
