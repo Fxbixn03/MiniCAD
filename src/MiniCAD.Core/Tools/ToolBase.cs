@@ -69,9 +69,6 @@ public abstract class ToolBase : ITool
 
     public virtual IReadOnlyList<OverlayItem> GetOverlay() => Array.Empty<OverlayItem>();
 
-    /// <summary>Angle increment for the Shift "ortho" constraint (0/45/90/… degrees).</summary>
-    protected static readonly double OrthoAngleStep = GeometryMath.DegreesToRadians(45);
-
     /// <summary>Snaps the input point, remembering the result so <see cref="AddSnapMarker"/> can show it.</summary>
     protected Point2D Snap(in ToolPointerInput input)
     {
@@ -80,19 +77,27 @@ public abstract class ToolBase : ITool
     }
 
     /// <summary>
-    /// Resolves the next point of a segment-drawing tool: while Shift is held the point is
-    /// locked to the nearest ortho/diagonal direction from <paramref name="origin"/> (taking
-    /// precedence over object/grid snapping); otherwise normal snapping applies.
+    /// Resolves the next point of a segment-drawing tool. When an angle constraint is active —
+    /// Ortho/Polar from <see cref="InputSettings"/>, or temporarily via held Shift — the point is
+    /// locked to the nearest matching ray from <paramref name="origin"/>; an object snap target
+    /// still wins when the cursor is over one, so the two combine. Otherwise normal snapping
+    /// applies.
     /// </summary>
     protected Point2D ResolveSegmentPoint(Point2D origin, in ToolPointerInput input)
     {
-        if (input.HasShift)
+        if (Context.InputSettings.AngleStepDegrees(input.HasShift) is not { } stepDegrees)
+            return Snap(input);
+
+        // Object snapping still takes precedence when the cursor is actually over a snap target.
+        SnapResult snap = Context.Snap(input.World);
+        if (snap.IsSnapped)
         {
-            ClearSnap();
-            return GeometryMath.SnapToAngleStep(origin, input.World, OrthoAngleStep);
+            CurrentSnap = snap;
+            return snap.Point;
         }
 
-        return Snap(input);
+        ClearSnap();
+        return GeometryMath.SnapToAngleStep(origin, input.World, GeometryMath.DegreesToRadians(stepDegrees));
     }
 
     /// <summary>Forgets the current snap so its marker disappears (e.g. after committing).</summary>

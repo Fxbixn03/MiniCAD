@@ -41,6 +41,8 @@ public sealed class ToolManager : IToolContext
 
     public SnapSettings SnapSettings { get; } = new();
 
+    public InputSettings InputSettings { get; } = new();
+
     /// <summary>The tool returned to when a drawing tool is cancelled (the select tool).</summary>
     public ITool? DefaultTool { get; set; }
 

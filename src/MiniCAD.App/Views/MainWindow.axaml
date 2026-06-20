@@ -125,6 +125,11 @@
                         Padding="8,2" Margin="10,4" BorderBrush="{DynamicResource Brush.BorderSubtle}" BorderThickness="1">
                     <TextBlock Classes="mono" Foreground="{DynamicResource Brush.StatusInfo}" Text="{Binding CursorText}" />
                 </Border>
+                <Border DockPanel.Dock="Left" Background="{DynamicResource Brush.SurfaceSunken}" CornerRadius="4"
+                        Padding="8,2" Margin="0,4,4,4" BorderBrush="{DynamicResource Brush.BorderSubtle}" BorderThickness="1"
+                        IsVisible="{Binding PolarReadout, Converter={x:Static converters:StringConverters.IsNotNullOrEmpty}}">
+                    <TextBlock Classes="mono" Foreground="{DynamicResource Brush.StatusWarn}" Text="{Binding PolarReadout}" />
+                </Border>
                 <TextBlock DockPanel.Dock="Left" Classes="mono" Margin="6,0" Foreground="{DynamicResource Brush.TextBody}"
                            Text="{Binding StatusText}" />
                 <TextBlock DockPanel.Dock="Left" Classes="mono" Margin="6,0" Foreground="{DynamicResource Brush.StatusOk}"
@@ -293,6 +298,14 @@
                 <ToggleButton Classes="rail" IsChecked="{Binding SnapEnabled}"
                               ToolTip.Tip="Objekt- und Rasterfang ein/aus">
                     <Path Classes="ico" Data="{StaticResource Icon.Snap}" />
+                </ToggleButton>
+                <ToggleButton Classes="rail" IsChecked="{Binding OrthoEnabled}"
+                              ToolTip.Tip="Ortho (horizontal/vertikal)  ·  F8">
+                    <Path Classes="ico" Data="{StaticResource Icon.Ortho}" />
+                </ToggleButton>
+                <ToggleButton Classes="rail" IsChecked="{Binding PolarEnabled}"
+                              ToolTip.Tip="Polar-Tracking (Winkelschritte)  ·  F10">
+                    <Path Classes="ico" Data="{StaticResource Icon.Polar}" />
                 </ToggleButton>
                 <Button Classes="rail" Classes.active="{Binding IsSetNullPointActive}"
                         Command="{Binding ActivateSetNullPointCommand}"

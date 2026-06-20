@@ -37,6 +37,8 @@ public sealed class KeyboardShortcuts
         (ShortcutAction.Redo, "Wiederholen", "Ctrl+Y"),
         (ShortcutAction.ZoomToFit, "Zoom anpassen", "F"),
         (ShortcutAction.ToggleSnap, "Fang ein/aus", "F3"),
+        (ShortcutAction.Ortho, "Ortho ein/aus", "F8"),
+        (ShortcutAction.Polar, "Polar-Tracking ein/aus", "F10"),
         (ShortcutAction.SetNullPoint, "Nullpunkt setzen", "U"),
         (ShortcutAction.NewProject, "Neues Projekt", "Ctrl+N"),
         (ShortcutAction.OpenProject, "Projekt öffnen", "Ctrl+O"),

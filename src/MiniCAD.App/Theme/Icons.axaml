@@ -70,6 +70,12 @@
     <!-- Origin / Nullpunkt: crosshair through a ring (target). -->
     <StreamGeometry x:Key="Icon.Origin">M12,2 V22 M2,12 H22 M17,12 A5,5 0 1 1 7,12 A5,5 0 1 1 17,12 Z</StreamGeometry>
 
+    <!-- Ortho: an L-shaped right-angle bracket. -->
+    <StreamGeometry x:Key="Icon.Ortho">M5,4 V20 H21 M5,9 H10 V4</StreamGeometry>
+
+    <!-- Polar: an angle opening from a vertex with an arc. -->
+    <StreamGeometry x:Key="Icon.Polar">M5,19 H20 M5,19 L18,7 M5,14 A5,5 0 0 0 9.7,17.2</StreamGeometry>
+
     <!-- Zoom to fit: four outward corner brackets. -->
     <StreamGeometry x:Key="Icon.ZoomFit">M3,8 V3 H8 M16,3 H21 V8 M21,16 V21 H16 M8,21 H3 V16</StreamGeometry>
 

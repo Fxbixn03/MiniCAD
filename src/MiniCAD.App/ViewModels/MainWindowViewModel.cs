@@ -147,6 +147,14 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _snapEnabled = true;
 
+    /// <summary>Two-way bound to the Ortho toggle: locks segments to horizontal/vertical.</summary>
+    [ObservableProperty]
+    private bool _orthoEnabled;
+
+    /// <summary>Two-way bound to the Polar toggle: snaps segments to fixed angle steps.</summary>
+    [ObservableProperty]
+    private bool _polarEnabled;
+
     /// <summary>The current project's display name (derived from the file name).</summary>
     [ObservableProperty]
     private string _projectName = UntitledName;
@@ -163,6 +171,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _cursorText = "X 0   Y 0   Z 0";
 
+    /// <summary>Length/angle from the last point to the cursor while a drawing tool is active.</summary>
+    [ObservableProperty]
+    private string _polarReadout = string.Empty;
+
     /// <summary>Updates the coordinate readout from a cursor position in absolute world space.</summary>
     public void UpdateCursor(Point2D world)
     {
@@ -170,6 +182,23 @@ public partial class MainWindowViewModel : ViewModelBase
         CursorText = $"X {CoordinateFormat.ToText(local.X, "0.##")}   "
                    + $"Y {CoordinateFormat.ToText(local.Y, "0.##")}   "
                    + $"Z {CoordinateFormat.ToText(local.Z, "0.##")}";
+
+        // Polar readout: distance and angle from the last placed point (Allplan/AutoCAD style).
+        if (IsCoordinateTool(Tools.ActiveTool) && Tools.LastPoint is { } last)
+        {
+            Vector2D delta = world - last;
+            double length = delta.Length;
+            double angle = GeometryMath.RadiansToDegrees(System.Math.Atan2(delta.Y, delta.X));
+            if (angle < 0)
+                angle += 360.0;
+            PolarReadout = length < 1e-6
+                ? string.Empty
+                : $"L {CoordinateFormat.ToText(length, "0.##")}   ∠ {CoordinateFormat.ToText(angle, "0.#")}°";
+        }
+        else
+        {
+            PolarReadout = string.Empty;
+        }
     }
 
     private void OnOriginChanged(object? sender, System.EventArgs e)
@@ -238,6 +267,18 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnSnapEnabledChanged(bool value)
     {
         Tools.SnapSettings.Enabled = value;
+        Tools.RequestRedraw();
+    }
+
+    partial void OnOrthoEnabledChanged(bool value)
+    {
+        Tools.InputSettings.OrthoEnabled = value;
+        Tools.RequestRedraw();
+    }
+
+    partial void OnPolarEnabledChanged(bool value)
+    {
+        Tools.InputSettings.PolarEnabled = value;
         Tools.RequestRedraw();
     }
 
@@ -466,6 +507,8 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Redo: RedoCommand.Execute(null); return true;
             case ShortcutAction.ZoomToFit: ZoomToFit(); return true;
             case ShortcutAction.ToggleSnap: ToggleSnap(); return true;
+            case ShortcutAction.Ortho: OrthoEnabled = !OrthoEnabled; return true;
+            case ShortcutAction.Polar: PolarEnabled = !PolarEnabled; return true;
             case ShortcutAction.SetNullPoint: ActivateSetNullPoint(); return true;
             default: return false; // file actions handled by the window
         }

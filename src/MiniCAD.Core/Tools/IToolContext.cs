@@ -37,6 +37,12 @@ public interface IToolContext
     /// <summary>Resolves a free world point to the nearest snap target (or returns it unchanged).</summary>
     SnapResult Snap(Point2D world);
 
+    /// <summary>
+    /// Angle-constraint options (Ortho / Polar tracking) for segment point entry. Hosts that
+    /// don't support them inherit the default "no constraint".
+    /// </summary>
+    InputSettings InputSettings => InputSettings.None;
+
     /// <summary>Asks the host to repaint, e.g. after a preview changes.</summary>
     void RequestRedraw();
 }
