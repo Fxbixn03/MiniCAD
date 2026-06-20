@@ -269,6 +269,10 @@
                         Command="{Binding ActivatePolylineCommand}" ToolTip.Tip="Polylinie  ·  P">
                     <Path Classes="ico" Data="{StaticResource Icon.Polyline}" />
                 </Button>
+                <Button Classes="rail" Classes.active="{Binding IsSplineActive}"
+                        Command="{Binding ActivateSplineCommand}" ToolTip.Tip="Spline  ·  K">
+                    <Path Classes="ico" Data="{StaticResource Icon.Spline}" />
+                </Button>
                 <Button Classes="rail" Classes.active="{Binding IsPointActive}"
                         Command="{Binding ActivatePointCommand}" ToolTip.Tip="Punkt / Knoten  ·  N">
                     <Path Classes="ico" Data="{StaticResource Icon.Point}" />

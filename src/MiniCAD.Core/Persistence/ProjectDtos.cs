@@ -122,6 +122,7 @@ public sealed class PointDto
 [JsonDerivedType(typeof(PolylineDto), "polyline")]
 [JsonDerivedType(typeof(PointMarkerDto), "point")]
 [JsonDerivedType(typeof(EllipseDto), "ellipse")]
+[JsonDerivedType(typeof(SplineDto), "spline")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -178,4 +179,9 @@ public sealed class EllipseDto : EntityDto
     public double Rotation { get; set; }
     public double StartAngle { get; set; }
     public double SweepAngle { get; set; } = Math.PI * 2.0;
+}
+
+public sealed class SplineDto : EntityDto
+{
+    public List<PointDto> Points { get; set; } = new();
 }

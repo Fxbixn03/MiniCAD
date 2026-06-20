@@ -198,6 +198,7 @@ public static class DocumentMapper
                 StartAngle = ellipse.StartAngle,
                 SweepAngle = ellipse.SweepAngle,
             },
+            SplineEntity spline => new SplineDto { Points = spline.Points.Select(ToDto).ToList() },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -222,6 +223,7 @@ public static class DocumentMapper
             EllipseDto ellipse => new EllipseEntity(
                 FromDto(ellipse.Center), ellipse.RadiusX, ellipse.RadiusY,
                 ellipse.Rotation, ellipse.StartAngle, ellipse.SweepAngle),
+            SplineDto spline => new SplineEntity(spline.Points.Select(FromDto)),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

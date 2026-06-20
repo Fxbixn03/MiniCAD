@@ -13,6 +13,7 @@ public enum ShortcutAction
     Arc,
     Ellipse,
     Polyline,
+    Spline,
     Point,
     Delete,
     Undo,

@@ -24,6 +24,7 @@ public sealed class KeyboardShortcuts
         (ShortcutAction.Arc, "Bogen", "A"),
         (ShortcutAction.Ellipse, "Ellipse", "E"),
         (ShortcutAction.Polyline, "Polylinie", "P"),
+        (ShortcutAction.Spline, "Spline", "K"),
         (ShortcutAction.Point, "Punkt", "N"),
         (ShortcutAction.Move, "Verschieben", "M"),
         (ShortcutAction.Copy, "Kopieren", "Shift+C"),
