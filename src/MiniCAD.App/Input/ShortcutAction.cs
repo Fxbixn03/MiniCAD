@@ -26,4 +26,5 @@ public enum ShortcutAction
     Rotate,
     Mirror,
     Scale,
+    Offset,
 }

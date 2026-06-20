@@ -442,4 +442,59 @@ public class ToolTests
         tool.PointerUp(Click(50, 50, ToolButton.None)); // no drag -> treated as a click
         ctx.Selection.IsEmpty.Should().BeTrue();
     }
+
+    [Fact]
+    public void OffsetTool_Line_CreatesParallelCopyOnCursorSide()
+    {
+        (CadDocument doc, _) = Setup<OffsetTool>(out OffsetTool tool);
+        var line = new LineEntity(new Point2D(0, 0), new Point2D(10, 0));
+        doc.AddEntity(line);
+
+        tool.PointerDown(Click(5, 0));   // pick the line
+        tool.PointerDown(Click(5, 3));   // through point 3 units above
+
+        doc.Entities.Should().HaveCount(2);
+        var copy = doc.Entities[1].Should().BeOfType<LineEntity>().Subject;
+        copy.Start.Should().Be(new Point2D(0, 3));
+        copy.End.Should().Be(new Point2D(10, 3));
+    }
+
+    [Fact]
+    public void OffsetTool_Circle_CreatesConcentricCircleThroughCursor()
+    {
+        (CadDocument doc, _) = Setup<OffsetTool>(out OffsetTool tool);
+        var circle = new CircleEntity(new Point2D(0, 0), 5);
+        doc.AddEntity(circle);
+
+        tool.PointerDown(Click(5, 0));   // pick on the ring
+        tool.PointerDown(Click(8, 0));   // through point -> radius 8
+
+        var copy = doc.Entities[1].Should().BeOfType<CircleEntity>().Subject;
+        copy.Center.Should().Be(new Point2D(0, 0));
+        copy.Radius.Should().BeApproximately(8, 1e-9);
+    }
+
+    [Fact]
+    public void OffsetTool_ClosedRectangle_OffsetsOutward()
+    {
+        (CadDocument doc, _) = Setup<OffsetTool>(out OffsetTool tool);
+        var rect = PolylineEntity.Rectangle(new Point2D(0, 0), new Point2D(10, 10));
+        doc.AddEntity(rect);
+
+        tool.PointerDown(Click(5, 0));    // pick the bottom edge
+        tool.PointerDown(Click(5, -2));   // through point below -> outward by 2
+
+        var copy = doc.Entities[1].Should().BeOfType<PolylineEntity>().Subject;
+        copy.IsClosed.Should().BeTrue();
+        copy.Points.Should().HaveCount(4);
+        copy.Bounds.Should().Be(new Rect2D(-2, -2, 12, 12));
+    }
+
+    [Fact]
+    public void OffsetGeometry_ThroughPointOnLine_ReturnsNull()
+    {
+        var line = new LineEntity(new Point2D(0, 0), new Point2D(10, 0));
+
+        OffsetGeometry.Offset(line, new Point2D(4, 0)).Should().BeNull();
+    }
 }

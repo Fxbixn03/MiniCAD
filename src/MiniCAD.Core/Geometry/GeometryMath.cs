@@ -120,4 +120,25 @@ public static class GeometryMath
             || SegmentsIntersect(a, b, topRight, topLeft)
             || SegmentsIntersect(a, b, topLeft, bottomLeft);
     }
+
+    /// <summary>
+    /// Intersection of the two infinite lines through (<paramref name="a1"/>, <paramref name="a2"/>)
+    /// and (<paramref name="b1"/>, <paramref name="b2"/>). Returns <c>false</c> when the lines are
+    /// parallel (or a defining pair is degenerate).
+    /// </summary>
+    public static bool TryLineIntersection(Point2D a1, Point2D a2, Point2D b1, Point2D b2, out Point2D intersection)
+    {
+        Vector2D r = a2 - a1;
+        Vector2D s = b2 - b1;
+        double denominator = r.Cross(s);
+        if (Math.Abs(denominator) <= Epsilon)
+        {
+            intersection = default;
+            return false;
+        }
+
+        double t = (b1 - a1).Cross(s) / denominator;
+        intersection = a1 + r * t;
+        return true;
+    }
 }

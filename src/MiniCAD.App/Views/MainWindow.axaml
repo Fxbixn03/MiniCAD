@@ -69,6 +69,7 @@
                             <MenuItem Header="_Drehen" Command="{Binding ActivateRotateCommand}" InputGesture="Shift+R" />
                             <MenuItem Header="_Spiegeln" Command="{Binding ActivateMirrorCommand}" InputGesture="Shift+M" />
                             <MenuItem Header="S_kalieren" Command="{Binding ActivateScaleCommand}" InputGesture="Shift+S" />
+                            <MenuItem Header="_Parallele (Offset)" Command="{Binding ActivateOffsetCommand}" InputGesture="O" />
                             <Separator />
                             <MenuItem Header="_Löschen" Command="{Binding DeleteSelectionCommand}" InputGesture="Delete" />
                         </MenuItem>
@@ -196,6 +197,10 @@
                 <Button Classes="rail" Classes.active="{Binding IsScaleActive}"
                         Command="{Binding ActivateScaleCommand}" ToolTip.Tip="Skalieren  ·  Shift+S">
                     <Path Classes="ico" Data="{StaticResource Icon.Scale}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsOffsetActive}"
+                        Command="{Binding ActivateOffsetCommand}" ToolTip.Tip="Parallele (Offset)  ·  O">
+                    <Path Classes="ico" Data="{StaticResource Icon.Offset}" />
                 </Button>
 
                 <Border Classes="raildiv" />

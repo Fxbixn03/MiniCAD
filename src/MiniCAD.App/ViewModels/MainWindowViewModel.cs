@@ -34,6 +34,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly RotateTool _rotateTool = new();
     private readonly MirrorTool _mirrorTool = new();
     private readonly ScaleTool _scaleTool = new();
+    private readonly OffsetTool _offsetTool = new();
 
     private string? _filePath;
 
@@ -127,7 +128,7 @@ public partial class MainWindowViewModel : ViewModelBase
         => tool == _lineTool || tool == _rectangleTool || tool == _circleTool
         || tool == _polylineTool || tool == _setNullPointTool
         || tool == _moveTool || tool == _copyTool || tool == _rotateTool
-        || tool == _mirrorTool || tool == _scaleTool;
+        || tool == _mirrorTool || tool == _scaleTool || tool == _offsetTool;
 
     /// <summary>Two-way bound to the snap toggle in the toolbar.</summary>
     [ObservableProperty]
@@ -190,6 +191,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsRotateActive => Tools.ActiveTool == _rotateTool;
     public bool IsMirrorActive => Tools.ActiveTool == _mirrorTool;
     public bool IsScaleActive => Tools.ActiveTool == _scaleTool;
+    public bool IsOffsetActive => Tools.ActiveTool == _offsetTool;
 
     private void RaiseActiveToolFlags()
     {
@@ -205,6 +207,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsRotateActive));
         OnPropertyChanged(nameof(IsMirrorActive));
         OnPropertyChanged(nameof(IsScaleActive));
+        OnPropertyChanged(nameof(IsOffsetActive));
     }
 
     partial void OnProjectNameChanged(string value) => OnPropertyChanged(nameof(Title));
@@ -315,6 +318,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(HasSelection))]
     private void ActivateScale() => Tools.SetActiveTool(_scaleTool);
 
+    /// <summary>Offset picks its own source object, so it needs no prior selection.</summary>
+    [RelayCommand]
+    private void ActivateOffset() => Tools.SetActiveTool(_offsetTool);
+
     /// <summary>True while at least one entity is selected (gates the editing tools).</summary>
     private bool HasSelection => !Tools.Selection.IsEmpty;
 
@@ -412,6 +419,7 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Rotate: ActivateRotateCommand.Execute(null); return true;
             case ShortcutAction.Mirror: ActivateMirrorCommand.Execute(null); return true;
             case ShortcutAction.Scale: ActivateScaleCommand.Execute(null); return true;
+            case ShortcutAction.Offset: ActivateOffsetCommand.Execute(null); return true;
             case ShortcutAction.Delete: DeleteSelectionCommand.Execute(null); return true;
             case ShortcutAction.Undo: UndoCommand.Execute(null); return true;
             case ShortcutAction.Redo: RedoCommand.Execute(null); return true;
