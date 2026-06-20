@@ -72,6 +72,7 @@
                             <MenuItem Header="_Parallele (Offset)" Command="{Binding ActivateOffsetCommand}" InputGesture="O" />
                             <MenuItem Header="S_tutzen / Dehnen" Command="{Binding ActivateTrimCommand}" InputGesture="T" />
                             <MenuItem Header="_Dehnen (Fenster)" Command="{Binding ActivateStretchCommand}" InputGesture="S" />
+                            <MenuItem Header="_Abrundung / Fase" Command="{Binding ActivateFilletCommand}" InputGesture="Shift+F" />
                             <Separator />
                             <MenuItem Header="_Löschen" Command="{Binding DeleteSelectionCommand}" InputGesture="Delete" />
                         </MenuItem>
@@ -130,6 +131,23 @@
                 <TextBlock DockPanel.Dock="Right" Classes="mono" Margin="12,0" Foreground="{DynamicResource Brush.TextFaint}"
                            Text="MMT = verschieben · Rad = zoom · Esc = abbrechen · Entf = löschen" />
             </DockPanel>
+        </Border>
+
+        <!-- Inline fillet/chamfer parameters, shown while that tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsFilletActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding FilletOptions}" x:DataType="vm:FilletOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="ECKE" VerticalAlignment="Center" />
+                <ToggleButton IsChecked="{Binding IsChamfer}" Content="{Binding ModeLabel}" MinWidth="92"
+                              ToolTip.Tip="Abrundung (Bogen) ⟷ Fase (Gerade)" />
+                <TextBlock Text="{Binding DistanceLabel}" Foreground="{DynamicResource Brush.StatusInfo}"
+                           FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                <TextBox Width="80" Text="{Binding DistanceText}" FontFamily="{StaticResource Font.Mono}" />
+                <TextBlock Text="Erste Linie wählen, dann zweite. 0 = scharfe Ecke."
+                           Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
         </Border>
 
         <!-- Allplan-style coordinate entry: type X/Y and press Enter to place the point. -->
@@ -211,6 +229,10 @@
                 <Button Classes="rail" Classes.active="{Binding IsStretchActive}"
                         Command="{Binding ActivateStretchCommand}" ToolTip.Tip="Dehnen mit Kreuzungsfenster  ·  S">
                     <Path Classes="ico" Data="{StaticResource Icon.Stretch}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsFilletActive}"
+                        Command="{Binding ActivateFilletCommand}" ToolTip.Tip="Abrundung / Fase  ·  Shift+F">
+                    <Path Classes="ico" Data="{StaticResource Icon.Fillet}" />
                 </Button>
 
                 <Border Classes="raildiv" />

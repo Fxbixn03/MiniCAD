@@ -37,6 +37,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly OffsetTool _offsetTool = new();
     private readonly TrimExtendTool _trimTool = new();
     private readonly StretchTool _stretchTool = new();
+    private readonly FilletTool _filletTool = new();
 
     private string? _filePath;
 
@@ -50,6 +51,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Patterns = new PatternsViewModel(Document);
         Assistant = new AssistantViewModel();
         CoordinateInput = new CoordinateInputViewModel(Tools, Document);
+        FilletOptions = new FilletOptionsViewModel(_filletTool);
 
         Document.Changed += OnDocumentChanged;
         Document.CoordinateSystem.Changed += OnOriginChanged;
@@ -125,6 +127,9 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>The Allplan-style coordinate entry line (type X/Y instead of clicking).</summary>
     public CoordinateInputViewModel CoordinateInput { get; }
 
+    /// <summary>Inline radius/chamfer parameters, shown while the fillet tool is active.</summary>
+    public FilletOptionsViewModel FilletOptions { get; }
+
     /// <summary>True for tools that place points, where typed coordinate entry is meaningful.</summary>
     private bool IsCoordinateTool(ITool? tool)
         => tool == _lineTool || tool == _rectangleTool || tool == _circleTool
@@ -196,6 +201,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsOffsetActive => Tools.ActiveTool == _offsetTool;
     public bool IsTrimActive => Tools.ActiveTool == _trimTool;
     public bool IsStretchActive => Tools.ActiveTool == _stretchTool;
+    public bool IsFilletActive => Tools.ActiveTool == _filletTool;
 
     private void RaiseActiveToolFlags()
     {
@@ -214,6 +220,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsOffsetActive));
         OnPropertyChanged(nameof(IsTrimActive));
         OnPropertyChanged(nameof(IsStretchActive));
+        OnPropertyChanged(nameof(IsFilletActive));
     }
 
     partial void OnProjectNameChanged(string value) => OnPropertyChanged(nameof(Title));
@@ -336,6 +343,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ActivateStretch() => Tools.SetActiveTool(_stretchTool);
 
+    /// <summary>Fillet/Chamfer picks two lines; the radius comes from the inline options line.</summary>
+    [RelayCommand]
+    private void ActivateFillet() => Tools.SetActiveTool(_filletTool);
+
     /// <summary>True while at least one entity is selected (gates the editing tools).</summary>
     private bool HasSelection => !Tools.Selection.IsEmpty;
 
@@ -436,6 +447,7 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Offset: ActivateOffsetCommand.Execute(null); return true;
             case ShortcutAction.Trim: ActivateTrimCommand.Execute(null); return true;
             case ShortcutAction.Stretch: ActivateStretchCommand.Execute(null); return true;
+            case ShortcutAction.Fillet: ActivateFilletCommand.Execute(null); return true;
             case ShortcutAction.Delete: DeleteSelectionCommand.Execute(null); return true;
             case ShortcutAction.Undo: UndoCommand.Execute(null); return true;
             case ShortcutAction.Redo: RedoCommand.Execute(null); return true;

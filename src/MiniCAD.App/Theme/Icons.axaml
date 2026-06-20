@@ -49,6 +49,9 @@
     <!-- Stretch: a dashed window with an arrow pulling a corner node. -->
     <StreamGeometry x:Key="Icon.Stretch">M4,14 H12 V20 H4 Z M12,11 L20,5 M20,5 H15.5 M20,5 V9.5 M11,13 H13 V15 H11 Z</StreamGeometry>
 
+    <!-- Fillet: an L-corner with the inside angle rounded off. -->
+    <StreamGeometry x:Key="Icon.Fillet">M5,4 V13 A6,6 0 0 0 11,19 H20</StreamGeometry>
+
     <!-- Delete: trash can. -->
     <StreamGeometry x:Key="Icon.Delete">M5,7 H19 M8,7 V5.6 A1.6,1.6 0 0 1 9.6,4 H14.4 A1.6,1.6 0 0 1 16,5.6 V7 M6.6,7 L7.6,19.4 A1.6,1.6 0 0 0 9.2,21 H14.8 A1.6,1.6 0 0 0 16.4,19.4 L17.4,7 M10,10.5 V17.5 M14,10.5 V17.5</StreamGeometry>
 

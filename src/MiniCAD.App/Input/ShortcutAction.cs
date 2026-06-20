@@ -29,4 +29,5 @@ public enum ShortcutAction
     Offset,
     Trim,
     Stretch,
+    Fillet,
 }
