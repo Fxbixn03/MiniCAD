@@ -1,0 +1,96 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MiniCAD.App.ViewModels"
+        xmlns:controls="using:MiniCAD.App.Controls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="440" d:DesignHeight="480"
+        x:Class="MiniCAD.App.Views.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Title="Einstellungen"
+        Width="440" Height="500"
+        CanResize="True" WindowStartupLocation="CenterOwner">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel/>
+    </Design.DataContext>
+
+    <DockPanel Margin="14">
+        <Button DockPanel.Dock="Bottom" Content="Schließen" HorizontalAlignment="Right"
+                Margin="0,12,0,0" Click="OnClose" />
+
+        <TabControl>
+
+            <TabItem Header="Allgemein">
+                <StackPanel Margin="6,12" Spacing="16">
+                    <TextBlock Text="Start" FontWeight="SemiBold" Foreground="#AAA" />
+                    <CheckBox Content="Beim Start zuletzt geöffnetes Projekt laden"
+                              IsChecked="{Binding OpenLastProjectOnStartup}" />
+
+                    <Border Height="1" Background="#3A3A40" />
+
+                    <TextBlock Text="Ansicht" FontWeight="SemiBold" Foreground="#AAA" />
+                    <CheckBox Content="Raster anzeigen" IsChecked="{Binding ShowGrid}" />
+
+                    <Border Height="1" Background="#3A3A40" />
+
+                    <TextBlock Text="Eingabe" FontWeight="SemiBold" Foreground="#AAA" />
+                    <CheckBox Content="Punkt statt Komma als Dezimaltrennzeichen"
+                              IsChecked="{Binding UseDecimalPoint}" />
+
+                    <Border Height="1" Background="#3A3A40" />
+
+                    <DockPanel>
+                        <TextBlock Text="Hintergrundfarbe" FontWeight="SemiBold" Foreground="#AAA" DockPanel.Dock="Left" />
+                        <TextBlock Text="{Binding BackgroundHex}" Foreground="#888" HorizontalAlignment="Right" />
+                    </DockPanel>
+
+                    <Grid ColumnDefinitions="20,*,40" RowDefinitions="Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="8">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="R" VerticalAlignment="Center" />
+                        <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding BackgroundRed}" />
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding BackgroundRed, StringFormat='{}{0:0}'}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="G" VerticalAlignment="Center" />
+                        <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding BackgroundGreen}" />
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding BackgroundGreen, StringFormat='{}{0:0}'}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="B" VerticalAlignment="Center" />
+                        <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding BackgroundBlue}" />
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding BackgroundBlue, StringFormat='{}{0:0}'}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                    </Grid>
+
+                    <Border Height="40" CornerRadius="4" Background="{Binding BackgroundBrush}"
+                            BorderBrush="#3A3A40" BorderThickness="1" />
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="Tastenkürzel">
+                <DockPanel Margin="6,12" DataContext="{Binding Shortcuts}" x:DataType="vm:ShortcutsViewModel">
+                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <Button DockPanel.Dock="Right" Content="Alle zurücksetzen" Command="{Binding ResetAllCommand}" />
+                        <TextBlock Text="Tastenkürzel für Werkzeuge und Funktionen" Foreground="#AAA" VerticalAlignment="Center" />
+                    </DockPanel>
+
+                    <TextBlock DockPanel.Dock="Bottom" Margin="0,8,0,0" Foreground="#777" TextWrapping="Wrap"
+                               Text="Feld anklicken und die gewünschte Taste(nkombination) drücken. Entf löscht die Belegung." />
+
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding Items}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ShortcutItemViewModel">
+                                    <Grid ColumnDefinitions="*,150,Auto" Margin="0,3" ColumnSpacing="8">
+                                        <TextBlock Grid.Column="0" Text="{Binding Label}" VerticalAlignment="Center" />
+                                        <controls:GestureCaptureBox Grid.Column="1" Text="{Binding Gesture, Mode=TwoWay}" />
+                                        <Button Grid.Column="2" Content="Standard" Command="{Binding ResetCommand}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </TabItem>
+
+        </TabControl>
+    </DockPanel>
+
+</Window>

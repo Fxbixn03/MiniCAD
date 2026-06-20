@@ -1,0 +1,20 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MiniCAD.App.Views.SplashWindow"
+        Width="440" Height="280"
+        WindowDecorations="None"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterScreen">
+
+    <Border Background="#1E1E22" BorderBrush="#3A3A40" BorderThickness="1">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+            <Image Source="/Assets/logo.png" Width="104" Height="104" />
+            <TextBlock Text="MiniCAD" FontSize="30" FontWeight="SemiBold"
+                       Foreground="#EDEDED" HorizontalAlignment="Center" />
+            <TextBlock Text="wird geladen …" FontSize="13" Foreground="#888"
+                       HorizontalAlignment="Center" />
+        </StackPanel>
+    </Border>
+
+</Window>

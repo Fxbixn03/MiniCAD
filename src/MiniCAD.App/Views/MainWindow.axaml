@@ -1,20 +1,347 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:MiniCAD.App.ViewModels"
+        xmlns:controls="using:MiniCAD.App.Controls"
+        xmlns:converters="using:Avalonia.Data.Converters"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
         x:Class="MiniCAD.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="MiniCAD.App">
+        Icon="/Assets/logo.ico"
+        Width="1100" Height="700"
+        Title="{Binding Title}">
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <!-- Only used by the IDE previewer; the runtime DataContext is set in App.axaml.cs. -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Datei">
+                <MenuItem Header="_Neues Projekt" Click="OnNewProject" InputGesture="Ctrl+N" />
+                <MenuItem Header="Projekt _öffnen…" Click="OnOpenProject" InputGesture="Ctrl+O" />
+                <Separator />
+                <MenuItem Header="_Speichern" Click="OnSaveProject" InputGesture="Ctrl+S" />
+                <MenuItem Header="Speichern _unter…" Click="OnSaveProjectAs" InputGesture="Ctrl+Shift+S" />
+                <Separator />
+                <MenuItem Header="_Beenden" Click="OnExit" />
+            </MenuItem>
+            <MenuItem Header="_Ansicht">
+                <MenuItem Header="_Zoom anpassen" Command="{Binding ZoomToFitCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Werkzeuge">
+                <MenuItem Header="_Nullpunkt setzen" Command="{Binding ActivateSetNullPointCommand}" />
+                <MenuItem Header="Nullpunkt zu_rücksetzen" Command="{Binding ResetNullPointCommand}" />
+                <Separator />
+                <MenuItem Header="_Standard-Layer einfügen" Command="{Binding AddStandardLayersCommand}" />
+                <Separator />
+                <MenuItem Header="_Einstellungen…" Click="OnOpenSettings" />
+            </MenuItem>
+        </Menu>
+
+        <Border DockPanel.Dock="Top" Background="#252528" BorderBrush="#3A3A40" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="8,6">
+                <Button Content="Auswahl" Command="{Binding ActivateSelectCommand}" />
+                <Button Content="Linie" Command="{Binding ActivateLineCommand}" />
+                <Button Content="Rechteck" Command="{Binding ActivateRectangleCommand}" />
+                <Button Content="Kreis" Command="{Binding ActivateCircleCommand}" />
+                <Button Content="Polylinie" Command="{Binding ActivatePolylineCommand}" />
+                <Border Width="1" Background="#3A3A40" Margin="4,2" />
+                <Button Content="Löschen" Command="{Binding DeleteSelectionCommand}" />
+                <Button Content="Rückgängig" Command="{Binding UndoCommand}" />
+                <Button Content="Wiederholen" Command="{Binding RedoCommand}" />
+                <Border Width="1" Background="#3A3A40" Margin="4,2" />
+                <ToggleButton Content="Fang" IsChecked="{Binding SnapEnabled}"
+                              ToolTip.Tip="Objekt- und Rasterfang ein/aus" />
+                <Button Content="Nullpunkt" Command="{Binding ActivateSetNullPointCommand}"
+                        ToolTip.Tip="Nullpunkt (Ursprung) per Klick setzen" />
+                <Button Content="Zoom anpassen" Command="{Binding ZoomToFitCommand}" />
+            </StackPanel>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" Background="#252528" BorderBrush="#3A3A40" BorderThickness="0,1,0,0">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Right" Margin="8,4" Foreground="#888"
+                           Text="MMT = verschieben · Rad = zoom · Esc = abbrechen/Auswahl · Entf = löschen" />
+                <Border DockPanel.Dock="Left" Background="#1E1E22" CornerRadius="3" Padding="8,2" Margin="8,3"
+                        BorderBrush="#3A3A40" BorderThickness="1">
+                    <TextBlock Foreground="#9FD3C7" FontFamily="Consolas,monospace" Text="{Binding CursorText}" />
+                </Border>
+                <TextBlock Margin="8,4" Foreground="#CCC" Text="{Binding StatusText}" />
+                <TextBlock Margin="4,4" Foreground="#7FB069" Text="{Binding StatusMessage}" />
+            </DockPanel>
+        </Border>
+
+        <!-- Allplan-style coordinate entry: type X/Y and press Enter to place the point. -->
+        <Border DockPanel.Dock="Bottom" Background="#202024" BorderBrush="#3A3A40" BorderThickness="0,1,0,0"
+                IsEnabled="{Binding CoordinateInput.IsEnabled}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="8,5" VerticalAlignment="Center"
+                        DataContext="{Binding CoordinateInput}" x:DataType="vm:CoordinateInputViewModel">
+                <TextBlock Text="Koordinate" Foreground="#AAA" VerticalAlignment="Center" />
+                <ToggleButton IsChecked="{Binding IsRelative}" Content="{Binding ModeLabel}" MinWidth="74"
+                              ToolTip.Tip="Absolut (vom Nullpunkt) ⟷ Relativ (vom letzten Punkt)" />
+                <TextBlock Text="X" Foreground="#9FD3C7" VerticalAlignment="Center" />
+                <TextBox Width="92" Text="{Binding XText}" KeyDown="OnCoordinateKeyDown" />
+                <TextBlock Text="Y" Foreground="#9FD3C7" VerticalAlignment="Center" />
+                <TextBox Width="92" Text="{Binding YText}" KeyDown="OnCoordinateKeyDown" />
+                <Button Content="Setzen ⏎" Command="{Binding CommitCommand}" />
+                <TextBlock Text="{Binding Hint}" Foreground="#E0A060" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Canvas | splitter | docked right panel (resizable in width). -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="200" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="300" MinWidth="230" MaxWidth="600" />
+            </Grid.ColumnDefinitions>
+
+            <controls:CadCanvasControl Grid.Column="0" x:Name="Canvas"
+                                       Document="{Binding Document}" Viewport="{Binding Viewport}" Tools="{Binding Tools}"
+                                       ShowGrid="{Binding Settings.ShowGrid}" SceneBackground="{Binding Settings.BackgroundColor}" />
+
+            <GridSplitter Grid.Column="1" Width="5" Background="#3A3A40"
+                          ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" />
+
+            <Border Grid.Column="2" Background="#252528" BorderBrush="#3A3A40" BorderThickness="1,0,0,0">
+                <TabControl Padding="0">
+
+                    <!-- ===== Eigenschaften (Attribute) ===== -->
+                    <TabItem Header="Eigenschaften">
+                        <ScrollViewer>
+                            <StackPanel Margin="12" Spacing="12" DataContext="{Binding Attributes}"
+                                        x:DataType="vm:AttributesViewModel">
+                                <TextBlock Text="{Binding Summary}" FontWeight="SemiBold" Foreground="#CFCFCF" />
+
+                                <TextBlock Text="Keine Auswahl. Wähle ein Objekt, um seine Eigenschaften zu bearbeiten."
+                                           Foreground="#888" TextWrapping="Wrap"
+                                           IsVisible="{Binding !HasSelection}" />
+
+                                <StackPanel Spacing="10" IsVisible="{Binding HasSelection}">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Layer" Foreground="#AAA" />
+                                        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding LayerOptions}"
+                                                  SelectedItem="{Binding SelectedLayer}" />
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Teilbild" Foreground="#AAA" />
+                                        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding PartialDrawingOptions}"
+                                                  SelectedItem="{Binding SelectedPartialDrawing}" />
+                                    </StackPanel>
+
+                                    <Border Height="1" Background="#3A3A40" />
+
+                                    <CheckBox Content="Eigener Linienstil" IsChecked="{Binding UseStrokeOverride}" />
+                                    <StackPanel Spacing="6" IsEnabled="{Binding UseStrokeOverride}">
+                                        <Grid ColumnDefinitions="16,*" ColumnSpacing="8" RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="R" VerticalAlignment="Center" />
+                                            <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding StrokeRed}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="G" VerticalAlignment="Center" />
+                                            <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding StrokeGreen}" />
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="B" VerticalAlignment="Center" />
+                                            <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding StrokeBlue}" />
+                                        </Grid>
+                                        <DockPanel>
+                                            <TextBlock Text="Stärke" Foreground="#AAA" DockPanel.Dock="Left" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding StrokeWidth, StringFormat='{}{0:0.0} px'}"
+                                                       Foreground="#888" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                        </DockPanel>
+                                        <Slider Minimum="0.25" Maximum="8" Value="{Binding StrokeWidth}" />
+                                        <Border Height="20" CornerRadius="3" BorderBrush="#3A3A40" BorderThickness="1"
+                                                Background="{Binding StrokeBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="4" IsVisible="{Binding CanFill}">
+                                        <Border Height="1" Background="#3A3A40" />
+                                        <TextBlock Text="Füllung (Muster)" Foreground="#AAA" />
+                                        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding FillOptions}"
+                                                  SelectedItem="{Binding SelectedFill}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <!-- ===== Teilbilder ===== -->
+                    <TabItem Header="Teilbilder">
+                        <DockPanel Margin="10" DataContext="{Binding StructurePanel}" x:DataType="vm:StructurePanelViewModel">
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="0,0,0,8">
+                                <Button Content="▲" Command="{Binding MovePartialDrawingUpCommand}" ToolTip.Tip="Nach oben" />
+                                <Button Content="▼" Command="{Binding MovePartialDrawingDownCommand}" ToolTip.Tip="Nach unten" />
+                                <Button Content="Neu" Command="{Binding AddPartialDrawingCommand}" />
+                            </StackPanel>
+                            <ListBox ItemsSource="{Binding PartialDrawings}" SelectedItem="{Binding SelectedPartialDrawing}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:PartialDrawingItemViewModel">
+                                        <DockPanel>
+                                            <ComboBox DockPanel.Dock="Left" SelectedIndex="{Binding StateIndex}"
+                                                      Width="112" Margin="0,0,8,0" ToolTip.Tip="Aktiviert / Gesperrt / Deaktiviert">
+                                                <ComboBoxItem>Aktiviert</ComboBoxItem>
+                                                <ComboBoxItem>Gesperrt</ComboBoxItem>
+                                                <ComboBoxItem>Deaktiviert</ComboBoxItem>
+                                            </ComboBox>
+                                            <TextBox Text="{Binding Name}" BorderThickness="0" Background="Transparent"
+                                                     VerticalAlignment="Center" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DockPanel>
+                    </TabItem>
+
+                    <!-- ===== Layer ===== -->
+                    <TabItem Header="Layer">
+                        <DockPanel Margin="10" DataContext="{Binding StructurePanel}" x:DataType="vm:StructurePanelViewModel">
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="0,0,0,8">
+                                <Button Content="Neu" Command="{Binding AddLayerCommand}" />
+                                <Button Content="Standard-Layer" Command="{Binding AddStandardLayersCommand}"
+                                        ToolTip.Tip="Professionellen Standard-Layersatz einfügen" />
+                            </StackPanel>
+
+                            <Border DockPanel.Dock="Bottom" Margin="0,10,0,0" Padding="10" CornerRadius="4"
+                                    Background="#1E1E22" BorderBrush="#3A3A40" BorderThickness="1"
+                                    IsVisible="{Binding SelectedLayer, Converter={x:Static converters:ObjectConverters.IsNotNull}}">
+                                <StackPanel Spacing="8">
+                                    <DockPanel>
+                                        <TextBlock Text="Farbe" FontWeight="SemiBold" Foreground="#CFCFCF" />
+                                        <TextBlock Text="{Binding SelectedLayer.ColorHex}" HorizontalAlignment="Right" Foreground="#888" />
+                                    </DockPanel>
+                                    <Grid ColumnDefinitions="16,*,36" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="6">
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="R" VerticalAlignment="Center" />
+                                        <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding SelectedLayer.ColorRed}" />
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding SelectedLayer.ColorRed, StringFormat='{}{0:0}'}"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="#AAA" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="G" VerticalAlignment="Center" />
+                                        <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding SelectedLayer.ColorGreen}" />
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding SelectedLayer.ColorGreen, StringFormat='{}{0:0}'}"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="#AAA" />
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="B" VerticalAlignment="Center" />
+                                        <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding SelectedLayer.ColorBlue}" />
+                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding SelectedLayer.ColorBlue, StringFormat='{}{0:0}'}"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="#AAA" />
+                                    </Grid>
+                                    <Border Height="22" CornerRadius="3" BorderBrush="#3A3A40" BorderThickness="1"
+                                            Background="{Binding SelectedLayer.ColorBrush}" />
+                                </StackPanel>
+                            </Border>
+
+                            <ListBox ItemsSource="{Binding Layers}" SelectedItem="{Binding SelectedLayer}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:LayerItemViewModel">
+                                        <DockPanel>
+                                            <ComboBox DockPanel.Dock="Left" SelectedIndex="{Binding StateIndex}"
+                                                      Width="108" Margin="0,0,6,0" ToolTip.Tip="Aktiviert / Gesperrt / Deaktiviert">
+                                                <ComboBoxItem>Aktiviert</ComboBoxItem>
+                                                <ComboBoxItem>Gesperrt</ComboBoxItem>
+                                                <ComboBoxItem>Deaktiviert</ComboBoxItem>
+                                            </ComboBox>
+                                            <Border DockPanel.Dock="Left" Width="14" Height="14" CornerRadius="2"
+                                                    Margin="0,0,6,0" VerticalAlignment="Center"
+                                                    BorderBrush="#3A3A40" BorderThickness="1"
+                                                    Background="{Binding ColorBrush}" />
+                                            <TextBox Text="{Binding Name}" BorderThickness="0" Background="Transparent"
+                                                     VerticalAlignment="Center" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DockPanel>
+                    </TabItem>
+
+                    <!-- ===== Muster (Patterns) ===== -->
+                    <TabItem Header="Muster">
+                        <ScrollViewer>
+                            <StackPanel Margin="10" Spacing="8" DataContext="{Binding Patterns}" x:DataType="vm:PatternsViewModel">
+                                <TextBlock Text="Globale Muster" FontWeight="SemiBold" Foreground="#CFCFCF" />
+                                <ItemsControl ItemsSource="{Binding GlobalPatterns}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" Foreground="#BBB" Margin="4,2" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <Border Height="1" Background="#3A3A40" />
+                                <DockPanel>
+                                    <TextBlock Text="Projekt-Muster" FontWeight="SemiBold" Foreground="#CFCFCF" />
+                                    <Button DockPanel.Dock="Right" Content="Entfernen" Command="{Binding RemoveProjectPatternCommand}" />
+                                </DockPanel>
+                                <ListBox MaxHeight="120" ItemsSource="{Binding ProjectPatterns}" SelectedItem="{Binding SelectedProjectPattern}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" />
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+                                <Border Margin="0,4,0,0" Padding="10" CornerRadius="4" Background="#1E1E22"
+                                        BorderBrush="#3A3A40" BorderThickness="1">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="Neues Projekt-Muster" Foreground="#AAA" />
+                                        <TextBox Text="{Binding NewName}" PlaceholderText="Name" />
+                                        <DockPanel>
+                                            <TextBlock Text="Winkel" Foreground="#AAA" DockPanel.Dock="Left" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding NewAngle, StringFormat='{}{0:0}°'}" HorizontalAlignment="Right" Foreground="#888" />
+                                        </DockPanel>
+                                        <Slider Minimum="0" Maximum="180" Value="{Binding NewAngle}" />
+                                        <DockPanel>
+                                            <TextBlock Text="Abstand" Foreground="#AAA" DockPanel.Dock="Left" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding NewSpacing, StringFormat='{}{0:0}'}" HorizontalAlignment="Right" Foreground="#888" />
+                                        </DockPanel>
+                                        <Slider Minimum="2" Maximum="120" Value="{Binding NewSpacing}" />
+                                        <CheckBox Content="Kreuzschraffur" IsChecked="{Binding NewCross}" />
+                                        <Grid ColumnDefinitions="16,*" ColumnSpacing="8" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="R" VerticalAlignment="Center" />
+                                            <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding NewRed}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="G" VerticalAlignment="Center" />
+                                            <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding NewGreen}" />
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="B" VerticalAlignment="Center" />
+                                            <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding NewBlue}" />
+                                        </Grid>
+                                        <Border Height="18" CornerRadius="3" BorderBrush="#3A3A40" BorderThickness="1"
+                                                Background="{Binding NewColorBrush}" />
+                                        <Button Content="Hinzufügen" HorizontalAlignment="Right" Command="{Binding AddProjectPatternCommand}" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <!-- ===== Assistent ===== -->
+                    <TabItem Header="Assistent">
+                        <DockPanel Margin="10">
+                            <TextBlock DockPanel.Dock="Top" Margin="0,0,0,6" Foreground="#888" TextWrapping="Wrap"
+                                       Text="Doppelklick auf eine Vorlage übernimmt Werkzeug und Linienstil." />
+                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="4" Margin="0,8,0,0">
+                                <Button Content="Auswahl als Vorlage" Command="{Binding AddSelectionAsTemplateCommand}" />
+                                <Button Content="Entfernen" Command="{Binding Assistant.RemoveSelectedCommand}" />
+                            </StackPanel>
+                            <ListBox x:Name="AssistantList" ItemsSource="{Binding Assistant.Templates}"
+                                     SelectedItem="{Binding Assistant.SelectedTemplate}"
+                                     DoubleTapped="OnAssistantDoubleTapped">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:AssistantItemViewModel">
+                                        <DockPanel>
+                                            <Border DockPanel.Dock="Left" Width="26" CornerRadius="1"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0"
+                                                    Height="{Binding PreviewWidth}" Background="{Binding PreviewBrush}" />
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding ToolLabel}" Foreground="#777"
+                                                       VerticalAlignment="Center" Margin="8,0,0,0" />
+                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DockPanel>
+                    </TabItem>
+
+                </TabControl>
+            </Border>
+        </Grid>
+    </DockPanel>
 
 </Window>

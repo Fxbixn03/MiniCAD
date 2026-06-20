@@ -1,0 +1,46 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MiniCAD.App.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="360" d:DesignHeight="440"
+        x:Class="MiniCAD.App.Views.PartialDrawingsWindow"
+        x:DataType="vm:StructurePanelViewModel"
+        Title="Teilbilder verwalten"
+        Width="360" Height="440"
+        WindowStartupLocation="CenterOwner">
+
+    <DockPanel Margin="14">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
+                <Button Content="▲" Command="{Binding MovePartialDrawingUpCommand}" ToolTip.Tip="Nach oben" />
+                <Button Content="▼" Command="{Binding MovePartialDrawingDownCommand}" ToolTip.Tip="Nach unten" />
+                <Button Content="Neu" Command="{Binding AddPartialDrawingCommand}" />
+            </StackPanel>
+            <TextBlock Text="Teilbilder" FontSize="16" FontWeight="SemiBold"
+                       Foreground="#CFCFCF" VerticalAlignment="Center" />
+        </DockPanel>
+
+        <Button DockPanel.Dock="Bottom" Content="Schließen" HorizontalAlignment="Right"
+                Margin="0,10,0,0" Click="OnClose" />
+
+        <ListBox ItemsSource="{Binding PartialDrawings}"
+                 SelectedItem="{Binding SelectedPartialDrawing}">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:PartialDrawingItemViewModel">
+                    <DockPanel>
+                        <ComboBox DockPanel.Dock="Left" SelectedIndex="{Binding StateIndex}"
+                                  Width="118" Margin="0,0,8,0" ToolTip.Tip="Aktiviert / Gesperrt / Deaktiviert">
+                            <ComboBoxItem>Aktiviert</ComboBoxItem>
+                            <ComboBoxItem>Gesperrt</ComboBoxItem>
+                            <ComboBoxItem>Deaktiviert</ComboBoxItem>
+                        </ComboBox>
+                        <TextBox Text="{Binding Name}" BorderThickness="0" Background="Transparent"
+                                 VerticalAlignment="Center" />
+                    </DockPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+
+</Window>

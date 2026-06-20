@@ -1,0 +1,58 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MiniCAD.App.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="780" d:DesignHeight="500"
+        x:Class="MiniCAD.App.Views.StartWindow"
+        x:DataType="vm:StartWindowViewModel"
+        Icon="/Assets/logo.ico"
+        Width="780" Height="500"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        Title="MiniCAD — Projektübersicht">
+
+    <Design.DataContext>
+        <vm:StartWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="300,*" Background="#1E1E22">
+
+        <!-- Left: branding + actions -->
+        <Border Grid.Column="0" Background="#252528" BorderBrush="#3A3A40" BorderThickness="0,0,1,0">
+            <StackPanel Margin="26" Spacing="14">
+                <Image Source="/Assets/logo.png" Width="72" Height="72" HorizontalAlignment="Left" />
+                <TextBlock Text="MiniCAD" FontSize="26" FontWeight="SemiBold" Foreground="#EDEDED" />
+                <TextBlock Text="Wähle ein Projekt oder beginne ein neues."
+                           TextWrapping="Wrap" Foreground="#9A9A9A" />
+                <Button Content="＋  Neues Projekt" HorizontalAlignment="Stretch"
+                        Padding="10,8" Click="OnNewProject" />
+                <Button Content="📂  Projekt öffnen …" HorizontalAlignment="Stretch"
+                        Padding="10,8" Click="OnOpenProject" />
+            </StackPanel>
+        </Border>
+
+        <!-- Right: recent projects -->
+        <DockPanel Grid.Column="1" Margin="22">
+            <TextBlock DockPanel.Dock="Top" Text="Zuletzt verwendet" FontSize="16"
+                       FontWeight="SemiBold" Foreground="#CFCFCF" Margin="0,0,0,12" />
+
+            <TextBlock DockPanel.Dock="Top" Text="Noch keine Projekte vorhanden."
+                       Foreground="#777" IsVisible="{Binding !HasRecentProjects}" />
+
+            <ListBox x:Name="RecentList" ItemsSource="{Binding RecentProjects}"
+                     Background="Transparent" BorderThickness="0"
+                     DoubleTapped="OnRecentDoubleTapped">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:RecentProjectItem">
+                        <StackPanel Margin="2,4">
+                            <TextBlock Text="{Binding Name}" Foreground="#EDEDED" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding Path}" Foreground="#7E7E86" FontSize="12" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+    </Grid>
+
+</Window>

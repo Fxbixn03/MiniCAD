@@ -1,0 +1,24 @@
+using MiniCAD.Core.Entities;
+using MiniCAD.Core.Geometry;
+using MiniCAD.Core.Styling;
+
+namespace MiniCAD.Core.Documents;
+
+/// <summary>
+/// A full snapshot of a document's structure, used to load a document in place via
+/// <see cref="CadDocument.LoadContents"/>.
+/// </summary>
+public sealed record DocumentContents(
+    IReadOnlyList<Layer> Layers,
+    Guid DefaultLayerId,
+    Guid ActiveLayerId,
+    IReadOnlyList<PartialDrawing> PartialDrawings,
+    Guid ActivePartialDrawingId,
+    IReadOnlyList<IEntity> Entities)
+{
+    /// <summary>Project-specific hatch patterns (the global library is always available too).</summary>
+    public IReadOnlyList<HatchPattern> Patterns { get; init; } = Array.Empty<HatchPattern>();
+
+    /// <summary>The user-defined origin (Nullpunkt) in absolute world coordinates.</summary>
+    public Point3D Origin { get; init; } = Point3D.Origin;
+}

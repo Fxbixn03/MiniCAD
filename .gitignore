@@ -434,3 +434,6 @@ CLAUDE.md
 .codex
 .gemini
 lancedb/
+
+# Private user files
+.notes/

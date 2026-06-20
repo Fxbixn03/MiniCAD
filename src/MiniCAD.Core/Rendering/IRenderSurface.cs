@@ -1,0 +1,26 @@
+using MiniCAD.Core.Geometry;
+using MiniCAD.Core.Styling;
+
+namespace MiniCAD.Core.Rendering;
+
+/// <summary>
+/// The drawing abstraction that decouples the domain from any concrete graphics backend.
+/// Coordinates are expressed in <em>world</em> units; an implementation is responsible for
+/// mapping them to device pixels (see the SkiaSharp implementation in MiniCAD.Renderer).
+/// Entities render themselves by emitting these primitives, so a new entity type never has
+/// to know about SkiaSharp and a new backend never has to know about entity types.
+/// </summary>
+public interface IRenderSurface
+{
+    void DrawLine(Point2D a, Point2D b, in StrokeStyle stroke);
+
+    void DrawPolyline(IReadOnlyList<Point2D> points, bool closed, in StrokeStyle stroke);
+
+    void DrawCircle(Point2D center, double radius, in StrokeStyle stroke);
+
+    /// <summary>
+    /// Draws a circular arc. Angles are in radians, measured counter-clockwise from the
+    /// positive X axis; <paramref name="sweepAngle"/> may be negative for clockwise arcs.
+    /// </summary>
+    void DrawArc(Point2D center, double radius, double startAngle, double sweepAngle, in StrokeStyle stroke);
+}
