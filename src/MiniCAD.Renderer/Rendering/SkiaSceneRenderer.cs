@@ -16,6 +16,13 @@ namespace MiniCAD.Renderer.Rendering;
 /// </summary>
 public sealed class SkiaSceneRenderer
 {
+    // Passive (Locked) elements: blended toward a muted blue-gray and faded, so they read as
+    // background reference yet stay legible for snapping.
+    private static readonly Color PassiveTint = new(120, 130, 145);
+
+    private static StrokeStyle Dim(StrokeStyle stroke)
+        => stroke.WithColor(stroke.Color.Lerp(PassiveTint, 0.7).WithAlpha((byte)(stroke.Color.A * 0.6)));
+
     // Blueprint grid: translucent light-blue (logo vertex node #93c5fd) over the navy canvas.
     private static readonly Color GridColor = new(147, 197, 253, 38);
     private static readonly Color XAxisColor = new(190, 92, 96);
@@ -69,19 +76,27 @@ public sealed class SkiaSceneRenderer
             DrawNullPoint(surface, viewport, document);
 
             // Draw Teilbild by Teilbild in stacking order; within each, only visible entities.
+            // Passive (Locked) Teilbilder/layers render dimmed but stay snappable (see SnapEngine).
             foreach (PartialDrawing partialDrawing in document.PartialDrawings)
             {
                 if (!partialDrawing.IsVisible)
                     continue;
 
+                bool teilbildPassive = partialDrawing.State == ElementState.Locked;
+
                 foreach (IEntity entity in document.Entities)
                 {
                     if (entity.PartialDrawingId != partialDrawing.Id)
                         continue;
-                    if (document.FindLayer(entity.LayerId) is { IsVisible: false })
+
+                    Layer? layer = document.FindLayer(entity.LayerId);
+                    if (layer is { IsVisible: false })
                         continue;
 
                     StrokeStyle stroke = document.ResolveStroke(entity);
+                    if (teilbildPassive || layer is { State: ElementState.Locked })
+                        stroke = Dim(stroke);
+
                     entity.Render(surface, stroke);
                 }
             }

@@ -460,11 +460,16 @@
                                     <DataTemplate x:DataType="vm:PartialDrawingItemViewModel">
                                         <DockPanel>
                                             <ComboBox DockPanel.Dock="Left" SelectedIndex="{Binding StateIndex}"
-                                                      Width="112" Margin="0,0,8,0" ToolTip.Tip="Aktiviert / Gesperrt / Deaktiviert">
-                                                <ComboBoxItem>Aktiviert</ComboBoxItem>
-                                                <ComboBoxItem>Gesperrt</ComboBoxItem>
-                                                <ComboBoxItem>Deaktiviert</ComboBoxItem>
+                                                      Width="100" Margin="0,0,8,0" ToolTip.Tip="Aktiv / Passiv (gedimmt, snapbar) / Aus">
+                                                <ComboBoxItem>Aktiv</ComboBoxItem>
+                                                <ComboBoxItem>Passiv</ComboBoxItem>
+                                                <ComboBoxItem>Aus</ComboBoxItem>
                                             </ComboBox>
+                                            <Border DockPanel.Dock="Right" Classes="badge brand" Margin="6,0,0,0"
+                                                    VerticalAlignment="Center" IsVisible="{Binding IsCurrent}"
+                                                    ToolTip.Tip="Aktuelles Teilbild – neue Geometrie landet hier">
+                                                <TextBlock Text="Aktuell" />
+                                            </Border>
                                             <TextBox Text="{Binding Name}" BorderThickness="0" Background="Transparent"
                                                      VerticalAlignment="Center" />
                                         </DockPanel>

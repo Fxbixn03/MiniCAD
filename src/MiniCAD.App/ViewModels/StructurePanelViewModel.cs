@@ -37,7 +37,16 @@ public partial class StructurePanelViewModel : ViewModelBase
     partial void OnSelectedPartialDrawingChanged(PartialDrawingItemViewModel? value)
     {
         if (value is not null)
+        {
             _document.ActivePartialDrawing = value.Model;
+            RefreshPartialDrawingStatuses(); // the "Aktuell" badge moves to the new target
+        }
+    }
+
+    private void RefreshPartialDrawingStatuses()
+    {
+        foreach (PartialDrawingItemViewModel item in PartialDrawings)
+            item.RefreshStatus();
     }
 
     partial void OnSelectedLayerChanged(LayerItemViewModel? value)
@@ -106,6 +115,8 @@ public partial class StructurePanelViewModel : ViewModelBase
         // A loaded project replaces the structure wholesale.
         if (e.Kind == DocumentChangeKind.Reloaded)
             Rebuild();
+        else if (e.Kind == DocumentChangeKind.PartialDrawingModified)
+            RefreshPartialDrawingStatuses();
     }
 
     private void Rebuild()

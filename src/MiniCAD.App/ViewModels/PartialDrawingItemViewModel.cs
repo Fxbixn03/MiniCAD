@@ -24,11 +24,33 @@ public partial class PartialDrawingItemViewModel : ViewModelBase
     [ObservableProperty]
     private ElementState _state;
 
-    /// <summary>State as a 0/1/2 index for the dropdown (Aktiviert / Gesperrt / Deaktiviert).</summary>
+    /// <summary>State as a 0/1/2 index for the dropdown (Aktiv / Passiv / Aus).</summary>
     public int StateIndex
     {
         get => (int)State;
         set => State = (ElementState)value;
+    }
+
+    /// <summary>The Allplan four-state status (Aktuell / Aktiv / Passiv / Aus).</summary>
+    public PartialDrawingStatus Status => _document.GetPartialDrawingStatus(Model);
+
+    public string StatusLabel => Status switch
+    {
+        PartialDrawingStatus.Current => "Aktuell",
+        PartialDrawingStatus.Active => "Aktiv",
+        PartialDrawingStatus.Passive => "Passiv",
+        _ => "Aus",
+    };
+
+    /// <summary>True for the current (drawing-target) Teilbild, which drives the "Aktuell" badge.</summary>
+    public bool IsCurrent => Status == PartialDrawingStatus.Current;
+
+    /// <summary>Recomputes the derived status (after the current Teilbild or a state changes).</summary>
+    public void RefreshStatus()
+    {
+        OnPropertyChanged(nameof(Status));
+        OnPropertyChanged(nameof(StatusLabel));
+        OnPropertyChanged(nameof(IsCurrent));
     }
 
     partial void OnNameChanged(string value) => _document.RenamePartialDrawing(Model, value);
@@ -37,5 +59,6 @@ public partial class PartialDrawingItemViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(StateIndex));
         _document.SetPartialDrawingState(Model, value);
+        RefreshStatus();
     }
 }

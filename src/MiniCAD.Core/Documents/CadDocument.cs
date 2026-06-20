@@ -177,6 +177,36 @@ public sealed class CadDocument : ICadDocument
         Raise(DocumentChangedEventArgs.ForPartialDrawing(DocumentChangeKind.PartialDrawingModified, partialDrawing));
     }
 
+    /// <summary>
+    /// The Allplan four-state status of a Teilbild: <see cref="PartialDrawingStatus.Current"/> for
+    /// the active drawing target, <see cref="PartialDrawingStatus.Active"/> for other editable
+    /// Teilbilder, <see cref="PartialDrawingStatus.Passive"/> for Locked (dimmed/snap-only) ones,
+    /// and <see cref="PartialDrawingStatus.Off"/> for hidden ones.
+    /// </summary>
+    public PartialDrawingStatus GetPartialDrawingStatus(PartialDrawing partialDrawing) => partialDrawing.State switch
+    {
+        ElementState.Off => PartialDrawingStatus.Off,
+        ElementState.Locked => PartialDrawingStatus.Passive,
+        _ => ReferenceEquals(partialDrawing, ActivePartialDrawing)
+            ? PartialDrawingStatus.Current
+            : PartialDrawingStatus.Active,
+    };
+
+    /// <summary>
+    /// Makes <paramref name="partialDrawing"/> the current (drawing-target) Teilbild. It is forced
+    /// to <see cref="ElementState.Active"/> so the target is always editable, and a change is
+    /// raised so views and the renderer refresh.
+    /// </summary>
+    public void SetCurrentPartialDrawing(PartialDrawing partialDrawing)
+    {
+        ArgumentNullException.ThrowIfNull(partialDrawing);
+        if (partialDrawing.State != ElementState.Active)
+            partialDrawing.State = ElementState.Active;
+
+        ActivePartialDrawing = partialDrawing;
+        Raise(DocumentChangedEventArgs.ForPartialDrawing(DocumentChangeKind.PartialDrawingModified, partialDrawing));
+    }
+
     public void RenamePartialDrawing(PartialDrawing partialDrawing, string name)
     {
         partialDrawing.Name = name;

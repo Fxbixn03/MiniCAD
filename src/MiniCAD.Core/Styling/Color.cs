@@ -28,6 +28,19 @@ public readonly struct Color : IEquatable<Color>
 
     public Color WithAlpha(byte alpha) => new(R, G, B, alpha);
 
+    /// <summary>Linearly blends toward <paramref name="other"/> by <paramref name="t"/> (0 = this, 1 = other).</summary>
+    public Color Lerp(Color other, double t)
+    {
+        t = t < 0 ? 0 : t > 1 ? 1 : t;
+        return new Color(
+            Channel(R, other.R, t),
+            Channel(G, other.G, t),
+            Channel(B, other.B, t),
+            Channel(A, other.A, t));
+    }
+
+    private static byte Channel(byte a, byte b, double t) => (byte)Math.Round(a + (b - a) * t);
+
     public static readonly Color Transparent = new(0, 0, 0, 0);
     public static readonly Color Black = new(0, 0, 0);
     public static readonly Color White = new(255, 255, 255);
