@@ -120,6 +120,9 @@ public sealed class StrokeDto
 
     /// <summary>Line type / dash pattern (Solid / Dashed / Dotted / DashDot / …).</summary>
     public string LineType { get; set; } = "Solid";
+
+    /// <summary>Real plot line weight in mm (0 = use the pixel width).</summary>
+    public double LineWeightMm { get; set; }
 }
 
 public sealed class ColorDto

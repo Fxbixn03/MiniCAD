@@ -178,12 +178,14 @@ public static class DocumentMapper
         Color = ToDto(stroke.Color),
         Width = stroke.Width,
         LineType = stroke.LineType.ToString(),
+        LineWeightMm = stroke.LineWeightMm,
     };
 
     private static StrokeStyle FromDto(StrokeDto dto) => new(
         FromDto(dto.Color),
         dto.Width,
-        Enum.TryParse(dto.LineType, out LineType lineType) ? lineType : LineType.Solid);
+        Enum.TryParse(dto.LineType, out LineType lineType) ? lineType : LineType.Solid,
+        dto.LineWeightMm);
 
     private static ColorDto ToDto(Color color) => new() { R = color.R, G = color.G, B = color.B, A = color.A };
 

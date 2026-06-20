@@ -24,16 +24,24 @@ public partial class LayerItemViewModel : ViewModelBase
         _colorGreen = color.G;
         _colorBlue = color.B;
         _lineType = model.Stroke.LineType;
+        _lineWeight = model.Stroke.LineWeightMm;
     }
 
     public Layer Model { get; }
 
     public LineType[] LineTypeOptions { get; } = Enum.GetValues<LineType>();
 
+    public double[] LineWeightOptions { get; } = StyleOptions.LineWeights;
+
     [ObservableProperty]
     private LineType _lineType;
 
+    [ObservableProperty]
+    private double _lineWeight;
+
     partial void OnLineTypeChanged(LineType value) => _document.SetLayerLineType(Model, value);
+
+    partial void OnLineWeightChanged(double value) => _document.SetLayerLineWeight(Model, value);
 
     [ObservableProperty]
     private string _name;

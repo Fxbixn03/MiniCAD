@@ -25,6 +25,31 @@ public class LineTypeTests
     }
 
     [Fact]
+    public void StrokeStyle_CarriesLineWeightMm_AndEqualityRespectsIt()
+    {
+        var thin = new StrokeStyle(Color.White, 1.0);
+        var plotted = thin.WithLineWeight(0.35);
+
+        thin.LineWeightMm.Should().Be(0.0);
+        plotted.LineWeightMm.Should().Be(0.35);
+        (plotted == thin).Should().BeFalse();
+        new StrokeStyle(Color.White, 1.0, LineType.Solid, -5).LineWeightMm.Should().Be(0.0); // clamped
+    }
+
+    [Fact]
+    public void LayerLineWeight_PersistsRoundTrip()
+    {
+        var doc = new CadDocument();
+        doc.SetLayerLineWeight(doc.DefaultLayer, 0.5);
+
+        DocumentDto dto = DocumentMapper.ToDto(doc);
+        var restored = new CadDocument();
+        DocumentMapper.Apply(dto, restored);
+
+        restored.DefaultLayer.Stroke.LineWeightMm.Should().Be(0.5);
+    }
+
+    [Fact]
     public void LayerLineType_PersistsAndAppliesToEntities()
     {
         var doc = new CadDocument();

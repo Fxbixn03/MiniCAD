@@ -79,6 +79,11 @@ public partial class AttributesViewModel : ViewModelBase
     public LineType[] StrokeLineTypeOptions { get; } = Enum.GetValues<LineType>();
 
     [ObservableProperty]
+    private double _strokeLineWeight;
+
+    public double[] StrokeLineWeightOptions { get; } = StyleOptions.LineWeights;
+
+    [ObservableProperty]
     private bool _canFill;
 
     [ObservableProperty]
@@ -151,6 +156,7 @@ public partial class AttributesViewModel : ViewModelBase
             StrokeBlue = stroke.Color.B;
             StrokeWidth = stroke.Width;
             StrokeLineType = stroke.LineType;
+            StrokeLineWeight = stroke.LineWeightMm;
         }
         else
         {
@@ -231,6 +237,8 @@ public partial class AttributesViewModel : ViewModelBase
 
     partial void OnStrokeLineTypeChanged(LineType value) => ApplyStrokeOverride();
 
+    partial void OnStrokeLineWeightChanged(double value) => ApplyStrokeOverride();
+
     partial void OnSelectedFillChanged(PatternOptionViewModel? value)
     {
         if (_suppress || value is null)
@@ -280,7 +288,7 @@ public partial class AttributesViewModel : ViewModelBase
             return;
 
         CoreStroke? next = UseStrokeOverride
-            ? new CoreStroke(new CoreColor((byte)StrokeRed, (byte)StrokeGreen, (byte)StrokeBlue), StrokeWidth, StrokeLineType)
+            ? new CoreStroke(new CoreColor((byte)StrokeRed, (byte)StrokeGreen, (byte)StrokeBlue), StrokeWidth, StrokeLineType, StrokeLineWeight)
             : null;
 
         ApplyToSelection("Linienstil ändern", entity =>

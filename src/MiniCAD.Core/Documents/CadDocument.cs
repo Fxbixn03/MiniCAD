@@ -178,6 +178,16 @@ public sealed class CadDocument : ICadDocument
         Raise(DocumentChangedEventArgs.ForLayer(DocumentChangeKind.LayerModified, layer));
     }
 
+    /// <summary>Sets a layer's default plot line weight in mm (0 = pixel width).</summary>
+    public void SetLayerLineWeight(Layer layer, double lineWeightMm)
+    {
+        if (layer.Stroke.LineWeightMm.Equals(lineWeightMm))
+            return;
+
+        layer.Stroke = layer.Stroke.WithLineWeight(lineWeightMm);
+        Raise(DocumentChangedEventArgs.ForLayer(DocumentChangeKind.LayerModified, layer));
+    }
+
     // ----- Partial drawings (Teilbilder) -----
 
     public PartialDrawing AddPartialDrawing(string name)

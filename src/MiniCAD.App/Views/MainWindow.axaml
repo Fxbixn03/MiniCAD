@@ -2,6 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:MiniCAD.App.ViewModels"
         xmlns:documents="using:MiniCAD.Core.Documents"
+        xmlns:conv="using:MiniCAD.App.Converters"
+        xmlns:sys="using:System"
         xmlns:controls="using:MiniCAD.App.Controls"
         xmlns:converters="using:Avalonia.Data.Converters"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -487,6 +489,15 @@
                                         <TextBlock Classes="eyebrow" Text="LINIENTYP" Margin="0,4,0,0" />
                                         <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding StrokeLineTypeOptions}"
                                                   SelectedItem="{Binding StrokeLineType}" />
+                                        <TextBlock Classes="eyebrow" Text="LINIENSTÄRKE" Margin="0,4,0,0" />
+                                        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding StrokeLineWeightOptions}"
+                                                  SelectedItem="{Binding StrokeLineWeight}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate x:DataType="sys:Double">
+                                                    <TextBlock Text="{Binding Converter={x:Static conv:LineWeightLabelConverter.Instance}}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
                                     </StackPanel>
 
                                     <StackPanel Spacing="4" IsVisible="{Binding CanFill}">
@@ -591,6 +602,15 @@
                                     <TextBlock Classes="eyebrow" Text="LINIENTYP" Margin="0,4,0,0" />
                                     <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SelectedLayer.LineTypeOptions}"
                                               SelectedItem="{Binding SelectedLayer.LineType}" />
+                                    <TextBlock Classes="eyebrow" Text="LINIENSTÄRKE" Margin="0,4,0,0" />
+                                    <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SelectedLayer.LineWeightOptions}"
+                                              SelectedItem="{Binding SelectedLayer.LineWeight}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="sys:Double">
+                                                <TextBlock Text="{Binding Converter={x:Static conv:LineWeightLabelConverter.Instance}}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
                             </Border>
 

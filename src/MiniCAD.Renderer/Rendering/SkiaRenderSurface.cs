@@ -171,11 +171,17 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
         return typeface;
     }
 
+    // 1 mm at 96 logical DPI; real plot line weights are shown at a constant on-screen size
+    // (independent of zoom), the usual CAD "display lineweight" behaviour.
+    private const double PixelsPerMm = 96.0 / 25.4;
+
     private void ApplyStroke(in StrokeStyle stroke)
     {
         Color c = stroke.Color;
         _paint.Color = new SKColor(c.R, c.G, c.B, c.A);
-        _paint.StrokeWidth = (float)stroke.Width;
+        _paint.StrokeWidth = stroke.LineWeightMm > 0.0
+            ? Math.Max((float)(stroke.LineWeightMm * PixelsPerMm), 1f)
+            : (float)stroke.Width;
         _paint.PathEffect = DashEffect(stroke.LineType);
     }
 
