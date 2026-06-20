@@ -8,7 +8,18 @@
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
-  
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- MiniCAD Design System foundation tokens (colors, brushes, fonts, radii). -->
+                <ResourceInclude Source="avares://MiniCAD.App/Theme/DesignTokens.axaml" />
+                <!-- Line-art tool/palette icons used by the editor chrome. -->
+                <ResourceInclude Source="avares://MiniCAD.App/Theme/Icons.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
     <Application.Styles>
         <FluentTheme />
     </Application.Styles>

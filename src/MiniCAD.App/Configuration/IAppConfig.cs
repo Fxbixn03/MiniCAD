@@ -17,12 +17,16 @@ public interface IAppConfig
     [Option(DefaultValue = "")]
     string RecentProjects { get; set; }
 
+    /// <summary>UI colour theme: "Light" (default) or "Dark".</summary>
+    [Option(DefaultValue = "Light")]
+    string Theme { get; set; }
+
     /// <summary>Whether the canvas reference grid is shown.</summary>
     [Option(DefaultValue = true)]
     bool ShowGrid { get; set; }
 
-    /// <summary>Canvas background color as a <c>#RRGGBB</c> hex string.</summary>
-    [Option(DefaultValue = "#1E1E22")]
+    /// <summary>Canvas background color as a <c>#RRGGBB</c> hex string (the navy blueprint surface).</summary>
+    [Option(DefaultValue = "#0A1430")]
     string BackgroundColor { get; set; }
 
     /// <summary>Decimal separator for coordinate input/readout — "," (default) or ".".</summary>

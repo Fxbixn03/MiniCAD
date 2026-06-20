@@ -16,10 +16,11 @@ namespace MiniCAD.Renderer.Rendering;
 /// </summary>
 public sealed class SkiaSceneRenderer
 {
-    private static readonly Color GridColor = new(56, 56, 62);
-    private static readonly Color XAxisColor = new(120, 64, 64);
-    private static readonly Color YAxisColor = new(64, 96, 64);
-    private static readonly Color NullPointColor = new(240, 180, 60);
+    // Blueprint grid: translucent light-blue (logo vertex node #93c5fd) over the navy canvas.
+    private static readonly Color GridColor = new(147, 197, 253, 38);
+    private static readonly Color XAxisColor = new(190, 92, 96);
+    private static readonly Color YAxisColor = new(96, 162, 118);
+    private static readonly Color NullPointColor = new(234, 140, 12);
 
     /// <summary>Set to <c>false</c> to suppress the background reference grid.</summary>
     public bool ShowGrid { get; set; } = true;

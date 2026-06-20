@@ -53,6 +53,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             OnPropertyChanged(nameof(StatusText));
             CoordinateInput.IsEnabled = IsCoordinateTool(Tools.ActiveTool);
+            RaiseActiveToolFlags();
         };
         _commands.StateChanged += (_, _) =>
         {
@@ -159,6 +160,28 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public string StatusText =>
         $"Werkzeug: {Tools.ActiveToolName}   ·   {Document.Entities.Count} Objekte   ·   Auswahl: {Tools.Selection.Count}";
+
+    /// <summary>The active tool's display name, shown in the status bar tool cell.</summary>
+    public string ActiveToolName => Tools.ActiveToolName;
+
+    // Per-tool active flags drive the toolbar's brand-blue "selected tool" highlight.
+    public bool IsSelectActive => Tools.ActiveTool == _selectTool;
+    public bool IsLineActive => Tools.ActiveTool == _lineTool;
+    public bool IsRectangleActive => Tools.ActiveTool == _rectangleTool;
+    public bool IsCircleActive => Tools.ActiveTool == _circleTool;
+    public bool IsPolylineActive => Tools.ActiveTool == _polylineTool;
+    public bool IsSetNullPointActive => Tools.ActiveTool == _setNullPointTool;
+
+    private void RaiseActiveToolFlags()
+    {
+        OnPropertyChanged(nameof(ActiveToolName));
+        OnPropertyChanged(nameof(IsSelectActive));
+        OnPropertyChanged(nameof(IsLineActive));
+        OnPropertyChanged(nameof(IsRectangleActive));
+        OnPropertyChanged(nameof(IsCircleActive));
+        OnPropertyChanged(nameof(IsPolylineActive));
+        OnPropertyChanged(nameof(IsSetNullPointActive));
+    }
 
     partial void OnProjectNameChanged(string value) => OnPropertyChanged(nameof(Title));
 

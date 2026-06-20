@@ -38,6 +38,13 @@ public sealed class AppConfig
         set => _config.OpenLastProjectOnStartup = value;
     }
 
+    /// <summary>UI colour theme, "Light" or "Dark".</summary>
+    public string Theme
+    {
+        get => _config.Theme;
+        set => _config.Theme = value;
+    }
+
     public bool ShowGrid
     {
         get => _config.ShowGrid;

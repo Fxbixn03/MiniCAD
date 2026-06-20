@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using MiniCAD.App.Configuration;
 using MiniCAD.App.ViewModels;
@@ -23,6 +24,12 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        // Apply the persisted colour theme before any window is shown.
+        RequestedThemeVariant =
+            string.Equals(AppConfig.Instance.Theme, "Dark", StringComparison.OrdinalIgnoreCase)
+                ? ThemeVariant.Dark
+                : ThemeVariant.Light;
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;

@@ -10,7 +10,27 @@
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/logo.ico"
         Width="1100" Height="700"
+        FontFamily="{StaticResource Font.Sans}"
+        FontSize="{StaticResource Text.sm}"
+        Background="{DynamicResource Brush.SurfaceApp}"
+        Foreground="{DynamicResource Brush.TextBody}"
         Title="{Binding Title}">
+
+    <Window.Resources>
+        <!-- Re-point Fluent's accent (tab underline, list/text selection, focus, slider)
+             at the MiniCAD engineering blue so every standard control reads on-brand. -->
+        <Color x:Key="SystemAccentColor">#2563eb</Color>
+        <Color x:Key="SystemAccentColorLight1">#5b94f7</Color>
+        <Color x:Key="SystemAccentColorLight2">#93c5fd</Color>
+        <Color x:Key="SystemAccentColorLight3">#bfd3fe</Color>
+        <Color x:Key="SystemAccentColorDark1">#1d4fd0</Color>
+        <Color x:Key="SystemAccentColorDark2">#1e3a8a</Color>
+        <Color x:Key="SystemAccentColorDark3">#172e6b</Color>
+    </Window.Resources>
+
+    <Window.Styles>
+        <StyleInclude Source="avares://MiniCAD.App/Theme/EditorStyles.axaml" />
+    </Window.Styles>
 
     <Design.DataContext>
         <!-- Only used by the IDE previewer; the runtime DataContext is set in App.axaml.cs. -->
@@ -18,80 +38,165 @@
     </Design.DataContext>
 
     <DockPanel>
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_Datei">
-                <MenuItem Header="_Neues Projekt" Click="OnNewProject" InputGesture="Ctrl+N" />
-                <MenuItem Header="Projekt _öffnen…" Click="OnOpenProject" InputGesture="Ctrl+O" />
-                <Separator />
-                <MenuItem Header="_Speichern" Click="OnSaveProject" InputGesture="Ctrl+S" />
-                <MenuItem Header="Speichern _unter…" Click="OnSaveProjectAs" InputGesture="Ctrl+Shift+S" />
-                <Separator />
-                <MenuItem Header="_Beenden" Click="OnExit" />
-            </MenuItem>
-            <MenuItem Header="_Ansicht">
-                <MenuItem Header="_Zoom anpassen" Command="{Binding ZoomToFitCommand}" />
-            </MenuItem>
-            <MenuItem Header="_Werkzeuge">
-                <MenuItem Header="_Nullpunkt setzen" Command="{Binding ActivateSetNullPointCommand}" />
-                <MenuItem Header="Nullpunkt zu_rücksetzen" Command="{Binding ResetNullPointCommand}" />
-                <Separator />
-                <MenuItem Header="_Standard-Layer einfügen" Command="{Binding AddStandardLayersCommand}" />
-                <Separator />
-                <MenuItem Header="_Einstellungen…" Click="OnOpenSettings" />
-            </MenuItem>
-        </Menu>
+        <!-- ===== Top menu bar: wordmark · menus · document title · actions ===== -->
+        <Border DockPanel.Dock="Top" Background="{DynamicResource Brush.SurfaceChrome}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="Auto,*,Auto" Height="44" Margin="12,0,10,0">
 
-        <Border DockPanel.Dock="Top" Background="#252528" BorderBrush="#3A3A40" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" Spacing="6" Margin="8,6">
-                <Button Content="Auswahl" Command="{Binding ActivateSelectCommand}" />
-                <Button Content="Linie" Command="{Binding ActivateLineCommand}" />
-                <Button Content="Rechteck" Command="{Binding ActivateRectangleCommand}" />
-                <Button Content="Kreis" Command="{Binding ActivateCircleCommand}" />
-                <Button Content="Polylinie" Command="{Binding ActivatePolylineCommand}" />
-                <Border Width="1" Background="#3A3A40" Margin="4,2" />
-                <Button Content="Löschen" Command="{Binding DeleteSelectionCommand}" />
-                <Button Content="Rückgängig" Command="{Binding UndoCommand}" />
-                <Button Content="Wiederholen" Command="{Binding RedoCommand}" />
-                <Border Width="1" Background="#3A3A40" Margin="4,2" />
-                <ToggleButton Content="Fang" IsChecked="{Binding SnapEnabled}"
-                              ToolTip.Tip="Objekt- und Rasterfang ein/aus" />
-                <Button Content="Nullpunkt" Command="{Binding ActivateSetNullPointCommand}"
-                        ToolTip.Tip="Nullpunkt (Ursprung) per Klick setzen" />
-                <Button Content="Zoom anpassen" Command="{Binding ZoomToFitCommand}" />
-            </StackPanel>
+                <!-- Left: brand mark + menus -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Image Source="/Assets/logo.png" Width="22" Height="22" VerticalAlignment="Center" />
+                    <TextBlock Classes="wordmark" Margin="0,0,4,0">
+                        <Run Text="Mini" /><Run Text="CAD" Foreground="{DynamicResource Brush.Brand}" />
+                    </TextBlock>
+
+                    <Menu Classes="appmenu" Background="Transparent" VerticalAlignment="Center">
+                        <MenuItem Header="_Datei">
+                            <MenuItem Header="_Neues Projekt" Click="OnNewProject" InputGesture="Ctrl+N" />
+                            <MenuItem Header="Projekt _öffnen…" Click="OnOpenProject" InputGesture="Ctrl+O" />
+                            <Separator />
+                            <MenuItem Header="_Speichern" Click="OnSaveProject" InputGesture="Ctrl+S" />
+                            <MenuItem Header="Speichern _unter…" Click="OnSaveProjectAs" InputGesture="Ctrl+Shift+S" />
+                            <Separator />
+                            <MenuItem Header="_Beenden" Click="OnExit" />
+                        </MenuItem>
+                        <MenuItem Header="_Ansicht">
+                            <MenuItem Header="_Zoom anpassen" Command="{Binding ZoomToFitCommand}" />
+                        </MenuItem>
+                        <MenuItem Header="_Werkzeuge">
+                            <MenuItem Header="_Nullpunkt setzen" Command="{Binding ActivateSetNullPointCommand}" />
+                            <MenuItem Header="Nullpunkt zu_rücksetzen" Command="{Binding ResetNullPointCommand}" />
+                            <Separator />
+                            <MenuItem Header="_Standard-Layer einfügen" Command="{Binding AddStandardLayersCommand}" />
+                            <Separator />
+                            <MenuItem Header="_Einstellungen…" Click="OnOpenSettings" />
+                        </MenuItem>
+                    </Menu>
+                </StackPanel>
+
+                <!-- Center: document title + save state -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding ProjectName}" Classes="panelheading" />
+                    <Border Classes="badge warn" IsVisible="{Binding IsDirty}">
+                        <TextBlock Text="Ungespeichert" />
+                    </Border>
+                    <Border Classes="badge ok" IsVisible="{Binding !IsDirty}">
+                        <TextBlock Text="Gespeichert" />
+                    </Border>
+                </StackPanel>
+
+                <!-- Right: theme toggle + status badge + primary action -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <ToggleButton Classes="chrometoggle" IsChecked="{Binding Settings.IsDarkMode}"
+                                  ToolTip.Tip="Helles / dunkles Design umschalten">
+                        <Panel>
+                            <Path Classes="ico" Data="{StaticResource Icon.Moon}" IsVisible="{Binding !Settings.IsDarkMode}" />
+                            <Path Classes="ico" Data="{StaticResource Icon.Sun}" IsVisible="{Binding Settings.IsDarkMode}" />
+                        </Panel>
+                    </ToggleButton>
+                    <Border Classes="badge brand">
+                        <TextBlock Text="Beta" />
+                    </Border>
+                    <Button Classes="primary" Content="Speichern" Click="OnSaveProject" />
+                </StackPanel>
+            </Grid>
         </Border>
 
-        <Border DockPanel.Dock="Bottom" Background="#252528" BorderBrush="#3A3A40" BorderThickness="0,1,0,0">
-            <DockPanel>
-                <TextBlock DockPanel.Dock="Right" Margin="8,4" Foreground="#888"
-                           Text="MMT = verschieben · Rad = zoom · Esc = abbrechen/Auswahl · Entf = löschen" />
-                <Border DockPanel.Dock="Left" Background="#1E1E22" CornerRadius="3" Padding="8,2" Margin="8,3"
-                        BorderBrush="#3A3A40" BorderThickness="1">
-                    <TextBlock Foreground="#9FD3C7" FontFamily="Consolas,monospace" Text="{Binding CursorText}" />
+        <!-- ===== Bottom: monospace status strip ===== -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChrome}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0" Height="28">
+            <DockPanel LastChildFill="False">
+                <Border DockPanel.Dock="Left" Background="{DynamicResource Brush.SurfaceSunken}" CornerRadius="4"
+                        Padding="8,2" Margin="10,4" BorderBrush="{DynamicResource Brush.BorderSubtle}" BorderThickness="1">
+                    <TextBlock Classes="mono" Foreground="{DynamicResource Brush.StatusInfo}" Text="{Binding CursorText}" />
                 </Border>
-                <TextBlock Margin="8,4" Foreground="#CCC" Text="{Binding StatusText}" />
-                <TextBlock Margin="4,4" Foreground="#7FB069" Text="{Binding StatusMessage}" />
+                <TextBlock DockPanel.Dock="Left" Classes="mono" Margin="6,0" Foreground="{DynamicResource Brush.TextBody}"
+                           Text="{Binding StatusText}" />
+                <TextBlock DockPanel.Dock="Left" Classes="mono" Margin="6,0" Foreground="{DynamicResource Brush.StatusOk}"
+                           Text="{Binding StatusMessage}" />
+                <TextBlock DockPanel.Dock="Right" Classes="mono" Margin="12,0" Foreground="{DynamicResource Brush.TextFaint}"
+                           Text="MMT = verschieben · Rad = zoom · Esc = abbrechen · Entf = löschen" />
             </DockPanel>
         </Border>
 
         <!-- Allplan-style coordinate entry: type X/Y and press Enter to place the point. -->
-        <Border DockPanel.Dock="Bottom" Background="#202024" BorderBrush="#3A3A40" BorderThickness="0,1,0,0"
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
                 IsEnabled="{Binding CoordinateInput.IsEnabled}">
-            <StackPanel Orientation="Horizontal" Spacing="6" Margin="8,5" VerticalAlignment="Center"
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
                         DataContext="{Binding CoordinateInput}" x:DataType="vm:CoordinateInputViewModel">
-                <TextBlock Text="Koordinate" Foreground="#AAA" VerticalAlignment="Center" />
+                <TextBlock Classes="eyebrow" Text="KOORDINATE" VerticalAlignment="Center" />
                 <ToggleButton IsChecked="{Binding IsRelative}" Content="{Binding ModeLabel}" MinWidth="74"
                               ToolTip.Tip="Absolut (vom Nullpunkt) ⟷ Relativ (vom letzten Punkt)" />
-                <TextBlock Text="X" Foreground="#9FD3C7" VerticalAlignment="Center" />
-                <TextBox Width="92" Text="{Binding XText}" KeyDown="OnCoordinateKeyDown" />
-                <TextBlock Text="Y" Foreground="#9FD3C7" VerticalAlignment="Center" />
-                <TextBox Width="92" Text="{Binding YText}" KeyDown="OnCoordinateKeyDown" />
+                <TextBlock Text="X" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                <TextBox Width="92" Text="{Binding XText}" FontFamily="{StaticResource Font.Mono}" KeyDown="OnCoordinateKeyDown" />
+                <TextBlock Text="Y" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                <TextBox Width="92" Text="{Binding YText}" FontFamily="{StaticResource Font.Mono}" KeyDown="OnCoordinateKeyDown" />
                 <Button Content="Setzen ⏎" Command="{Binding CommitCommand}" />
-                <TextBlock Text="{Binding Hint}" Foreground="#E0A060" VerticalAlignment="Center" Margin="6,0,0,0" />
+                <TextBlock Text="{Binding Hint}" Foreground="{DynamicResource Brush.StatusWarn}" VerticalAlignment="Center" Margin="6,0,0,0" />
             </StackPanel>
         </Border>
 
-        <!-- Canvas | splitter | docked right panel (resizable in width). -->
+        <!-- ===== Left: vertical icon tool rail (Allplan-style) ===== -->
+        <Border DockPanel.Dock="Left" Background="{DynamicResource Brush.SurfaceChrome}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,0,1,0">
+            <StackPanel Orientation="Vertical" Spacing="2" Margin="4,8" HorizontalAlignment="Center">
+
+                <!-- Drawing tools -->
+                <Button Classes="rail" Classes.active="{Binding IsSelectActive}"
+                        Command="{Binding ActivateSelectCommand}" ToolTip.Tip="Auswahl  ·  V">
+                    <Path Classes="ico" Data="{StaticResource Icon.Select}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsLineActive}"
+                        Command="{Binding ActivateLineCommand}" ToolTip.Tip="Linie  ·  L">
+                    <Path Classes="ico" Data="{StaticResource Icon.Line}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsRectangleActive}"
+                        Command="{Binding ActivateRectangleCommand}" ToolTip.Tip="Rechteck  ·  R">
+                    <Path Classes="ico" Data="{StaticResource Icon.Rectangle}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsCircleActive}"
+                        Command="{Binding ActivateCircleCommand}" ToolTip.Tip="Kreis  ·  C">
+                    <Path Classes="ico" Data="{StaticResource Icon.Circle}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsPolylineActive}"
+                        Command="{Binding ActivatePolylineCommand}" ToolTip.Tip="Polylinie  ·  P">
+                    <Path Classes="ico" Data="{StaticResource Icon.Polyline}" />
+                </Button>
+
+                <Border Classes="raildiv" />
+
+                <!-- Edit / history -->
+                <Button Classes="rail" Command="{Binding DeleteSelectionCommand}" ToolTip.Tip="Löschen  ·  Entf">
+                    <Path Classes="ico" Data="{StaticResource Icon.Delete}" />
+                </Button>
+                <Button Classes="rail" Command="{Binding UndoCommand}" ToolTip.Tip="Rückgängig  ·  Ctrl+Z">
+                    <Path Classes="ico" Data="{StaticResource Icon.Undo}" />
+                </Button>
+                <Button Classes="rail" Command="{Binding RedoCommand}" ToolTip.Tip="Wiederholen  ·  Ctrl+Y">
+                    <Path Classes="ico" Data="{StaticResource Icon.Redo}" />
+                </Button>
+
+                <Border Classes="raildiv" />
+
+                <!-- Snap, origin & view -->
+                <ToggleButton Classes="rail" IsChecked="{Binding SnapEnabled}"
+                              ToolTip.Tip="Objekt- und Rasterfang ein/aus">
+                    <Path Classes="ico" Data="{StaticResource Icon.Snap}" />
+                </ToggleButton>
+                <Button Classes="rail" Classes.active="{Binding IsSetNullPointActive}"
+                        Command="{Binding ActivateSetNullPointCommand}"
+                        ToolTip.Tip="Nullpunkt (Ursprung) per Klick setzen">
+                    <Path Classes="ico" Data="{StaticResource Icon.Origin}" />
+                </Button>
+                <Button Classes="rail" Command="{Binding ZoomToFitCommand}" ToolTip.Tip="Zoom anpassen">
+                    <Path Classes="ico" Data="{StaticResource Icon.ZoomFit}" />
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- ===== Canvas | splitter | docked right palette (resizable in width) ===== -->
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" MinWidth="200" />
@@ -103,37 +208,43 @@
                                        Document="{Binding Document}" Viewport="{Binding Viewport}" Tools="{Binding Tools}"
                                        ShowGrid="{Binding Settings.ShowGrid}" SceneBackground="{Binding Settings.BackgroundColor}" />
 
-            <GridSplitter Grid.Column="1" Width="5" Background="#3A3A40"
+            <GridSplitter Grid.Column="1" Width="5" Background="{DynamicResource Brush.BorderStrong}"
                           ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" />
 
-            <Border Grid.Column="2" Background="#252528" BorderBrush="#3A3A40" BorderThickness="1,0,0,0">
-                <TabControl Padding="0">
+            <Border Grid.Column="2" Background="{DynamicResource Brush.SurfacePanel}"
+                    BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="1,0,0,0">
+                <TabControl Classes="palette" TabStripPlacement="Bottom" Padding="0">
 
                     <!-- ===== Eigenschaften (Attribute) ===== -->
-                    <TabItem Header="Eigenschaften">
+                    <TabItem ToolTip.Tip="Eigenschaften">
+                        <TabItem.Header>
+                            <Border Classes="tabicon">
+                                <Path Classes="icotab" Width="22" Height="22" Data="{StaticResource Icon.Properties}" />
+                            </Border>
+                        </TabItem.Header>
                         <ScrollViewer>
                             <StackPanel Margin="12" Spacing="12" DataContext="{Binding Attributes}"
                                         x:DataType="vm:AttributesViewModel">
-                                <TextBlock Text="{Binding Summary}" FontWeight="SemiBold" Foreground="#CFCFCF" />
+                                <TextBlock Text="{Binding Summary}" Classes="panelheading" />
 
                                 <TextBlock Text="Keine Auswahl. Wähle ein Objekt, um seine Eigenschaften zu bearbeiten."
-                                           Foreground="#888" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource Brush.TextMuted}" TextWrapping="Wrap"
                                            IsVisible="{Binding !HasSelection}" />
 
                                 <StackPanel Spacing="10" IsVisible="{Binding HasSelection}">
                                     <StackPanel Spacing="4">
-                                        <TextBlock Text="Layer" Foreground="#AAA" />
+                                        <TextBlock Classes="eyebrow" Text="LAYER" />
                                         <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding LayerOptions}"
                                                   SelectedItem="{Binding SelectedLayer}" />
                                     </StackPanel>
 
                                     <StackPanel Spacing="4">
-                                        <TextBlock Text="Teilbild" Foreground="#AAA" />
+                                        <TextBlock Classes="eyebrow" Text="TEILBILD" />
                                         <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding PartialDrawingOptions}"
                                                   SelectedItem="{Binding SelectedPartialDrawing}" />
                                     </StackPanel>
 
-                                    <Border Height="1" Background="#3A3A40" />
+                                    <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
 
                                     <CheckBox Content="Eigener Linienstil" IsChecked="{Binding UseStrokeOverride}" />
                                     <StackPanel Spacing="6" IsEnabled="{Binding UseStrokeOverride}">
@@ -146,18 +257,18 @@
                                             <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding StrokeBlue}" />
                                         </Grid>
                                         <DockPanel>
-                                            <TextBlock Text="Stärke" Foreground="#AAA" DockPanel.Dock="Left" VerticalAlignment="Center" />
+                                            <TextBlock Text="Stärke" Foreground="{DynamicResource Brush.TextMuted}" DockPanel.Dock="Left" VerticalAlignment="Center" />
                                             <TextBlock Text="{Binding StrokeWidth, StringFormat='{}{0:0.0} px'}"
-                                                       Foreground="#888" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                                       Classes="mono" Foreground="{DynamicResource Brush.TextMuted}" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                         </DockPanel>
                                         <Slider Minimum="0.25" Maximum="8" Value="{Binding StrokeWidth}" />
-                                        <Border Height="20" CornerRadius="3" BorderBrush="#3A3A40" BorderThickness="1"
+                                        <Border Height="20" CornerRadius="4" BorderBrush="{DynamicResource Brush.BorderDefault}" BorderThickness="1"
                                                 Background="{Binding StrokeBrush}" />
                                     </StackPanel>
 
                                     <StackPanel Spacing="4" IsVisible="{Binding CanFill}">
-                                        <Border Height="1" Background="#3A3A40" />
-                                        <TextBlock Text="Füllung (Muster)" Foreground="#AAA" />
+                                        <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
+                                        <TextBlock Classes="eyebrow" Text="FÜLLUNG (MUSTER)" />
                                         <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding FillOptions}"
                                                   SelectedItem="{Binding SelectedFill}" />
                                     </StackPanel>
@@ -167,7 +278,12 @@
                     </TabItem>
 
                     <!-- ===== Teilbilder ===== -->
-                    <TabItem Header="Teilbilder">
+                    <TabItem ToolTip.Tip="Teilbilder">
+                        <TabItem.Header>
+                            <Border Classes="tabicon">
+                                <Path Classes="icotab" Width="22" Height="22" Data="{StaticResource Icon.Sheets}" />
+                            </Border>
+                        </TabItem.Header>
                         <DockPanel Margin="10" DataContext="{Binding StructurePanel}" x:DataType="vm:StructurePanelViewModel">
                             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="0,0,0,8">
                                 <Button Content="▲" Command="{Binding MovePartialDrawingUpCommand}" ToolTip.Tip="Nach oben" />
@@ -194,7 +310,12 @@
                     </TabItem>
 
                     <!-- ===== Layer ===== -->
-                    <TabItem Header="Layer">
+                    <TabItem ToolTip.Tip="Layer">
+                        <TabItem.Header>
+                            <Border Classes="tabicon">
+                                <Path Classes="icotab" Width="22" Height="22" Data="{StaticResource Icon.Layers}" />
+                            </Border>
+                        </TabItem.Header>
                         <DockPanel Margin="10" DataContext="{Binding StructurePanel}" x:DataType="vm:StructurePanelViewModel">
                             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="0,0,0,8">
                                 <Button Content="Neu" Command="{Binding AddLayerCommand}" />
@@ -202,29 +323,29 @@
                                         ToolTip.Tip="Professionellen Standard-Layersatz einfügen" />
                             </StackPanel>
 
-                            <Border DockPanel.Dock="Bottom" Margin="0,10,0,0" Padding="10" CornerRadius="4"
-                                    Background="#1E1E22" BorderBrush="#3A3A40" BorderThickness="1"
+                            <Border DockPanel.Dock="Bottom" Margin="0,10,0,0" Padding="10" CornerRadius="6"
+                                    Background="{DynamicResource Brush.SurfaceSunken}" BorderBrush="{DynamicResource Brush.BorderDefault}" BorderThickness="1"
                                     IsVisible="{Binding SelectedLayer, Converter={x:Static converters:ObjectConverters.IsNotNull}}">
                                 <StackPanel Spacing="8">
                                     <DockPanel>
-                                        <TextBlock Text="Farbe" FontWeight="SemiBold" Foreground="#CFCFCF" />
-                                        <TextBlock Text="{Binding SelectedLayer.ColorHex}" HorizontalAlignment="Right" Foreground="#888" />
+                                        <TextBlock Classes="eyebrow" Text="FARBE" />
+                                        <TextBlock Text="{Binding SelectedLayer.ColorHex}" Classes="mono" HorizontalAlignment="Right" Foreground="{DynamicResource Brush.TextMuted}" />
                                     </DockPanel>
                                     <Grid ColumnDefinitions="16,*,36" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="6">
                                         <TextBlock Grid.Row="0" Grid.Column="0" Text="R" VerticalAlignment="Center" />
                                         <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding SelectedLayer.ColorRed}" />
                                         <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding SelectedLayer.ColorRed, StringFormat='{}{0:0}'}"
-                                                   VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="#AAA" />
+                                                   Classes="mono" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource Brush.TextMuted}" />
                                         <TextBlock Grid.Row="1" Grid.Column="0" Text="G" VerticalAlignment="Center" />
                                         <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding SelectedLayer.ColorGreen}" />
                                         <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding SelectedLayer.ColorGreen, StringFormat='{}{0:0}'}"
-                                                   VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="#AAA" />
+                                                   Classes="mono" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource Brush.TextMuted}" />
                                         <TextBlock Grid.Row="2" Grid.Column="0" Text="B" VerticalAlignment="Center" />
                                         <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding SelectedLayer.ColorBlue}" />
                                         <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding SelectedLayer.ColorBlue, StringFormat='{}{0:0}'}"
-                                                   VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="#AAA" />
+                                                   Classes="mono" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource Brush.TextMuted}" />
                                     </Grid>
-                                    <Border Height="22" CornerRadius="3" BorderBrush="#3A3A40" BorderThickness="1"
+                                    <Border Height="22" CornerRadius="4" BorderBrush="{DynamicResource Brush.BorderDefault}" BorderThickness="1"
                                             Background="{Binding SelectedLayer.ColorBrush}" />
                                 </StackPanel>
                             </Border>
@@ -239,9 +360,9 @@
                                                 <ComboBoxItem>Gesperrt</ComboBoxItem>
                                                 <ComboBoxItem>Deaktiviert</ComboBoxItem>
                                             </ComboBox>
-                                            <Border DockPanel.Dock="Left" Width="14" Height="14" CornerRadius="2"
+                                            <Border DockPanel.Dock="Left" Width="14" Height="14" CornerRadius="3"
                                                     Margin="0,0,6,0" VerticalAlignment="Center"
-                                                    BorderBrush="#3A3A40" BorderThickness="1"
+                                                    BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="1"
                                                     Background="{Binding ColorBrush}" />
                                             <TextBox Text="{Binding Name}" BorderThickness="0" Background="Transparent"
                                                      VerticalAlignment="Center" />
@@ -253,21 +374,26 @@
                     </TabItem>
 
                     <!-- ===== Muster (Patterns) ===== -->
-                    <TabItem Header="Muster">
+                    <TabItem ToolTip.Tip="Muster">
+                        <TabItem.Header>
+                            <Border Classes="tabicon">
+                                <Path Classes="icotab" Width="22" Height="22" Data="{StaticResource Icon.Pattern}" />
+                            </Border>
+                        </TabItem.Header>
                         <ScrollViewer>
                             <StackPanel Margin="10" Spacing="8" DataContext="{Binding Patterns}" x:DataType="vm:PatternsViewModel">
-                                <TextBlock Text="Globale Muster" FontWeight="SemiBold" Foreground="#CFCFCF" />
+                                <TextBlock Classes="eyebrow" Text="GLOBALE MUSTER" />
                                 <ItemsControl ItemsSource="{Binding GlobalPatterns}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Name}" Foreground="#BBB" Margin="4,2" />
+                                            <TextBlock Text="{Binding Name}" Foreground="{DynamicResource Brush.TextBody}" Margin="4,2" />
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
 
-                                <Border Height="1" Background="#3A3A40" />
+                                <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
                                 <DockPanel>
-                                    <TextBlock Text="Projekt-Muster" FontWeight="SemiBold" Foreground="#CFCFCF" />
+                                    <TextBlock Classes="eyebrow" Text="PROJEKT-MUSTER" VerticalAlignment="Center" />
                                     <Button DockPanel.Dock="Right" Content="Entfernen" Command="{Binding RemoveProjectPatternCommand}" />
                                 </DockPanel>
                                 <ListBox MaxHeight="120" ItemsSource="{Binding ProjectPatterns}" SelectedItem="{Binding SelectedProjectPattern}">
@@ -278,19 +404,19 @@
                                     </ListBox.ItemTemplate>
                                 </ListBox>
 
-                                <Border Margin="0,4,0,0" Padding="10" CornerRadius="4" Background="#1E1E22"
-                                        BorderBrush="#3A3A40" BorderThickness="1">
+                                <Border Margin="0,4,0,0" Padding="10" CornerRadius="6" Background="{DynamicResource Brush.SurfaceSunken}"
+                                        BorderBrush="{DynamicResource Brush.BorderDefault}" BorderThickness="1">
                                     <StackPanel Spacing="6">
-                                        <TextBlock Text="Neues Projekt-Muster" Foreground="#AAA" />
+                                        <TextBlock Classes="eyebrow" Text="NEUES PROJEKT-MUSTER" />
                                         <TextBox Text="{Binding NewName}" PlaceholderText="Name" />
                                         <DockPanel>
-                                            <TextBlock Text="Winkel" Foreground="#AAA" DockPanel.Dock="Left" VerticalAlignment="Center" />
-                                            <TextBlock Text="{Binding NewAngle, StringFormat='{}{0:0}°'}" HorizontalAlignment="Right" Foreground="#888" />
+                                            <TextBlock Text="Winkel" Foreground="{DynamicResource Brush.TextMuted}" DockPanel.Dock="Left" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding NewAngle, StringFormat='{}{0:0}°'}" Classes="mono" HorizontalAlignment="Right" Foreground="{DynamicResource Brush.TextMuted}" />
                                         </DockPanel>
                                         <Slider Minimum="0" Maximum="180" Value="{Binding NewAngle}" />
                                         <DockPanel>
-                                            <TextBlock Text="Abstand" Foreground="#AAA" DockPanel.Dock="Left" VerticalAlignment="Center" />
-                                            <TextBlock Text="{Binding NewSpacing, StringFormat='{}{0:0}'}" HorizontalAlignment="Right" Foreground="#888" />
+                                            <TextBlock Text="Abstand" Foreground="{DynamicResource Brush.TextMuted}" DockPanel.Dock="Left" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding NewSpacing, StringFormat='{}{0:0}'}" Classes="mono" HorizontalAlignment="Right" Foreground="{DynamicResource Brush.TextMuted}" />
                                         </DockPanel>
                                         <Slider Minimum="2" Maximum="120" Value="{Binding NewSpacing}" />
                                         <CheckBox Content="Kreuzschraffur" IsChecked="{Binding NewCross}" />
@@ -302,7 +428,7 @@
                                             <TextBlock Grid.Row="2" Grid.Column="0" Text="B" VerticalAlignment="Center" />
                                             <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding NewBlue}" />
                                         </Grid>
-                                        <Border Height="18" CornerRadius="3" BorderBrush="#3A3A40" BorderThickness="1"
+                                        <Border Height="18" CornerRadius="4" BorderBrush="{DynamicResource Brush.BorderDefault}" BorderThickness="1"
                                                 Background="{Binding NewColorBrush}" />
                                         <Button Content="Hinzufügen" HorizontalAlignment="Right" Command="{Binding AddProjectPatternCommand}" />
                                     </StackPanel>
@@ -312,9 +438,14 @@
                     </TabItem>
 
                     <!-- ===== Assistent ===== -->
-                    <TabItem Header="Assistent">
+                    <TabItem ToolTip.Tip="Assistent">
+                        <TabItem.Header>
+                            <Border Classes="tabicon">
+                                <Path Classes="icotab" Width="22" Height="22" Data="{StaticResource Icon.Assistant}" />
+                            </Border>
+                        </TabItem.Header>
                         <DockPanel Margin="10">
-                            <TextBlock DockPanel.Dock="Top" Margin="0,0,0,6" Foreground="#888" TextWrapping="Wrap"
+                            <TextBlock DockPanel.Dock="Top" Margin="0,0,0,6" Foreground="{DynamicResource Brush.TextMuted}" TextWrapping="Wrap"
                                        Text="Doppelklick auf eine Vorlage übernimmt Werkzeug und Linienstil." />
                             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="4" Margin="0,8,0,0">
                                 <Button Content="Auswahl als Vorlage" Command="{Binding AddSelectionAsTemplateCommand}" />
@@ -326,10 +457,10 @@
                                 <ListBox.ItemTemplate>
                                     <DataTemplate x:DataType="vm:AssistantItemViewModel">
                                         <DockPanel>
-                                            <Border DockPanel.Dock="Left" Width="26" CornerRadius="1"
+                                            <Border DockPanel.Dock="Left" Width="26" CornerRadius="2"
                                                     VerticalAlignment="Center" Margin="0,0,8,0"
                                                     Height="{Binding PreviewWidth}" Background="{Binding PreviewBrush}" />
-                                            <TextBlock DockPanel.Dock="Right" Text="{Binding ToolLabel}" Foreground="#777"
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding ToolLabel}" Foreground="{DynamicResource Brush.TextFaint}"
                                                        VerticalAlignment="Center" Margin="8,0,0,0" />
                                             <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
                                         </DockPanel>

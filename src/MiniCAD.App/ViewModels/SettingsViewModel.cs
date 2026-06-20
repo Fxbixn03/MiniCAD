@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Media;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MiniCAD.App.Configuration;
 using MiniCAD.App.Input;
@@ -12,10 +14,14 @@ namespace MiniCAD.App.ViewModels;
 /// </summary>
 public partial class SettingsViewModel : ViewModelBase
 {
-    private static readonly Color DefaultBackground = Color.FromRgb(30, 30, 34);
+    private static readonly Color DefaultBackground = Color.FromRgb(10, 20, 48);
 
     [ObservableProperty]
     private bool _showGrid;
+
+    /// <summary>When true, the app uses the dark colour theme instead of the light one.</summary>
+    [ObservableProperty]
+    private bool _isDarkMode;
 
     /// <summary>When enabled, the app opens the last project on startup.</summary>
     [ObservableProperty]
@@ -43,6 +49,7 @@ public partial class SettingsViewModel : ViewModelBase
     {
         AppConfig config = AppConfig.Instance;
         _showGrid = config.ShowGrid;
+        _isDarkMode = IsDarkTheme(config.Theme);
         _openLastProjectOnStartup = config.OpenLastProjectOnStartup;
 
         Color background = ParseColor(config.BackgroundColorHex);
@@ -66,6 +73,22 @@ public partial class SettingsViewModel : ViewModelBase
     public string BackgroundHex => $"#{(byte)BackgroundRed:X2}{(byte)BackgroundGreen:X2}{(byte)BackgroundBlue:X2}";
 
     partial void OnShowGridChanged(bool value) => AppConfig.Instance.ShowGrid = value;
+
+    partial void OnIsDarkModeChanged(bool value)
+    {
+        AppConfig.Instance.Theme = value ? "Dark" : "Light";
+        ApplyTheme(value);
+    }
+
+    /// <summary>Pushes the chosen variant onto the running application so chrome swaps live.</summary>
+    public static void ApplyTheme(bool dark)
+    {
+        if (Application.Current is { } app)
+            app.RequestedThemeVariant = dark ? ThemeVariant.Dark : ThemeVariant.Light;
+    }
+
+    private static bool IsDarkTheme(string? theme)
+        => string.Equals(theme, "Dark", System.StringComparison.OrdinalIgnoreCase);
 
     partial void OnUseDecimalPointChanged(bool value)
         => AppConfig.Instance.DecimalSeparator = value ? "." : ",";

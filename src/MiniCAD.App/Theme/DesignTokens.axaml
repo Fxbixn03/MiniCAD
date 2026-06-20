@@ -1,0 +1,165 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--
+        MiniCAD Design System — foundation tokens (Avalonia port).
+        Translated from the claude.ai/design "MiniCAD Design System" project:
+        a precise engineering blue, cool blue-tinted "paper" neutrals and a deep
+        navy "blueprint" canvas. Reference the semantic Brush.* aliases in views,
+        not the raw Color.* scale.
+
+        Theme support: the semantic surface/text/brand/border brushes live in
+        ThemeDictionaries (Light + Dark) so they swap automatically when the
+        application's RequestedThemeVariant changes. Reference them with
+        {DynamicResource Brush.*} (not StaticResource) so the swap is live.
+        Theme-invariant tokens (the raw colour scale, type, radii, status pills,
+        the navy canvas) stay at the top level and are shared by both variants.
+    -->
+
+    <!-- ============ Raw color scale (shared) ============ -->
+    <!-- Brand / blueprint blue -->
+    <Color x:Key="Color.Blue50">#eff5ff</Color>
+    <Color x:Key="Color.Blue100">#dbe7fe</Color>
+    <Color x:Key="Color.Blue200">#bfd3fe</Color>
+    <Color x:Key="Color.Blue300">#93c5fd</Color>
+    <Color x:Key="Color.Blue400">#5b94f7</Color>
+    <Color x:Key="Color.Blue500">#2563eb</Color>
+    <Color x:Key="Color.Blue600">#1d4fd0</Color>
+    <Color x:Key="Color.Blue700">#1e3a8a</Color>
+    <Color x:Key="Color.Blue800">#172e6b</Color>
+    <Color x:Key="Color.Blue900">#11214d</Color>
+    <Color x:Key="Color.Blue950">#0a1430</Color>
+
+    <!-- Cool neutral / "paper" -->
+    <Color x:Key="Color.Neutral0">#ffffff</Color>
+    <Color x:Key="Color.Neutral50">#f7f9fc</Color>
+    <Color x:Key="Color.Neutral100">#eef2f8</Color>
+    <Color x:Key="Color.Neutral150">#e4e9f1</Color>
+    <Color x:Key="Color.Neutral200">#d6dde8</Color>
+    <Color x:Key="Color.Neutral300">#bcc6d6</Color>
+    <Color x:Key="Color.Neutral400">#94a1b6</Color>
+    <Color x:Key="Color.Neutral500">#6b7894</Color>
+    <Color x:Key="Color.Neutral600">#515d75</Color>
+    <Color x:Key="Color.Neutral700">#3c465a</Color>
+    <Color x:Key="Color.Neutral800">#2a3142</Color>
+    <Color x:Key="Color.Neutral900">#1b2030</Color>
+    <Color x:Key="Color.Neutral950">#11141f</Color>
+
+    <!-- Semantic accents -->
+    <Color x:Key="Color.Green500">#16a34a</Color>
+    <Color x:Key="Color.Green100">#dcfce7</Color>
+    <Color x:Key="Color.Amber500">#ea8c0c</Color>
+    <Color x:Key="Color.Amber100">#fdedd3</Color>
+    <Color x:Key="Color.Red500">#dc2626</Color>
+    <Color x:Key="Color.Red100">#fde4e4</Color>
+    <Color x:Key="Color.Cyan500">#0891b2</Color>
+    <Color x:Key="Color.Cyan100">#cff4fb</Color>
+
+    <!-- ============ Theme-invariant brushes (shared) ============ -->
+    <!-- The drawing canvas stays a navy blueprint surface in both themes. -->
+    <SolidColorBrush x:Key="Brush.SurfaceCanvas" Color="{StaticResource Color.Blue950}" />
+    <!-- Text drawn on a brand-blue fill (e.g. the primary button) is white in both themes. -->
+    <SolidColorBrush x:Key="Brush.TextInverse" Color="{StaticResource Color.Neutral0}" />
+    <SolidColorBrush x:Key="Brush.FocusRing" Color="{StaticResource Color.Blue400}" />
+
+    <!-- Status pills keep their hue in both themes (they are meant to pop). -->
+    <SolidColorBrush x:Key="Brush.StatusOk" Color="{StaticResource Color.Green500}" />
+    <SolidColorBrush x:Key="Brush.StatusOkBg" Color="{StaticResource Color.Green100}" />
+    <SolidColorBrush x:Key="Brush.StatusWarn" Color="{StaticResource Color.Amber500}" />
+    <SolidColorBrush x:Key="Brush.StatusWarnBg" Color="{StaticResource Color.Amber100}" />
+    <SolidColorBrush x:Key="Brush.StatusError" Color="{StaticResource Color.Red500}" />
+    <SolidColorBrush x:Key="Brush.StatusErrorBg" Color="{StaticResource Color.Red100}" />
+    <SolidColorBrush x:Key="Brush.StatusInfo" Color="{StaticResource Color.Cyan500}" />
+    <SolidColorBrush x:Key="Brush.StatusInfoBg" Color="{StaticResource Color.Cyan100}" />
+
+    <!-- ============ Type (shared) ============ -->
+    <!-- IBM Plex Sans/Mono per the design system, with graceful platform fallbacks
+         (the Avalonia app ships the system font; Plex is used if installed). -->
+    <FontFamily x:Key="Font.Sans">IBM Plex Sans, Inter, Segoe UI, -apple-system, Roboto, sans-serif</FontFamily>
+    <FontFamily x:Key="Font.Mono">IBM Plex Mono, Cascadia Mono, Consolas, SF Mono, Menlo, monospace</FontFamily>
+
+    <x:Double x:Key="Text.2xs">11</x:Double>
+    <x:Double x:Key="Text.xs">12</x:Double>
+    <x:Double x:Key="Text.sm">13</x:Double>
+    <x:Double x:Key="Text.md">14</x:Double>
+    <x:Double x:Key="Text.lg">16</x:Double>
+    <x:Double x:Key="Text.xl">20</x:Double>
+    <x:Double x:Key="Text.2xl">26</x:Double>
+
+    <!-- ============ Radii (shared) ============ -->
+    <CornerRadius x:Key="Radius.xs">3</CornerRadius>
+    <CornerRadius x:Key="Radius.sm">4</CornerRadius>
+    <CornerRadius x:Key="Radius.md">6</CornerRadius>
+    <CornerRadius x:Key="Radius.lg">8</CornerRadius>
+    <CornerRadius x:Key="Radius.xl">12</CornerRadius>
+    <CornerRadius x:Key="Radius.pill">999</CornerRadius>
+
+    <!-- ============ Theme-dependent semantic brushes ============ -->
+    <ResourceDictionary.ThemeDictionaries>
+
+        <!-- ===================== LIGHT ===================== -->
+        <ResourceDictionary x:Key="Light">
+            <!-- Surfaces (light desktop chrome) -->
+            <SolidColorBrush x:Key="Brush.SurfaceApp" Color="{StaticResource Color.Neutral100}" />
+            <SolidColorBrush x:Key="Brush.SurfacePanel" Color="{StaticResource Color.Neutral0}" />
+            <SolidColorBrush x:Key="Brush.SurfaceSunken" Color="{StaticResource Color.Neutral50}" />
+            <SolidColorBrush x:Key="Brush.SurfaceHover" Color="{StaticResource Color.Neutral100}" />
+            <SolidColorBrush x:Key="Brush.SurfaceActive" Color="{StaticResource Color.Blue50}" />
+            <!-- Allplan-style cool blue-grey chrome (toolbars, left rail, palette tab strip). -->
+            <SolidColorBrush x:Key="Brush.SurfaceChrome" Color="{StaticResource Color.Neutral150}" />
+            <SolidColorBrush x:Key="Brush.SurfaceChromeAlt" Color="{StaticResource Color.Neutral200}" />
+
+            <!-- Text -->
+            <SolidColorBrush x:Key="Brush.TextStrong" Color="{StaticResource Color.Neutral900}" />
+            <SolidColorBrush x:Key="Brush.TextBody" Color="{StaticResource Color.Neutral700}" />
+            <SolidColorBrush x:Key="Brush.TextMuted" Color="{StaticResource Color.Neutral500}" />
+            <SolidColorBrush x:Key="Brush.TextFaint" Color="{StaticResource Color.Neutral400}" />
+            <SolidColorBrush x:Key="Brush.TextLink" Color="{StaticResource Color.Blue600}" />
+
+            <!-- Brand -->
+            <SolidColorBrush x:Key="Brush.Brand" Color="{StaticResource Color.Blue500}" />
+            <SolidColorBrush x:Key="Brush.BrandStrong" Color="{StaticResource Color.Blue600}" />
+            <SolidColorBrush x:Key="Brush.BrandDeep" Color="{StaticResource Color.Blue700}" />
+            <SolidColorBrush x:Key="Brush.BrandTint" Color="{StaticResource Color.Blue50}" />
+            <SolidColorBrush x:Key="Brush.BrandAccent" Color="{StaticResource Color.Blue300}" />
+
+            <!-- Borders / lines -->
+            <SolidColorBrush x:Key="Brush.BorderSubtle" Color="{StaticResource Color.Neutral150}" />
+            <SolidColorBrush x:Key="Brush.BorderDefault" Color="{StaticResource Color.Neutral200}" />
+            <SolidColorBrush x:Key="Brush.BorderStrong" Color="{StaticResource Color.Neutral300}" />
+            <SolidColorBrush x:Key="Brush.BorderBrand" Color="{StaticResource Color.Blue500}" />
+        </ResourceDictionary>
+
+        <!-- ===================== DARK ===================== -->
+        <ResourceDictionary x:Key="Dark">
+            <!-- Surfaces (dark desktop chrome) -->
+            <SolidColorBrush x:Key="Brush.SurfaceApp" Color="{StaticResource Color.Neutral950}" />
+            <SolidColorBrush x:Key="Brush.SurfacePanel" Color="{StaticResource Color.Neutral900}" />
+            <SolidColorBrush x:Key="Brush.SurfaceSunken" Color="{StaticResource Color.Neutral950}" />
+            <SolidColorBrush x:Key="Brush.SurfaceHover" Color="{StaticResource Color.Neutral800}" />
+            <SolidColorBrush x:Key="Brush.SurfaceActive" Color="{StaticResource Color.Blue900}" />
+            <SolidColorBrush x:Key="Brush.SurfaceChrome" Color="{StaticResource Color.Neutral800}" />
+            <SolidColorBrush x:Key="Brush.SurfaceChromeAlt" Color="{StaticResource Color.Neutral700}" />
+
+            <!-- Text -->
+            <SolidColorBrush x:Key="Brush.TextStrong" Color="{StaticResource Color.Neutral50}" />
+            <SolidColorBrush x:Key="Brush.TextBody" Color="{StaticResource Color.Neutral200}" />
+            <SolidColorBrush x:Key="Brush.TextMuted" Color="{StaticResource Color.Neutral400}" />
+            <SolidColorBrush x:Key="Brush.TextFaint" Color="{StaticResource Color.Neutral500}" />
+            <SolidColorBrush x:Key="Brush.TextLink" Color="{StaticResource Color.Blue300}" />
+
+            <!-- Brand (lifted for contrast against dark surfaces) -->
+            <SolidColorBrush x:Key="Brush.Brand" Color="{StaticResource Color.Blue400}" />
+            <SolidColorBrush x:Key="Brush.BrandStrong" Color="{StaticResource Color.Blue300}" />
+            <SolidColorBrush x:Key="Brush.BrandDeep" Color="{StaticResource Color.Blue200}" />
+            <SolidColorBrush x:Key="Brush.BrandTint" Color="{StaticResource Color.Blue900}" />
+            <SolidColorBrush x:Key="Brush.BrandAccent" Color="{StaticResource Color.Blue400}" />
+
+            <!-- Borders / lines -->
+            <SolidColorBrush x:Key="Brush.BorderSubtle" Color="{StaticResource Color.Neutral800}" />
+            <SolidColorBrush x:Key="Brush.BorderDefault" Color="{StaticResource Color.Neutral700}" />
+            <SolidColorBrush x:Key="Brush.BorderStrong" Color="{StaticResource Color.Neutral600}" />
+            <SolidColorBrush x:Key="Brush.BorderBrand" Color="{StaticResource Color.Blue400}" />
+        </ResourceDictionary>
+
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

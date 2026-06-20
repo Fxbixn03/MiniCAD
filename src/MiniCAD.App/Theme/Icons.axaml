@@ -1,0 +1,70 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--
+        MiniCAD line-art icon set. Allplan presents every command as a compact icon in a
+        vertical tool rail, so MiniCAD's tools are drawn the same way: thin stroked
+        geometries on a ~22px grid. Each Path that consumes one of these uses Classes="ico"
+        (see EditorStyles) so the stroke tracks the host button's foreground for
+        hover/active recolouring.
+    -->
+
+    <!-- ===== Drawing & edit tools (left rail) ===== -->
+
+    <!-- Select: classic arrow cursor outline. -->
+    <StreamGeometry x:Key="Icon.Select">M5,3 L5,19 L9.2,15 L12,20.6 L14.4,19.6 L11.5,14 L17,14 Z</StreamGeometry>
+
+    <!-- Line: a segment between two hollow node squares. -->
+    <StreamGeometry x:Key="Icon.Line">M6.2,17.8 L17.8,6.2 M4.6,16.2 H7.6 V19.2 H4.6 Z M16.4,4.8 H19.4 V7.8 H16.4 Z</StreamGeometry>
+
+    <!-- Rectangle: outline box. -->
+    <StreamGeometry x:Key="Icon.Rectangle">M4,6 H20 V18 H4 Z</StreamGeometry>
+
+    <!-- Circle: outline ring with a small centre cross. -->
+    <StreamGeometry x:Key="Icon.Circle">M21,12 A9,9 0 1 1 3,12 A9,9 0 1 1 21,12 Z M10.5,12 H13.5 M12,10.5 V13.5</StreamGeometry>
+
+    <!-- Polyline: a vertex chain. -->
+    <StreamGeometry x:Key="Icon.Polyline">M3,18 L9,9 L14,15 L21,5</StreamGeometry>
+
+    <!-- Delete: trash can. -->
+    <StreamGeometry x:Key="Icon.Delete">M5,7 H19 M8,7 V5.6 A1.6,1.6 0 0 1 9.6,4 H14.4 A1.6,1.6 0 0 1 16,5.6 V7 M6.6,7 L7.6,19.4 A1.6,1.6 0 0 0 9.2,21 H14.8 A1.6,1.6 0 0 0 16.4,19.4 L17.4,7 M10,10.5 V17.5 M14,10.5 V17.5</StreamGeometry>
+
+    <!-- Undo: counter-clockwise arrow. -->
+    <StreamGeometry x:Key="Icon.Undo">M8.5,7.5 L4.5,11.5 L8.5,15.5 M4.5,11.5 H13.5 A5,5 0 0 1 18.5,16.5 V18</StreamGeometry>
+
+    <!-- Redo: clockwise arrow. -->
+    <StreamGeometry x:Key="Icon.Redo">M15.5,7.5 L19.5,11.5 L15.5,15.5 M19.5,11.5 H10.5 A5,5 0 0 0 5.5,16.5 V18</StreamGeometry>
+
+    <!-- Snap: crosshair with a diamond point node (object snap). -->
+    <StreamGeometry x:Key="Icon.Snap">M12,3 V21 M3,12 H21 M12,9 L15,12 L12,15 L9,12 Z</StreamGeometry>
+
+    <!-- Origin / Nullpunkt: crosshair through a ring (target). -->
+    <StreamGeometry x:Key="Icon.Origin">M12,2 V22 M2,12 H22 M17,12 A5,5 0 1 1 7,12 A5,5 0 1 1 17,12 Z</StreamGeometry>
+
+    <!-- Zoom to fit: four outward corner brackets. -->
+    <StreamGeometry x:Key="Icon.ZoomFit">M3,8 V3 H8 M16,3 H21 V8 M21,16 V21 H16 M8,21 H3 V16</StreamGeometry>
+
+    <!-- ===== Palette tabs (right dock, bottom strip) ===== -->
+
+    <!-- Properties: tune sliders with knobs. -->
+    <StreamGeometry x:Key="Icon.Properties">M4,7 H20 M4,12 H20 M4,17 H20 M8,5.5 H10 V8.5 H8 Z M14,10.5 H16 V13.5 H14 Z M9,15.5 H11 V18.5 H9 Z</StreamGeometry>
+
+    <!-- Partial drawings (Teilbilder): two stacked sheets. -->
+    <StreamGeometry x:Key="Icon.Sheets">M5,8 H16 V19 H5 Z M8,8 V5 H19 V16 H16</StreamGeometry>
+
+    <!-- Layers: three stacked planes. -->
+    <StreamGeometry x:Key="Icon.Layers">M12,4 L21,9 L12,14 L3,9 Z M3,13 L12,18 L21,13 M3,17 L12,22 L21,17</StreamGeometry>
+
+    <!-- Pattern (Muster): hatched box. -->
+    <StreamGeometry x:Key="Icon.Pattern">M4,6 H20 V18 H4 Z M7,18 L4,15 M12,18 L4,10 M17,18 L4,5 M19,16 L9,6 M19,11 L14,6</StreamGeometry>
+
+    <!-- Assistant: magic wand with a sparkle. -->
+    <StreamGeometry x:Key="Icon.Assistant">M5,19 L14.5,9.5 M12.5,7.5 L16.5,11.5 M18,3.5 V7 M16.3,5.2 H19.8 M6,5 V8 M4.5,6.5 H7.5</StreamGeometry>
+
+    <!-- ===== Theme toggle ===== -->
+
+    <!-- Sun: shown while in dark mode (click to go light). -->
+    <StreamGeometry x:Key="Icon.Sun">M12,7.6 A4.4,4.4 0 1 1 11.99,7.6 Z M12,2.6 V4.6 M12,19.4 V21.4 M2.6,12 H4.6 M19.4,12 H21.4 M5.3,5.3 L6.7,6.7 M17.3,17.3 L18.7,18.7 M18.7,5.3 L17.3,6.7 M6.7,17.3 L5.3,18.7</StreamGeometry>
+
+    <!-- Moon: shown while in light mode (click to go dark). -->
+    <StreamGeometry x:Key="Icon.Moon">M15.5,3.6 A9,9 0 1 0 20.4,15 A7,7 0 1 1 15.5,3.6 Z</StreamGeometry>
+</ResourceDictionary>

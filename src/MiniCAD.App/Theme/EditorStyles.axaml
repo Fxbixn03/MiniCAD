@@ -1,0 +1,295 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--
+        MiniCAD editor chrome styles. Applied inside MainWindow (scoped via Window.Styles)
+        so the blueprint light-chrome language does not leak into the other windows.
+        Standard controls inherit Fluent's Light theme; these styles add the brand accents,
+        the tool palette active-state, badges and the primary action button.
+    -->
+
+    <!-- ============ Top menu bar ============ -->
+    <Style Selector="Menu.appmenu">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Menu.appmenu > MenuItem">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Sans}" />
+        <Setter Property="FontSize" Value="{DynamicResource Text.sm}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextBody}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Radius.sm}" />
+        <Setter Property="Padding" Value="10,6" />
+    </Style>
+
+    <!-- ============ Wordmark ============ -->
+    <Style Selector="TextBlock.wordmark">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Sans}" />
+        <Setter Property="FontSize" Value="{DynamicResource Text.lg}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextStrong}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- ============ Badges (pill labels) ============ -->
+    <Style Selector="Border.badge">
+        <Setter Property="CornerRadius" Value="{DynamicResource Radius.pill}" />
+        <Setter Property="Padding" Value="8,2" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Background" Value="{DynamicResource Brush.SurfaceHover}" />
+    </Style>
+    <Style Selector="Border.badge > TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Sans}" />
+        <Setter Property="FontSize" Value="{DynamicResource Text.xs}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextMuted}" />
+    </Style>
+    <Style Selector="Border.badge.brand">
+        <Setter Property="Background" Value="{DynamicResource Brush.BrandTint}" />
+    </Style>
+    <Style Selector="Border.badge.brand > TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.BrandStrong}" />
+    </Style>
+    <Style Selector="Border.badge.warn">
+        <Setter Property="Background" Value="{DynamicResource Brush.StatusWarnBg}" />
+    </Style>
+    <Style Selector="Border.badge.warn > TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.StatusWarn}" />
+    </Style>
+    <Style Selector="Border.badge.ok">
+        <Setter Property="Background" Value="{DynamicResource Brush.StatusOkBg}" />
+    </Style>
+    <Style Selector="Border.badge.ok > TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.StatusOk}" />
+    </Style>
+
+    <!-- ============ Toolbar tool buttons ============ -->
+    <Style Selector="Button.tool">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Radius.sm}" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Sans}" />
+        <Setter Property="FontSize" Value="{DynamicResource Text.sm}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextBody}" />
+    </Style>
+    <Style Selector="Button.tool:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Brush.SurfaceHover}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource Brush.TextStrong}" />
+    </Style>
+    <Style Selector="Button.tool:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Brush.BorderSubtle}" />
+    </Style>
+    <!-- Selection is always blue: the active tool gets a brand-tint fill + brand border. -->
+    <Style Selector="Button.tool.active /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Brush.SurfaceActive}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderBrand}" />
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource Brush.BrandStrong}" />
+    </Style>
+    <Style Selector="Button.tool.active">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.BrandStrong}" />
+    </Style>
+
+    <!-- ============ Primary action button (Save) ============ -->
+    <Style Selector="Button.primary">
+        <Setter Property="Background" Value="{DynamicResource Brush.Brand}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextInverse}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Radius.sm}" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Sans}" />
+        <Setter Property="FontSize" Value="{DynamicResource Text.sm}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Brush.BrandStrong}" />
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource Brush.TextInverse}" />
+    </Style>
+    <Style Selector="Button.primary:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Brush.BrandDeep}" />
+    </Style>
+
+    <!-- ============ Snap toggle (active = brand) ============ -->
+    <Style Selector="ToggleButton.snap">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderDefault}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Radius.sm}" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Sans}" />
+        <Setter Property="FontSize" Value="{DynamicResource Text.sm}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextBody}" />
+    </Style>
+    <Style Selector="ToggleButton.snap:checked /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Brush.SurfaceActive}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderBrand}" />
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource Brush.BrandStrong}" />
+    </Style>
+    <Style Selector="ToggleButton.snap:checked">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.BrandStrong}" />
+    </Style>
+
+    <!-- ============ Line-art icons (rail tools + palette tabs) ============ -->
+    <!-- Bound to the host button's Foreground so icons recolour on hover/active without
+         per-button wiring. ToggleButton derives from Button, so $parent[Button] covers both. -->
+    <Style Selector="Path.ico">
+        <Setter Property="Stroke" Value="{Binding $parent[Button].Foreground}" />
+        <Setter Property="StrokeThickness" Value="1.7" />
+        <Setter Property="StrokeLineCap" Value="Round" />
+        <Setter Property="StrokeJoin" Value="Round" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <!-- Same icon, but hosted in a TabItem header (palette tabs), so it tracks the tab's foreground. -->
+    <Style Selector="Path.icotab">
+        <Setter Property="Stroke" Value="{Binding $parent[TabItem].Foreground}" />
+        <Setter Property="StrokeThickness" Value="1.6" />
+        <Setter Property="StrokeLineCap" Value="Round" />
+        <Setter Property="StrokeJoin" Value="Round" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- ============ Left tool rail (vertical icon palette) ============ -->
+    <!-- Allplan arranges drawing/edit commands in a slim vertical rail of icons. -->
+    <Style Selector="Button.rail">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Radius.md}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextBody}" />
+    </Style>
+    <Style Selector="Button.rail:pointerover">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextStrong}" />
+    </Style>
+    <Style Selector="Button.rail:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Brush.SurfaceHover}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSubtle}" />
+    </Style>
+    <Style Selector="Button.rail:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Brush.SurfaceChromeAlt}" />
+    </Style>
+    <!-- Active tool: brand-tint fill + brand border + brand icon. -->
+    <Style Selector="Button.rail.active">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.BrandStrong}" />
+    </Style>
+    <Style Selector="Button.rail.active /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Brush.SurfaceActive}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderBrand}" />
+    </Style>
+
+    <!-- Snap toggle, rail variant -->
+    <Style Selector="ToggleButton.rail">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Radius.md}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextBody}" />
+    </Style>
+    <Style Selector="ToggleButton.rail:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Brush.SurfaceHover}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSubtle}" />
+    </Style>
+    <Style Selector="ToggleButton.rail:checked">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.BrandStrong}" />
+    </Style>
+    <Style Selector="ToggleButton.rail:checked /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Brush.SurfaceActive}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderBrand}" />
+    </Style>
+
+    <!-- Compact icon toggle for the top bar (theme switch) -->
+    <Style Selector="ToggleButton.chrometoggle">
+        <Setter Property="Width" Value="34" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Radius.sm}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextBody}" />
+    </Style>
+    <Style Selector="ToggleButton.chrometoggle:pointerover">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.BrandStrong}" />
+    </Style>
+    <Style Selector="ToggleButton.chrometoggle:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Brush.SurfaceHover}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSubtle}" />
+    </Style>
+    <!-- The icon itself conveys state, so no checked fill is needed. -->
+    <Style Selector="ToggleButton.chrometoggle:checked /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- Thin grouping divider between rail sections -->
+    <Style Selector="Border.raildiv">
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Margin" Value="8,6" />
+        <Setter Property="Background" Value="{DynamicResource Brush.BorderStrong}" />
+    </Style>
+
+    <!-- ============ Palette tabs (right dock) — Allplan icon tabs at the bottom ============ -->
+    <Style Selector="TabControl.palette">
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="TabControl.palette > TabItem">
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="FontSize" Value="{DynamicResource Text.sm}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextMuted}" />
+    </Style>
+    <Style Selector="TabControl.palette > TabItem /template/ Border#PART_LayoutRoot">
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="TabControl.palette > TabItem:selected">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.BrandStrong}" />
+    </Style>
+    <Style Selector="TabControl.palette > TabItem:pointerover">
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextStrong}" />
+    </Style>
+    <!-- Each tab header hosts a single line-art icon in a fixed cell. -->
+    <Style Selector="Border.tabicon">
+        <Setter Property="Width" Value="40" />
+        <Setter Property="Height" Value="34" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- ============ Section eyebrow label (PROPERTIES, LAYERS) ============ -->
+    <Style Selector="TextBlock.eyebrow">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Sans}" />
+        <Setter Property="FontSize" Value="{DynamicResource Text.2xs}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextMuted}" />
+        <Setter Property="LetterSpacing" Value="1.2" />
+    </Style>
+
+    <!-- Monospace numeric readouts -->
+    <Style Selector="TextBlock.mono">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Mono}" />
+        <Setter Property="FontSize" Value="{DynamicResource Text.2xs}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Panel section header -->
+    <Style Selector="TextBlock.panelheading">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Sans}" />
+        <Setter Property="FontSize" Value="{DynamicResource Text.sm}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextStrong}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+</Styles>

@@ -37,11 +37,12 @@ public sealed class CadCanvasControl : Control
         AvaloniaProperty.Register<CadCanvasControl, bool>(nameof(ShowGrid), defaultValue: true);
 
     public static readonly StyledProperty<Color> SceneBackgroundProperty =
-        AvaloniaProperty.Register<CadCanvasControl, Color>(nameof(SceneBackground), Color.FromRgb(30, 30, 34));
+        AvaloniaProperty.Register<CadCanvasControl, Color>(nameof(SceneBackground), Color.FromRgb(10, 20, 48));
 
-    // Full-width/height CAD crosshair that replaces the OS cursor inside the canvas.
+    // Full-width/height CAD crosshair that replaces the OS cursor inside the canvas;
+    // light-blue (logo vertex node) to read against the navy blueprint surface.
     private static readonly IPen CrosshairPen =
-        new Pen(new SolidColorBrush(Color.FromArgb(170, 220, 220, 225)), 1);
+        new Pen(new SolidColorBrush(Color.FromArgb(150, 147, 197, 253)), 1);
 
     private readonly SkiaSceneRenderer _renderer = new();
     private WriteableBitmap? _bitmap;
