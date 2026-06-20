@@ -27,4 +27,5 @@ public enum ShortcutAction
     Mirror,
     Scale,
     Offset,
+    Trim,
 }

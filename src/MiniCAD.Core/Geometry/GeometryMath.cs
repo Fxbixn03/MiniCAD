@@ -141,4 +141,86 @@ public static class GeometryMath
         intersection = a1 + r * t;
         return true;
     }
+
+    /// <summary>
+    /// Intersection of the two segments [<paramref name="a"/>, <paramref name="b"/>] and
+    /// [<paramref name="c"/>, <paramref name="d"/>] if they actually cross within both spans.
+    /// Parallel/collinear segments report no single point.
+    /// </summary>
+    public static bool IntersectSegments(Point2D a, Point2D b, Point2D c, Point2D d, out Point2D point)
+    {
+        Vector2D r = b - a;
+        Vector2D s = d - c;
+        double denominator = r.Cross(s);
+        if (Math.Abs(denominator) <= Epsilon)
+        {
+            point = default;
+            return false;
+        }
+
+        double t = (c - a).Cross(s) / denominator;
+        double u = (c - a).Cross(r) / denominator;
+        if (t < -Epsilon || t > 1 + Epsilon || u < -Epsilon || u > 1 + Epsilon)
+        {
+            point = default;
+            return false;
+        }
+
+        point = a + r * t;
+        return true;
+    }
+
+    /// <summary>Adds the 0–2 points where the segment [<paramref name="a"/>, <paramref name="b"/>] meets the circle.</summary>
+    public static void IntersectSegmentCircle(Point2D a, Point2D b, Point2D center, double radius, ICollection<Point2D> results)
+    {
+        Vector2D d = b - a;
+        double aa = d.Dot(d);
+        if (aa <= Epsilon)
+            return;
+
+        Vector2D f = a - center;
+        double bb = 2.0 * f.Dot(d);
+        double cc = f.Dot(f) - radius * radius;
+        double discriminant = bb * bb - 4.0 * aa * cc;
+        if (discriminant < 0)
+            return;
+
+        double root = Math.Sqrt(discriminant);
+        foreach (double t in stackalloc[] { (-bb - root) / (2.0 * aa), (-bb + root) / (2.0 * aa) })
+        {
+            if (t >= -Epsilon && t <= 1 + Epsilon)
+                results.Add(a + d * t);
+        }
+    }
+
+    /// <summary>Adds the 0–2 points where two circles meet (none for coincident/contained circles).</summary>
+    public static void IntersectCircles(Point2D c1, double r1, Point2D c2, double r2, ICollection<Point2D> results)
+    {
+        double distance = c1.DistanceTo(c2);
+        if (distance <= Epsilon || distance > r1 + r2 + Epsilon || distance < Math.Abs(r1 - r2) - Epsilon)
+            return;
+
+        double a = (r1 * r1 - r2 * r2 + distance * distance) / (2.0 * distance);
+        double hSquared = r1 * r1 - a * a;
+        double h = hSquared <= 0 ? 0 : Math.Sqrt(hSquared);
+        Vector2D direction = (c2 - c1) / distance;
+        Point2D midpoint = c1 + direction * a;
+        Vector2D offset = direction.Perpendicular() * h;
+
+        results.Add(midpoint + offset);
+        if (h > Epsilon)
+            results.Add(midpoint - offset);
+    }
+
+    /// <summary>
+    /// True if the absolute <paramref name="angle"/> lies within the arc that starts at
+    /// <paramref name="startAngle"/> and spans <paramref name="sweepAngle"/> (signed, radians).
+    /// </summary>
+    public static bool AngleInSweep(double startAngle, double sweepAngle, double angle)
+    {
+        if (sweepAngle >= 0)
+            return NormalizeAngle(angle - startAngle) <= sweepAngle + Epsilon;
+
+        return NormalizeAngle(startAngle - angle) <= -sweepAngle + Epsilon;
+    }
 }

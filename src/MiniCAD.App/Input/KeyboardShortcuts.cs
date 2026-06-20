@@ -28,6 +28,7 @@ public sealed class KeyboardShortcuts
         (ShortcutAction.Mirror, "Spiegeln", "Shift+M"),
         (ShortcutAction.Scale, "Skalieren", "Shift+S"),
         (ShortcutAction.Offset, "Parallele", "O"),
+        (ShortcutAction.Trim, "Stutzen/Dehnen", "T"),
         (ShortcutAction.Delete, "Löschen", "Delete"),
         (ShortcutAction.Undo, "Rückgängig", "Ctrl+Z"),
         (ShortcutAction.Redo, "Wiederholen", "Ctrl+Y"),
