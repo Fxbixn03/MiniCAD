@@ -26,6 +26,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly RectangleTool _rectangleTool = new();
     private readonly CircleTool _circleTool = new();
     private readonly ArcTool _arcTool = new();
+    private readonly EllipseTool _ellipseTool = new();
     private readonly PolylineTool _polylineTool = new();
     private readonly PointTool _pointTool = new();
     private readonly SetNullPointTool _setNullPointTool = new();
@@ -97,6 +98,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<LineEntity>(_lineTool);
         Tools.RegisterQuickSelectTool<CircleEntity>(_circleTool);
         Tools.RegisterQuickSelectTool<ArcEntity>(_arcTool);
+        Tools.RegisterQuickSelectTool<EllipseEntity>(_ellipseTool);
         Tools.RegisterQuickSelectTool<PolylineEntity>(_polylineTool);
         Tools.RegisterQuickSelectTool<PointEntity>(_pointTool);
 
@@ -151,7 +153,8 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>True for tools that place points, where typed coordinate entry is meaningful.</summary>
     private bool IsCoordinateTool(ITool? tool)
         => tool == _lineTool || tool == _rectangleTool || tool == _circleTool
-        || tool == _arcTool || tool == _polylineTool || tool == _pointTool || tool == _setNullPointTool
+        || tool == _arcTool || tool == _ellipseTool || tool == _polylineTool || tool == _pointTool
+        || tool == _setNullPointTool
         || tool == _moveTool || tool == _copyTool || tool == _rotateTool
         || tool == _mirrorTool || tool == _scaleTool || tool == _offsetTool;
 
@@ -239,6 +242,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsRectangleActive => Tools.ActiveTool == _rectangleTool;
     public bool IsCircleActive => Tools.ActiveTool == _circleTool;
     public bool IsArcActive => Tools.ActiveTool == _arcTool;
+    public bool IsEllipseActive => Tools.ActiveTool == _ellipseTool;
     public bool IsPolylineActive => Tools.ActiveTool == _polylineTool;
     public bool IsPointActive => Tools.ActiveTool == _pointTool;
     public bool IsSetNullPointActive => Tools.ActiveTool == _setNullPointTool;
@@ -261,6 +265,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsRectangleActive));
         OnPropertyChanged(nameof(IsCircleActive));
         OnPropertyChanged(nameof(IsArcActive));
+        OnPropertyChanged(nameof(IsEllipseActive));
         OnPropertyChanged(nameof(IsPolylineActive));
         OnPropertyChanged(nameof(IsPointActive));
         OnPropertyChanged(nameof(IsSetNullPointActive));
@@ -373,6 +378,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void ActivateArc() => ActivateDrawingTool(_arcTool);
+
+    [RelayCommand]
+    private void ActivateEllipse() => ActivateDrawingTool(_ellipseTool);
 
     [RelayCommand]
     private void ActivatePolyline() => ActivateDrawingTool(_polylineTool);
@@ -514,6 +522,7 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Rectangle: ActivateRectangle(); return true;
             case ShortcutAction.Circle: ActivateCircle(); return true;
             case ShortcutAction.Arc: ActivateArc(); return true;
+            case ShortcutAction.Ellipse: ActivateEllipse(); return true;
             case ShortcutAction.Polyline: ActivatePolyline(); return true;
             case ShortcutAction.Point: ActivatePoint(); return true;
             case ShortcutAction.Move: ActivateMoveCommand.Execute(null); return true;

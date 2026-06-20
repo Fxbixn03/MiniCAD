@@ -22,6 +22,7 @@ public sealed class KeyboardShortcuts
         (ShortcutAction.Rectangle, "Rechteck", "R"),
         (ShortcutAction.Circle, "Kreis", "C"),
         (ShortcutAction.Arc, "Bogen", "A"),
+        (ShortcutAction.Ellipse, "Ellipse", "E"),
         (ShortcutAction.Polyline, "Polylinie", "P"),
         (ShortcutAction.Point, "Punkt", "N"),
         (ShortcutAction.Move, "Verschieben", "M"),

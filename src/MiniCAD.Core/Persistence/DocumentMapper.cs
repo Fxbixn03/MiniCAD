@@ -189,6 +189,15 @@ public static class DocumentMapper
                 Size = point.Size,
                 Style = point.Style.ToString(),
             },
+            EllipseEntity ellipse => new EllipseDto
+            {
+                Center = ToDto(ellipse.Center),
+                RadiusX = ellipse.RadiusX,
+                RadiusY = ellipse.RadiusY,
+                Rotation = ellipse.Rotation,
+                StartAngle = ellipse.StartAngle,
+                SweepAngle = ellipse.SweepAngle,
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -210,6 +219,9 @@ public static class DocumentMapper
                 FromDto(point.Position),
                 point.Size,
                 Enum.TryParse(point.Style, out PointStyle style) ? style : PointStyle.Plus),
+            EllipseDto ellipse => new EllipseEntity(
+                FromDto(ellipse.Center), ellipse.RadiusX, ellipse.RadiusY,
+                ellipse.Rotation, ellipse.StartAngle, ellipse.SweepAngle),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

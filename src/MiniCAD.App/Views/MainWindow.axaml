@@ -261,6 +261,10 @@
                         Command="{Binding ActivateArcCommand}" ToolTip.Tip="Bogen  ·  A">
                     <Path Classes="ico" Data="{StaticResource Icon.Arc}" />
                 </Button>
+                <Button Classes="rail" Classes.active="{Binding IsEllipseActive}"
+                        Command="{Binding ActivateEllipseCommand}" ToolTip.Tip="Ellipse  ·  E">
+                    <Path Classes="ico" Data="{StaticResource Icon.Ellipse}" />
+                </Button>
                 <Button Classes="rail" Classes.active="{Binding IsPolylineActive}"
                         Command="{Binding ActivatePolylineCommand}" ToolTip.Tip="Polylinie  ·  P">
                     <Path Classes="ico" Data="{StaticResource Icon.Polyline}" />

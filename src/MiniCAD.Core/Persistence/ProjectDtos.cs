@@ -121,6 +121,7 @@ public sealed class PointDto
 [JsonDerivedType(typeof(ArcDto), "arc")]
 [JsonDerivedType(typeof(PolylineDto), "polyline")]
 [JsonDerivedType(typeof(PointMarkerDto), "point")]
+[JsonDerivedType(typeof(EllipseDto), "ellipse")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -167,4 +168,14 @@ public sealed class PointMarkerDto : EntityDto
 
     /// <summary>Marker glyph (Plus / Cross / Dot / Square).</summary>
     public string Style { get; set; } = "Plus";
+}
+
+public sealed class EllipseDto : EntityDto
+{
+    public PointDto Center { get; set; } = new();
+    public double RadiusX { get; set; }
+    public double RadiusY { get; set; }
+    public double Rotation { get; set; }
+    public double StartAngle { get; set; }
+    public double SweepAngle { get; set; } = Math.PI * 2.0;
 }
