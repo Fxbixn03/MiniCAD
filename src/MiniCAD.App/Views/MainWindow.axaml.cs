@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -16,6 +17,9 @@ public partial class MainWindow : Window
 {
     private static readonly FilePickerFileType ProjectFileType =
         new("MiniCAD Projekt") { Patterns = new[] { "*.mcad" } };
+
+    private static readonly FilePickerFileType ImageFileType =
+        new("Bilder") { Patterns = new[] { "*.png", "*.jpg", "*.jpeg", "*.bmp", "*.gif" } };
 
     private MainWindowViewModel? _boundViewModel;
     private TextEditRequest? _activeEdit;
@@ -161,6 +165,50 @@ public partial class MainWindow : Window
     private void OnSaveProject(object? sender, RoutedEventArgs e) => _ = SaveAsync();
 
     private void OnSaveProjectAs(object? sender, RoutedEventArgs e) => _ = SaveAsAsync();
+
+    private void OnInsertImage(object? sender, RoutedEventArgs e) => _ = InsertImageAsync();
+
+    private async Task InsertImageAsync()
+    {
+        if (ViewModel is not { } viewModel || StorageProvider is not { } storage)
+            return;
+
+        var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Bild als Unterlage einfügen",
+            AllowMultiple = false,
+            FileTypeFilter = new[] { ImageFileType },
+        });
+
+        if (files.Count == 0)
+            return;
+
+        try
+        {
+            await using Stream source = await files[0].OpenReadAsync();
+            using var buffer = new MemoryStream();
+            await source.CopyToAsync(buffer);
+            byte[] data = buffer.ToArray();
+
+            double aspect = 1.0;
+            try
+            {
+                using var bitmap = new Avalonia.Media.Imaging.Bitmap(new MemoryStream(data));
+                if (bitmap.PixelSize.Height > 0)
+                    aspect = (double)bitmap.PixelSize.Width / bitmap.PixelSize.Height;
+            }
+            catch
+            {
+                // Unknown pixel size — fall back to a square placement.
+            }
+
+            viewModel.InsertImageEntity(data, aspect);
+        }
+        catch (Exception ex)
+        {
+            viewModel.StatusMessage = $"Fehler beim Einfügen: {ex.Message}";
+        }
+    }
 
     private void OnExit(object? sender, RoutedEventArgs e) => Close();
 

@@ -267,6 +267,14 @@ public static class DocumentMapper
                 TextHeight = leader.TextHeight,
                 ArrowSize = leader.ArrowSize,
             },
+            ImageEntity image => new ImageDto
+            {
+                Data = Convert.ToBase64String(image.Data),
+                Origin = ToDto(image.Origin),
+                Width = image.Width,
+                Height = image.Height,
+                Rotation = image.Rotation,
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -315,6 +323,8 @@ public static class DocumentMapper
             },
             LeaderDto leader => new LeaderEntity(
                 leader.Points.Select(FromDto), leader.Text, leader.TextHeight, leader.ArrowSize),
+            ImageDto image => new ImageEntity(
+                Convert.FromBase64String(image.Data), FromDto(image.Origin), image.Width, image.Height, image.Rotation),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

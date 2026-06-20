@@ -31,6 +31,14 @@ public interface IRenderSurface
     void DrawFilledPolygon(IReadOnlyList<Point2D> points, in FillStyle fill) { }
 
     /// <summary>
+    /// Draws a raster image (given as encoded PNG/JPEG bytes) into the world-space box anchored
+    /// at <paramref name="origin"/> (its lower-left corner), spanning <paramref name="width"/> ×
+    /// <paramref name="height"/> world units and rotated CCW by <paramref name="rotation"/>
+    /// radians. Backends without raster support inherit this no-op default.
+    /// </summary>
+    void DrawImage(byte[] encodedImage, Point2D origin, double width, double height, double rotation) { }
+
+    /// <summary>
     /// Draws a circular arc. Angles are in radians, measured counter-clockwise from the
     /// positive X axis; <paramref name="sweepAngle"/> may be negative for clockwise arcs.
     /// </summary>

@@ -511,6 +511,28 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ActivateSetNullPoint() => Tools.SetActiveTool(_setNullPointTool);
 
+    /// <summary>
+    /// Inserts a raster underlay centered in the current view. <paramref name="aspectRatio"/> is
+    /// width/height of the source image (computed by the view), sizing the placement box.
+    /// </summary>
+    public void InsertImageEntity(byte[] data, double aspectRatio)
+    {
+        if (data.Length == 0)
+            return;
+
+        double scale = Math.Max(Viewport.Scale, Viewport.MinScale);
+        double visibleWidth = Viewport.Width > 0 ? Viewport.Width / scale : 1000.0;
+        double width = visibleWidth > 0 ? visibleWidth * 0.5 : 1000.0;
+        double height = aspectRatio > 0 ? width / aspectRatio : width;
+
+        Point2D center = Viewport.Center;
+        var origin = new Point2D(center.X - width / 2, center.Y - height / 2);
+        var image = new ImageEntity(data, origin, width, height);
+        _commands.Execute(new AddEntityCommand(Document, image));
+        Tools.Selection.Set(image);
+        StatusMessage = "Bild als Unterlage eingefügt.";
+    }
+
     [RelayCommand]
     private void ResetNullPoint() => Document.CoordinateSystem.Reset();
 

@@ -85,14 +85,14 @@ public sealed class SkiaSceneRenderer
                 bool teilbildPassive = partialDrawing.State == ElementState.Locked;
                 surface.ModelScale = partialDrawing.ModelScaleFactor; // scales hatch density per 1:n
 
-                foreach (IEntity entity in document.Entities)
+                void Draw(IEntity entity)
                 {
                     if (entity.PartialDrawingId != partialDrawing.Id)
-                        continue;
+                        return;
 
                     Layer? layer = document.FindLayer(entity.LayerId);
                     if (layer is { IsVisible: false })
-                        continue;
+                        return;
 
                     StrokeStyle stroke = document.ResolveStroke(entity);
                     if (teilbildPassive || layer is { State: ElementState.Locked })
@@ -100,6 +100,14 @@ public sealed class SkiaSceneRenderer
 
                     entity.Render(surface, stroke);
                 }
+
+                // Raster underlays first so drawn geometry sits on top of the scan.
+                foreach (IEntity entity in document.Entities)
+                    if (entity is ImageEntity)
+                        Draw(entity);
+                foreach (IEntity entity in document.Entities)
+                    if (entity is not ImageEntity)
+                        Draw(entity);
             }
 
             // Transient overlay (tool previews, selection highlights) on top of everything.

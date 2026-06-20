@@ -151,6 +151,7 @@ public sealed class PointDto
 [JsonDerivedType(typeof(TextDto), "text")]
 [JsonDerivedType(typeof(MTextDto), "mtext")]
 [JsonDerivedType(typeof(LeaderDto), "leader")]
+[JsonDerivedType(typeof(ImageDto), "image")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -266,4 +267,14 @@ public sealed class LeaderDto : EntityDto
     public string Text { get; set; } = string.Empty;
     public double TextHeight { get; set; } = 12.0;
     public double ArrowSize { get; set; } = 12.0;
+}
+
+public sealed class ImageDto : EntityDto
+{
+    /// <summary>Base64-encoded image bytes (PNG/JPEG/…), embedded in the project.</summary>
+    public string Data { get; set; } = string.Empty;
+    public PointDto Origin { get; set; } = new();
+    public double Width { get; set; }
+    public double Height { get; set; }
+    public double Rotation { get; set; }
 }

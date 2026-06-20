@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using MiniCAD.Core.Geometry;
 using MiniCAD.Core.Rendering;
 using MiniCAD.Core.Styling;
@@ -110,6 +111,36 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
     }
 
     private static SKColor ToSkColor(Color c) => new(c.R, c.G, c.B, c.A);
+
+    // Decoded images are cached weakly by their byte[] so they decode once and are freed when
+    // the entity's data is collected (avoids decoding every frame).
+    private static readonly ConditionalWeakTable<byte[], SKImage> ImageCache = new();
+
+    public void DrawImage(byte[] encodedImage, Point2D origin, double width, double height, double rotation)
+    {
+        if (encodedImage.Length == 0 || width <= 0.0 || height <= 0.0)
+            return;
+
+        if (!ImageCache.TryGetValue(encodedImage, out SKImage? image))
+        {
+            image = SKImage.FromEncodedData(encodedImage);
+            if (image is null)
+                return;
+            ImageCache.Add(encodedImage, image);
+        }
+
+        SKPoint deviceOrigin = ToDevice(origin);
+        float wDev = DeviceLength(width);
+        float hDev = DeviceLength(height);
+
+        _canvas.Save();
+        _canvas.Translate(deviceOrigin.X, deviceOrigin.Y);
+        // World CCW rotation → device CW (Y-down); origin is the lower-left corner, so the image
+        // extends right and up (negative device Y) and stays upright.
+        _canvas.RotateDegrees((float)-GeometryMath.RadiansToDegrees(rotation));
+        _canvas.DrawImage(image, new SKRect(0, -hDev, wDev, 0));
+        _canvas.Restore();
+    }
 
     public void DrawArc(Point2D center, double radius, double startAngle, double sweepAngle, in StrokeStyle stroke)
     {

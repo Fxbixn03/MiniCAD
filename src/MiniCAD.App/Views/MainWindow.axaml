@@ -83,6 +83,7 @@
                         <MenuItem Header="_Werkzeuge">
                             <MenuItem Header="_Text / Beschriftung" Command="{Binding ActivateTextCommand}" InputGesture="X" />
                         <MenuItem Header="_Führungslinie / Callout" Command="{Binding ActivateLeaderCommand}" InputGesture="G" />
+                        <MenuItem Header="_Bild als Unterlage…" Click="OnInsertImage" />
                         <Separator />
                         <MenuItem Header="_Nullpunkt setzen" Command="{Binding ActivateSetNullPointCommand}" />
                             <MenuItem Header="Nullpunkt zu_rücksetzen" Command="{Binding ResetNullPointCommand}" />
