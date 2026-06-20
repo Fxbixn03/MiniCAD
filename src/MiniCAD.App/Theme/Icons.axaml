@@ -28,6 +28,9 @@
     <!-- Arc: a quarter arc with its two endpoint nodes. -->
     <StreamGeometry x:Key="Icon.Arc">M4,19 A15,15 0 0 1 19,4 M2.5,17.5 H5.5 V20.5 H2.5 Z M17.5,2.5 H20.5 V5.5 H17.5 Z</StreamGeometry>
 
+    <!-- Point: a node marker (plus through a small ring). -->
+    <StreamGeometry x:Key="Icon.Point">M12,4 V20 M4,12 H20 M14.5,12 A2.5,2.5 0 1 1 9.5,12 A2.5,2.5 0 1 1 14.5,12 Z</StreamGeometry>
+
     <!-- Move: four-way arrows from a centre. -->
     <StreamGeometry x:Key="Icon.Move">M12,3 V21 M3,12 H21 M12,3 L9.6,5.4 M12,3 L14.4,5.4 M12,21 L9.6,18.6 M12,21 L14.4,18.6 M3,12 L5.4,9.6 M3,12 L5.4,14.4 M21,12 L18.6,9.6 M21,12 L18.6,14.4</StreamGeometry>
 

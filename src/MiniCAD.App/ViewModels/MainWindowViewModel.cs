@@ -27,6 +27,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly CircleTool _circleTool = new();
     private readonly ArcTool _arcTool = new();
     private readonly PolylineTool _polylineTool = new();
+    private readonly PointTool _pointTool = new();
     private readonly SetNullPointTool _setNullPointTool = new();
 
     // Editing tools operating on the current selection (Epic: Bearbeitungswerkzeuge).
@@ -56,6 +57,7 @@ public partial class MainWindowViewModel : ViewModelBase
         FilletOptions = new FilletOptionsViewModel(_filletTool);
         ArrayOptions = new ArrayOptionsViewModel(_arrayTool);
         ArcOptions = new ArcOptionsViewModel(_arcTool);
+        PointOptions = new PointOptionsViewModel(_pointTool);
 
         Document.Changed += OnDocumentChanged;
         Document.CoordinateSystem.Changed += OnOriginChanged;
@@ -96,6 +98,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<CircleEntity>(_circleTool);
         Tools.RegisterQuickSelectTool<ArcEntity>(_arcTool);
         Tools.RegisterQuickSelectTool<PolylineEntity>(_polylineTool);
+        Tools.RegisterQuickSelectTool<PointEntity>(_pointTool);
 
         Tools.SetActiveTool(_selectTool);
     }
@@ -142,10 +145,13 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Inline arc-mode selector, shown while the arc tool is active.</summary>
     public ArcOptionsViewModel ArcOptions { get; }
 
+    /// <summary>Inline marker style/size, shown while the point tool is active.</summary>
+    public PointOptionsViewModel PointOptions { get; }
+
     /// <summary>True for tools that place points, where typed coordinate entry is meaningful.</summary>
     private bool IsCoordinateTool(ITool? tool)
         => tool == _lineTool || tool == _rectangleTool || tool == _circleTool
-        || tool == _arcTool || tool == _polylineTool || tool == _setNullPointTool
+        || tool == _arcTool || tool == _polylineTool || tool == _pointTool || tool == _setNullPointTool
         || tool == _moveTool || tool == _copyTool || tool == _rotateTool
         || tool == _mirrorTool || tool == _scaleTool || tool == _offsetTool;
 
@@ -234,6 +240,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsCircleActive => Tools.ActiveTool == _circleTool;
     public bool IsArcActive => Tools.ActiveTool == _arcTool;
     public bool IsPolylineActive => Tools.ActiveTool == _polylineTool;
+    public bool IsPointActive => Tools.ActiveTool == _pointTool;
     public bool IsSetNullPointActive => Tools.ActiveTool == _setNullPointTool;
     public bool IsMoveActive => Tools.ActiveTool == _moveTool;
     public bool IsCopyActive => Tools.ActiveTool == _copyTool;
@@ -255,6 +262,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsCircleActive));
         OnPropertyChanged(nameof(IsArcActive));
         OnPropertyChanged(nameof(IsPolylineActive));
+        OnPropertyChanged(nameof(IsPointActive));
         OnPropertyChanged(nameof(IsSetNullPointActive));
         OnPropertyChanged(nameof(IsMoveActive));
         OnPropertyChanged(nameof(IsCopyActive));
@@ -368,6 +376,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void ActivatePolyline() => ActivateDrawingTool(_polylineTool);
+
+    [RelayCommand]
+    private void ActivatePoint() => ActivateDrawingTool(_pointTool);
 
     /// <summary>Clears any Assistant style so the next entity uses the layer default again.</summary>
     private void ActivateDrawingTool(ITool tool)
@@ -504,6 +515,7 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Circle: ActivateCircle(); return true;
             case ShortcutAction.Arc: ActivateArc(); return true;
             case ShortcutAction.Polyline: ActivatePolyline(); return true;
+            case ShortcutAction.Point: ActivatePoint(); return true;
             case ShortcutAction.Move: ActivateMoveCommand.Execute(null); return true;
             case ShortcutAction.Copy: ActivateCopyCommand.Execute(null); return true;
             case ShortcutAction.Rotate: ActivateRotateCommand.Execute(null); return true;

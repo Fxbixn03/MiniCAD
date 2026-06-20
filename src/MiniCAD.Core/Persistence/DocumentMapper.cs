@@ -183,6 +183,12 @@ public static class DocumentMapper
                 Closed = poly.IsClosed,
                 FillPatternId = poly.Fill?.Id,
             },
+            PointEntity point => new PointMarkerDto
+            {
+                Position = ToDto(point.Position),
+                Size = point.Size,
+                Style = point.Style.ToString(),
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -200,6 +206,10 @@ public static class DocumentMapper
             CircleDto circle => new CircleEntity(FromDto(circle.Center), circle.Radius),
             ArcDto arc => new ArcEntity(FromDto(arc.Center), arc.Radius, arc.StartAngle, arc.SweepAngle),
             PolylineDto poly => new PolylineEntity(poly.Points.Select(FromDto), poly.Closed),
+            PointMarkerDto point => new PointEntity(
+                FromDto(point.Position),
+                point.Size,
+                Enum.TryParse(point.Style, out PointStyle style) ? style : PointStyle.Plus),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

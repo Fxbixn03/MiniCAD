@@ -173,6 +173,20 @@
             </StackPanel>
         </Border>
 
+        <!-- Inline marker style/size, shown while the point tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsPointActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding PointOptions}" x:DataType="vm:PointOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="PUNKT" VerticalAlignment="Center" />
+                <TextBlock Text="Stil" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                <ComboBox MinWidth="96" ItemsSource="{Binding StyleOptions}" SelectedItem="{Binding Style}" />
+                <TextBlock Text="Größe" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                <TextBox Width="60" Text="{Binding SizeText}" FontFamily="{StaticResource Font.Mono}" />
+            </StackPanel>
+        </Border>
+
         <!-- Inline arc-mode selector, shown while the arc tool is active. -->
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
                 BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
@@ -250,6 +264,10 @@
                 <Button Classes="rail" Classes.active="{Binding IsPolylineActive}"
                         Command="{Binding ActivatePolylineCommand}" ToolTip.Tip="Polylinie  ·  P">
                     <Path Classes="ico" Data="{StaticResource Icon.Polyline}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsPointActive}"
+                        Command="{Binding ActivatePointCommand}" ToolTip.Tip="Punkt / Knoten  ·  N">
+                    <Path Classes="ico" Data="{StaticResource Icon.Point}" />
                 </Button>
 
                 <Border Classes="raildiv" />

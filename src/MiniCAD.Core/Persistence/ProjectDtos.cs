@@ -120,6 +120,7 @@ public sealed class PointDto
 [JsonDerivedType(typeof(CircleDto), "circle")]
 [JsonDerivedType(typeof(ArcDto), "arc")]
 [JsonDerivedType(typeof(PolylineDto), "polyline")]
+[JsonDerivedType(typeof(PointMarkerDto), "point")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -157,4 +158,13 @@ public sealed class PolylineDto : EntityDto
 
     /// <summary>Id of the hatch pattern filling the region, or <c>null</c> for no fill.</summary>
     public Guid? FillPatternId { get; set; }
+}
+
+public sealed class PointMarkerDto : EntityDto
+{
+    public PointDto Position { get; set; } = new();
+    public double Size { get; set; } = 6.0;
+
+    /// <summary>Marker glyph (Plus / Cross / Dot / Square).</summary>
+    public string Style { get; set; } = "Plus";
 }
