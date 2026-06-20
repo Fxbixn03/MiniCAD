@@ -2,6 +2,7 @@ using System.Linq;
 using MiniCAD.Core.Documents;
 using MiniCAD.Core.Entities;
 using MiniCAD.Core.Geometry;
+using MiniCAD.Core.Rendering;
 using MiniCAD.Core.Styling;
 
 namespace MiniCAD.Core.Persistence;
@@ -201,6 +202,25 @@ public static class DocumentMapper
                 SweepAngle = ellipse.SweepAngle,
             },
             SplineEntity spline => new SplineDto { Points = spline.Points.Select(ToDto).ToList() },
+            TextEntity text => new TextDto
+            {
+                Position = ToDto(text.Position),
+                Text = text.Text,
+                Height = text.Height,
+                Rotation = text.Rotation,
+                HAlign = text.HorizontalAlignment.ToString(),
+                VAlign = text.VerticalAlignment.ToString(),
+            },
+            MTextEntity mtext => new MTextDto
+            {
+                Position = ToDto(mtext.Position),
+                Text = mtext.Text,
+                Height = mtext.Height,
+                Width = mtext.Width,
+                Rotation = mtext.Rotation,
+                HAlign = mtext.HorizontalAlignment.ToString(),
+                VAlign = mtext.VerticalAlignment.ToString(),
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -226,6 +246,12 @@ public static class DocumentMapper
                 FromDto(ellipse.Center), ellipse.RadiusX, ellipse.RadiusY,
                 ellipse.Rotation, ellipse.StartAngle, ellipse.SweepAngle),
             SplineDto spline => new SplineEntity(spline.Points.Select(FromDto)),
+            TextDto text => new TextEntity(
+                FromDto(text.Position), text.Text, text.Height, text.Rotation,
+                ParseHAlign(text.HAlign), ParseVAlign(text.VAlign)),
+            MTextDto mtext => new MTextEntity(
+                FromDto(mtext.Position), mtext.Text, mtext.Height, mtext.Width, mtext.Rotation,
+                ParseHAlign(mtext.HAlign), ParseVAlign(mtext.VAlign)),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 
@@ -234,4 +260,10 @@ public static class DocumentMapper
         entity.StrokeOverride = dto.Stroke is { } stroke ? FromDto(stroke) : null;
         return entity;
     }
+
+    private static TextHAlign ParseHAlign(string value)
+        => Enum.TryParse(value, out TextHAlign align) ? align : TextHAlign.Left;
+
+    private static TextVAlign ParseVAlign(string value)
+        => Enum.TryParse(value, out TextVAlign align) ? align : TextVAlign.Baseline;
 }

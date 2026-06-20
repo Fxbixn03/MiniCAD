@@ -126,6 +126,8 @@ public sealed class PointDto
 [JsonDerivedType(typeof(PointMarkerDto), "point")]
 [JsonDerivedType(typeof(EllipseDto), "ellipse")]
 [JsonDerivedType(typeof(SplineDto), "spline")]
+[JsonDerivedType(typeof(TextDto), "text")]
+[JsonDerivedType(typeof(MTextDto), "mtext")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -187,4 +189,35 @@ public sealed class EllipseDto : EntityDto
 public sealed class SplineDto : EntityDto
 {
     public List<PointDto> Points { get; set; } = new();
+}
+
+public sealed class TextDto : EntityDto
+{
+    public PointDto Position { get; set; } = new();
+    public string Text { get; set; } = string.Empty;
+    public double Height { get; set; } = 12.0;
+    public double Rotation { get; set; }
+
+    /// <summary>Horizontal alignment (Left / Center / Right).</summary>
+    public string HAlign { get; set; } = "Left";
+
+    /// <summary>Vertical alignment (Top / Middle / Baseline / Bottom).</summary>
+    public string VAlign { get; set; } = "Baseline";
+}
+
+public sealed class MTextDto : EntityDto
+{
+    public PointDto Position { get; set; } = new();
+    public string Text { get; set; } = string.Empty;
+    public double Height { get; set; } = 12.0;
+
+    /// <summary>Wrap width; 0 wraps only on explicit newlines.</summary>
+    public double Width { get; set; }
+    public double Rotation { get; set; }
+
+    /// <summary>Horizontal alignment (Left / Center / Right).</summary>
+    public string HAlign { get; set; } = "Left";
+
+    /// <summary>Vertical alignment (Top / Middle / Baseline / Bottom).</summary>
+    public string VAlign { get; set; } = "Top";
 }

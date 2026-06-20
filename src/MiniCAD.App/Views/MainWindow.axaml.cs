@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -7,6 +8,7 @@ using Avalonia.Platform.Storage;
 using MiniCAD.App.Input;
 using MiniCAD.App.ViewModels;
 using MiniCAD.Core.Geometry;
+using MiniCAD.Core.Tools;
 
 namespace MiniCAD.App.Views;
 
@@ -15,15 +17,91 @@ public partial class MainWindow : Window
     private static readonly FilePickerFileType ProjectFileType =
         new("MiniCAD Projekt") { Patterns = new[] { "*.mcad" } };
 
+    private MainWindowViewModel? _boundViewModel;
+    private bool _editorActive;
+
     public MainWindow()
     {
         InitializeComponent();
         Canvas.CursorWorldMoved += OnCursorWorldMoved;
+        Canvas.DoubleClicked += OnCanvasDoubleClicked;
+        DataContextChanged += OnDataContextChanged;
     }
 
     private MainWindowViewModel? ViewModel => DataContext as MainWindowViewModel;
 
+    private void OnDataContextChanged(object? sender, EventArgs e)
+    {
+        if (_boundViewModel is { } previous)
+            previous.TextEditRequested -= OnTextEditRequested;
+
+        _boundViewModel = ViewModel;
+        if (_boundViewModel is { } current)
+            current.TextEditRequested += OnTextEditRequested;
+    }
+
     private void OnCursorWorldMoved(object? sender, Point2D world) => ViewModel?.UpdateCursor(world);
+
+    private void OnCanvasDoubleClicked(object? sender, Point2D world) => ViewModel?.EditTextAt(world);
+
+    // ----- Inline text editor (text tool) -----
+
+    private void OnTextEditRequested(TextEditRequest request)
+    {
+        if (ViewModel is not { } viewModel)
+            return;
+
+        Point2D device = viewModel.Viewport.WorldToScreenPoint(request.AnchorWorld);
+        double scaling = TopLevel.GetTopLevel(Canvas)?.RenderScaling ?? 1.0;
+
+        InlineTextEditor.AcceptsReturn = request.Multiline;
+        InlineTextEditor.Text = request.InitialText;
+        InlineTextEditor.Margin = new Thickness(device.X / scaling, device.Y / scaling, 0, 0);
+        InlineTextEditor.IsVisible = true;
+        _editorActive = true;
+        InlineTextEditor.Focus();
+        InlineTextEditor.SelectAll();
+    }
+
+    private void OnInlineTextEditorKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            CancelInlineEditor();
+            e.Handled = true;
+        }
+        else if (e.Key is Key.Enter or Key.Return
+            && (!InlineTextEditor.AcceptsReturn || e.KeyModifiers.HasFlag(KeyModifiers.Control)))
+        {
+            // Single-line commits on Enter; multi-line keeps Enter for newlines, Ctrl+Enter commits.
+            CommitInlineEditor();
+            e.Handled = true;
+        }
+    }
+
+    private void OnInlineTextEditorLostFocus(object? sender, RoutedEventArgs e) => CommitInlineEditor();
+
+    private void CommitInlineEditor()
+    {
+        if (!_editorActive)
+            return;
+
+        _editorActive = false;
+        string text = InlineTextEditor.Text ?? string.Empty;
+        InlineTextEditor.IsVisible = false;
+        ViewModel?.CommitText(text);
+    }
+
+    private void CancelInlineEditor()
+    {
+        if (!_editorActive)
+            return;
+
+        _editorActive = false;
+        InlineTextEditor.IsVisible = false;
+        ViewModel?.CancelTextEdit();
+        Canvas.Focus();
+    }
 
     private void OnAssistantDoubleTapped(object? sender, TappedEventArgs e) => ViewModel?.Assistant.UseSelected();
 

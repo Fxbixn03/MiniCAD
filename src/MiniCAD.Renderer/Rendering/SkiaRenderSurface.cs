@@ -16,6 +16,8 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
     private readonly SKCanvas _canvas;
     private readonly Matrix2D _worldToScreen;
     private readonly SKPaint _paint;
+    private readonly SKPaint _textPaint;
+    private readonly SKFont _font;
 
     public SkiaRenderSurface(SKCanvas canvas, in Matrix2D worldToScreen)
     {
@@ -28,6 +30,9 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
             StrokeCap = SKStrokeCap.Round,
             StrokeJoin = SKStrokeJoin.Round,
         };
+        // Text is filled (not stroked) so glyphs read cleanly at any size.
+        _textPaint = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Fill };
+        _font = new SKFont(SKTypeface.Default);
     }
 
     /// <summary>Scale-dependent fill factor (set per Teilbild from its reference scale).</summary>
@@ -83,6 +88,55 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
         _canvas.DrawPath(path, _paint);
     }
 
+    public void DrawText(
+        string text,
+        Point2D position,
+        double height,
+        double rotation,
+        TextHAlign horizontalAlignment,
+        TextVAlign verticalAlignment,
+        in StrokeStyle stroke)
+    {
+        if (string.IsNullOrEmpty(text))
+            return;
+
+        float deviceHeight = DeviceLength(height);
+        if (deviceHeight <= 0f)
+            return;
+
+        _font.Size = deviceHeight;
+        Color c = stroke.Color;
+        _textPaint.Color = new SKColor(c.R, c.G, c.B, c.A);
+
+        float width = _font.MeasureText(text);
+        SKFontMetrics metrics = _font.Metrics;
+
+        // Anchor the run around the insertion point. dx/dy are in the (rotated) text frame,
+        // where +y is screen-down, so the glyphs always render upright.
+        float dx = horizontalAlignment switch
+        {
+            TextHAlign.Center => -width * 0.5f,
+            TextHAlign.Right => -width,
+            _ => 0f,
+        };
+        float dy = verticalAlignment switch
+        {
+            TextVAlign.Top => -metrics.Ascent,
+            TextVAlign.Middle => -(metrics.Ascent + metrics.Descent) * 0.5f,
+            TextVAlign.Bottom => -metrics.Descent,
+            _ => 0f, // Baseline
+        };
+
+        SKPoint device = ToDevice(position);
+        _canvas.Save();
+        _canvas.Translate(device.X, device.Y);
+        // World angles are CCW with Y up; device space is Y-down, so the rotation is negated
+        // (same convention as DrawArc) to keep the visual orientation correct.
+        _canvas.RotateDegrees((float)-GeometryMath.RadiansToDegrees(rotation));
+        _canvas.DrawText(text, dx, dy, _font, _textPaint);
+        _canvas.Restore();
+    }
+
     private void ApplyStroke(in StrokeStyle stroke)
     {
         Color c = stroke.Color;
@@ -99,5 +153,10 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
     private float DeviceLength(double worldLength)
         => (float)_worldToScreen.TransformVector(new Vector2D(worldLength, 0)).Length;
 
-    public void Dispose() => _paint.Dispose();
+    public void Dispose()
+    {
+        _paint.Dispose();
+        _textPaint.Dispose();
+        _font.Dispose();
+    }
 }

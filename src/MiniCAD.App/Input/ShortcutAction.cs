@@ -15,6 +15,7 @@ public enum ShortcutAction
     Polyline,
     Spline,
     Point,
+    Text,
     Delete,
     Undo,
     Redo,

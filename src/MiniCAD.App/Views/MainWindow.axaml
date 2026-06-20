@@ -78,7 +78,9 @@
                             <MenuItem Header="_Löschen" Command="{Binding DeleteSelectionCommand}" InputGesture="Delete" />
                         </MenuItem>
                         <MenuItem Header="_Werkzeuge">
-                            <MenuItem Header="_Nullpunkt setzen" Command="{Binding ActivateSetNullPointCommand}" />
+                            <MenuItem Header="_Text / Beschriftung" Command="{Binding ActivateTextCommand}" InputGesture="X" />
+                        <Separator />
+                        <MenuItem Header="_Nullpunkt setzen" Command="{Binding ActivateSetNullPointCommand}" />
                             <MenuItem Header="Nullpunkt zu_rücksetzen" Command="{Binding ResetNullPointCommand}" />
                             <Separator />
                             <MenuItem Header="_Standard-Layer einfügen" Command="{Binding AddStandardLayersCommand}" />
@@ -187,6 +189,24 @@
             </StackPanel>
         </Border>
 
+        <!-- Inline text options (cap height, alignment, multi-line), shown while the text tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsTextActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding TextOptions}" x:DataType="vm:TextOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="TEXT" VerticalAlignment="Center" />
+                <TextBlock Text="Höhe" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                <TextBox Width="60" Text="{Binding HeightText}" FontFamily="{StaticResource Font.Mono}" />
+                <TextBlock Text="H" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                <ComboBox MinWidth="92" ItemsSource="{Binding HorizontalOptions}" SelectedItem="{Binding HorizontalAlignment}" />
+                <TextBlock Text="V" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                <ComboBox MinWidth="92" ItemsSource="{Binding VerticalOptions}" SelectedItem="{Binding VerticalAlignment}" />
+                <CheckBox Content="Mehrzeilig" IsChecked="{Binding Multiline}" VerticalAlignment="Center" Margin="6,0,0,0" />
+                <TextBlock Text="Klicken, tippen, ⏎ bestätigt · Doppelklick bearbeitet" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
+        </Border>
+
         <!-- Inline arc-mode selector, shown while the arc tool is active. -->
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
                 BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
@@ -276,6 +296,10 @@
                 <Button Classes="rail" Classes.active="{Binding IsPointActive}"
                         Command="{Binding ActivatePointCommand}" ToolTip.Tip="Punkt / Knoten  ·  N">
                     <Path Classes="ico" Data="{StaticResource Icon.Point}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsTextActive}"
+                        Command="{Binding ActivateTextCommand}" ToolTip.Tip="Text / Beschriftung  ·  X">
+                    <Path Classes="ico" Data="{StaticResource Icon.Text}" />
                 </Button>
 
                 <Border Classes="raildiv" />
@@ -372,6 +396,14 @@
             <controls:CadCanvasControl Grid.Column="0" x:Name="Canvas"
                                        Document="{Binding Document}" Viewport="{Binding Viewport}" Tools="{Binding Tools}"
                                        ShowGrid="{Binding Settings.ShowGrid}" SceneBackground="{Binding Settings.BackgroundColor}" />
+
+            <!-- In-place text editor, positioned over the canvas at the insertion point (code-behind). -->
+            <TextBox Grid.Column="0" x:Name="InlineTextEditor" IsVisible="False"
+                     HorizontalAlignment="Left" VerticalAlignment="Top" MinWidth="80"
+                     FontFamily="{StaticResource Font.Mono}" Padding="4,2"
+                     Background="{DynamicResource Brush.SurfaceChromeAlt}" Foreground="{DynamicResource Brush.TextBody}"
+                     BorderBrush="{DynamicResource Brush.Brand}" BorderThickness="1"
+                     KeyDown="OnInlineTextEditorKeyDown" LostFocus="OnInlineTextEditorLostFocus" />
 
             <GridSplitter Grid.Column="1" Width="5" Background="{DynamicResource Brush.BorderStrong}"
                           ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" />

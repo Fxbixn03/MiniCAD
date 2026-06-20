@@ -29,4 +29,20 @@ public interface IRenderSurface
     /// positive X axis; <paramref name="sweepAngle"/> may be negative for clockwise arcs.
     /// </summary>
     void DrawArc(Point2D center, double radius, double startAngle, double sweepAngle, in StrokeStyle stroke);
+
+    /// <summary>
+    /// Draws a single line of text. <paramref name="position"/> is the insertion point in world
+    /// coordinates and <paramref name="height"/> the cap height in world units, so the text
+    /// scales with zoom. <paramref name="rotation"/> is the baseline angle in radians, CCW from
+    /// the world X axis (text stays upright/readable, never mirrored, despite the Y-flip). The
+    /// alignment arguments anchor the run around <paramref name="position"/>.
+    /// </summary>
+    void DrawText(
+        string text,
+        Point2D position,
+        double height,
+        double rotation,
+        TextHAlign horizontalAlignment,
+        TextVAlign verticalAlignment,
+        in StrokeStyle stroke);
 }

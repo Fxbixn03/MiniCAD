@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -30,6 +32,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly PolylineTool _polylineTool = new();
     private readonly SplineTool _splineTool = new();
     private readonly PointTool _pointTool = new();
+    private readonly TextTool _textTool = new();
     private readonly SetNullPointTool _setNullPointTool = new();
 
     // Editing tools operating on the current selection (Epic: Bearbeitungswerkzeuge).
@@ -60,6 +63,10 @@ public partial class MainWindowViewModel : ViewModelBase
         ArrayOptions = new ArrayOptionsViewModel(_arrayTool);
         ArcOptions = new ArcOptionsViewModel(_arcTool);
         PointOptions = new PointOptionsViewModel(_pointTool);
+        TextOptions = new TextOptionsViewModel(_textTool);
+
+        // The text tool can't open a UI field itself; re-raise its request so the view can.
+        _textTool.EditRequested += request => TextEditRequested?.Invoke(request);
 
         Document.Changed += OnDocumentChanged;
         Document.CoordinateSystem.Changed += OnOriginChanged;
@@ -103,6 +110,8 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<PolylineEntity>(_polylineTool);
         Tools.RegisterQuickSelectTool<SplineEntity>(_splineTool);
         Tools.RegisterQuickSelectTool<PointEntity>(_pointTool);
+        Tools.RegisterQuickSelectTool<TextEntity>(_textTool);
+        Tools.RegisterQuickSelectTool<MTextEntity>(_textTool);
 
         Tools.SetActiveTool(_selectTool);
     }
@@ -152,11 +161,17 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Inline marker style/size, shown while the point tool is active.</summary>
     public PointOptionsViewModel PointOptions { get; }
 
+    /// <summary>Inline cap height/alignment, shown while the text tool is active.</summary>
+    public TextOptionsViewModel TextOptions { get; }
+
+    /// <summary>Raised when the text tool wants the view to open its inline editor.</summary>
+    public event Action<TextEditRequest>? TextEditRequested;
+
     /// <summary>True for tools that place points, where typed coordinate entry is meaningful.</summary>
     private bool IsCoordinateTool(ITool? tool)
         => tool == _lineTool || tool == _rectangleTool || tool == _circleTool
         || tool == _arcTool || tool == _ellipseTool || tool == _polylineTool || tool == _splineTool
-        || tool == _pointTool || tool == _setNullPointTool
+        || tool == _pointTool || tool == _textTool || tool == _setNullPointTool
         || tool == _moveTool || tool == _copyTool || tool == _rotateTool
         || tool == _mirrorTool || tool == _scaleTool || tool == _offsetTool;
 
@@ -248,6 +263,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsPolylineActive => Tools.ActiveTool == _polylineTool;
     public bool IsSplineActive => Tools.ActiveTool == _splineTool;
     public bool IsPointActive => Tools.ActiveTool == _pointTool;
+    public bool IsTextActive => Tools.ActiveTool == _textTool;
     public bool IsSetNullPointActive => Tools.ActiveTool == _setNullPointTool;
     public bool IsMoveActive => Tools.ActiveTool == _moveTool;
     public bool IsCopyActive => Tools.ActiveTool == _copyTool;
@@ -272,6 +288,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsPolylineActive));
         OnPropertyChanged(nameof(IsSplineActive));
         OnPropertyChanged(nameof(IsPointActive));
+        OnPropertyChanged(nameof(IsTextActive));
         OnPropertyChanged(nameof(IsSetNullPointActive));
         OnPropertyChanged(nameof(IsMoveActive));
         OnPropertyChanged(nameof(IsCopyActive));
@@ -394,6 +411,46 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void ActivatePoint() => ActivateDrawingTool(_pointTool);
+
+    [RelayCommand]
+    private void ActivateText() => ActivateDrawingTool(_textTool);
+
+    /// <summary>Commits the inline editor's content to the pending text-tool edit session.</summary>
+    public void CommitText(string text) => _textTool.Commit(text);
+
+    /// <summary>Aborts the pending text-tool edit session without changing the document.</summary>
+    public void CancelTextEdit() => _textTool.CancelEdit();
+
+    /// <summary>
+    /// Double-click handler: if a text entity sits under <paramref name="world"/>, switch to the
+    /// text tool and open its inline editor for editing (otherwise do nothing).
+    /// </summary>
+    public void EditTextAt(Point2D world)
+    {
+        if (PickTextEntity(world) is null)
+            return;
+
+        Tools.SetActiveTool(_textTool);
+        _textTool.BeginEditAt(world);
+    }
+
+    private IEntity? PickTextEntity(Point2D world)
+    {
+        double tolerance = Tools.PickTolerance;
+        IReadOnlyList<IEntity> entities = Document.Entities;
+        for (int i = entities.Count - 1; i >= 0; i--)
+        {
+            IEntity entity = entities[i];
+            if (entity is (TextEntity or MTextEntity)
+                && Document.IsEntityEditable(entity)
+                && entity.HitTest(world, tolerance))
+            {
+                return entity;
+            }
+        }
+
+        return null;
+    }
 
     /// <summary>Clears any Assistant style so the next entity uses the layer default again.</summary>
     private void ActivateDrawingTool(ITool tool)
@@ -533,6 +590,7 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Polyline: ActivatePolyline(); return true;
             case ShortcutAction.Spline: ActivateSpline(); return true;
             case ShortcutAction.Point: ActivatePoint(); return true;
+            case ShortcutAction.Text: ActivateText(); return true;
             case ShortcutAction.Move: ActivateMoveCommand.Execute(null); return true;
             case ShortcutAction.Copy: ActivateCopyCommand.Execute(null); return true;
             case ShortcutAction.Rotate: ActivateRotateCommand.Execute(null); return true;

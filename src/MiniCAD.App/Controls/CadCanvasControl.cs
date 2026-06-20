@@ -96,6 +96,9 @@ public sealed class CadCanvasControl : Control
     /// <summary>Raised as the cursor moves, with the world-space position under it.</summary>
     public event EventHandler<Point2D>? CursorWorldMoved;
 
+    /// <summary>Raised on a left-button double-click, with the world-space position under it.</summary>
+    public event EventHandler<Point2D>? DoubleClicked;
+
     private double Scaling => TopLevel.GetTopLevel(this)?.RenderScaling ?? 1.0;
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -308,6 +311,10 @@ public sealed class CadCanvasControl : Control
             return;
 
         tools.PointerDown(BuildInput(point.Position, button, e.KeyModifiers, e.ClickCount));
+
+        if (button == ToolButton.Left && e.ClickCount == 2)
+            DoubleClicked?.Invoke(this, Viewport.ScreenToWorld(ToDevicePoint(point.Position)));
+
         e.Pointer.Capture(this);
         e.Handled = true;
     }
