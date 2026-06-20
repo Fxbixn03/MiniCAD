@@ -57,6 +57,24 @@ public readonly struct Matrix2D : IEquatable<Matrix2D>
     public static Matrix2D Rotation(double radians, Point2D center)
         => Translation(-center.X, -center.Y) * Rotation(radians) * Translation(center.X, center.Y);
 
+    /// <summary>
+    /// Reflection across the line through <paramref name="a"/> and <paramref name="b"/>. When the
+    /// two points coincide the axis is undefined and <see cref="Identity"/> is returned. The
+    /// resulting transform has determinant -1 (orientation-reversing) but is still invertible —
+    /// in fact it is its own inverse — so it remains undoable.
+    /// </summary>
+    public static Matrix2D Reflection(Point2D a, Point2D b)
+    {
+        Vector2D direction = (b - a).Normalized();
+        if (direction == Vector2D.Zero)
+            return Identity;
+
+        double dx = direction.X;
+        double dy = direction.Y;
+        var linear = new Matrix2D(dx * dx - dy * dy, 2.0 * dx * dy, 2.0 * dx * dy, dy * dy - dx * dx, 0.0, 0.0);
+        return Translation(-a.X, -a.Y) * linear * Translation(a.X, a.Y);
+    }
+
     public Point2D Transform(Point2D p)
         => new(p.X * M11 + p.Y * M21 + OffsetX, p.X * M12 + p.Y * M22 + OffsetY);
 

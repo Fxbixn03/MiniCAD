@@ -77,11 +77,17 @@ public sealed class ArcEntity : Entity
 
     public override void Transform(in Matrix2D matrix)
     {
+        // Transform the start endpoint explicitly so the result is correct under any conformal
+        // transform, including reflections (mirror): a reflection reverses the sweep direction
+        // and the start angle is whatever the transformed start point now subtends.
+        Point2D start = PointAt(StartAngle);
         Center = matrix.Transform(Center);
         Radius *= matrix.UniformScale;
-        // Rotate the start angle by the transform's rotation component. Uniform scale and
-        // rotation preserve the sweep; reflections are not supported.
-        StartAngle += Math.Atan2(matrix.M12, matrix.M11);
+
+        Point2D transformedStart = matrix.Transform(start);
+        StartAngle = Math.Atan2(transformedStart.Y - Center.Y, transformedStart.X - Center.X);
+        if (matrix.Determinant < 0)
+            SweepAngle = -SweepAngle;
     }
 
     public override void Render(IRenderSurface surface, in StrokeStyle stroke)

@@ -21,4 +21,9 @@ public enum ShortcutAction
     OpenProject,
     Save,
     SaveAs,
+    Move,
+    Copy,
+    Rotate,
+    Mirror,
+    Scale,
 }

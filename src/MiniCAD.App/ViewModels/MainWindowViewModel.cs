@@ -28,6 +28,13 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly PolylineTool _polylineTool = new();
     private readonly SetNullPointTool _setNullPointTool = new();
 
+    // Editing tools operating on the current selection (Epic: Bearbeitungswerkzeuge).
+    private readonly MoveTool _moveTool = new(copy: false);
+    private readonly MoveTool _copyTool = new(copy: true);
+    private readonly RotateTool _rotateTool = new();
+    private readonly MirrorTool _mirrorTool = new();
+    private readonly ScaleTool _scaleTool = new();
+
     private string? _filePath;
 
     public MainWindowViewModel()
@@ -48,6 +55,11 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(StatusText));
             DeleteSelectionCommand.NotifyCanExecuteChanged();
             AddSelectionAsTemplateCommand.NotifyCanExecuteChanged();
+            ActivateMoveCommand.NotifyCanExecuteChanged();
+            ActivateCopyCommand.NotifyCanExecuteChanged();
+            ActivateRotateCommand.NotifyCanExecuteChanged();
+            ActivateMirrorCommand.NotifyCanExecuteChanged();
+            ActivateScaleCommand.NotifyCanExecuteChanged();
         };
         Tools.ActiveToolChanged += (_, _) =>
         {
@@ -113,7 +125,9 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>True for tools that place points, where typed coordinate entry is meaningful.</summary>
     private bool IsCoordinateTool(ITool? tool)
         => tool == _lineTool || tool == _rectangleTool || tool == _circleTool
-        || tool == _polylineTool || tool == _setNullPointTool;
+        || tool == _polylineTool || tool == _setNullPointTool
+        || tool == _moveTool || tool == _copyTool || tool == _rotateTool
+        || tool == _mirrorTool || tool == _scaleTool;
 
     /// <summary>Two-way bound to the snap toggle in the toolbar.</summary>
     [ObservableProperty]
@@ -171,6 +185,11 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsCircleActive => Tools.ActiveTool == _circleTool;
     public bool IsPolylineActive => Tools.ActiveTool == _polylineTool;
     public bool IsSetNullPointActive => Tools.ActiveTool == _setNullPointTool;
+    public bool IsMoveActive => Tools.ActiveTool == _moveTool;
+    public bool IsCopyActive => Tools.ActiveTool == _copyTool;
+    public bool IsRotateActive => Tools.ActiveTool == _rotateTool;
+    public bool IsMirrorActive => Tools.ActiveTool == _mirrorTool;
+    public bool IsScaleActive => Tools.ActiveTool == _scaleTool;
 
     private void RaiseActiveToolFlags()
     {
@@ -181,6 +200,11 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsCircleActive));
         OnPropertyChanged(nameof(IsPolylineActive));
         OnPropertyChanged(nameof(IsSetNullPointActive));
+        OnPropertyChanged(nameof(IsMoveActive));
+        OnPropertyChanged(nameof(IsCopyActive));
+        OnPropertyChanged(nameof(IsRotateActive));
+        OnPropertyChanged(nameof(IsMirrorActive));
+        OnPropertyChanged(nameof(IsScaleActive));
     }
 
     partial void OnProjectNameChanged(string value) => OnPropertyChanged(nameof(Title));
@@ -276,6 +300,24 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.SetActiveTool(tool);
     }
 
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ActivateMove() => Tools.SetActiveTool(_moveTool);
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ActivateCopy() => Tools.SetActiveTool(_copyTool);
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ActivateRotate() => Tools.SetActiveTool(_rotateTool);
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ActivateMirror() => Tools.SetActiveTool(_mirrorTool);
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ActivateScale() => Tools.SetActiveTool(_scaleTool);
+
+    /// <summary>True while at least one entity is selected (gates the editing tools).</summary>
+    private bool HasSelection => !Tools.Selection.IsEmpty;
+
     [RelayCommand]
     private void ActivateSetNullPoint() => Tools.SetActiveTool(_setNullPointTool);
 
@@ -365,6 +407,11 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Rectangle: ActivateRectangle(); return true;
             case ShortcutAction.Circle: ActivateCircle(); return true;
             case ShortcutAction.Polyline: ActivatePolyline(); return true;
+            case ShortcutAction.Move: ActivateMoveCommand.Execute(null); return true;
+            case ShortcutAction.Copy: ActivateCopyCommand.Execute(null); return true;
+            case ShortcutAction.Rotate: ActivateRotateCommand.Execute(null); return true;
+            case ShortcutAction.Mirror: ActivateMirrorCommand.Execute(null); return true;
+            case ShortcutAction.Scale: ActivateScaleCommand.Execute(null); return true;
             case ShortcutAction.Delete: DeleteSelectionCommand.Execute(null); return true;
             case ShortcutAction.Undo: UndoCommand.Execute(null); return true;
             case ShortcutAction.Redo: RedoCommand.Execute(null); return true;

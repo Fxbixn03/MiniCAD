@@ -63,6 +63,15 @@
                         <MenuItem Header="_Ansicht">
                             <MenuItem Header="_Zoom anpassen" Command="{Binding ZoomToFitCommand}" />
                         </MenuItem>
+                        <MenuItem Header="_Bearbeiten">
+                            <MenuItem Header="_Verschieben" Command="{Binding ActivateMoveCommand}" InputGesture="M" />
+                            <MenuItem Header="_Kopieren" Command="{Binding ActivateCopyCommand}" InputGesture="Shift+C" />
+                            <MenuItem Header="_Drehen" Command="{Binding ActivateRotateCommand}" InputGesture="Shift+R" />
+                            <MenuItem Header="_Spiegeln" Command="{Binding ActivateMirrorCommand}" InputGesture="Shift+M" />
+                            <MenuItem Header="S_kalieren" Command="{Binding ActivateScaleCommand}" InputGesture="Shift+S" />
+                            <Separator />
+                            <MenuItem Header="_Löschen" Command="{Binding DeleteSelectionCommand}" InputGesture="Delete" />
+                        </MenuItem>
                         <MenuItem Header="_Werkzeuge">
                             <MenuItem Header="_Nullpunkt setzen" Command="{Binding ActivateSetNullPointCommand}" />
                             <MenuItem Header="Nullpunkt zu_rücksetzen" Command="{Binding ResetNullPointCommand}" />
@@ -163,6 +172,30 @@
                 <Button Classes="rail" Classes.active="{Binding IsPolylineActive}"
                         Command="{Binding ActivatePolylineCommand}" ToolTip.Tip="Polylinie  ·  P">
                     <Path Classes="ico" Data="{StaticResource Icon.Polyline}" />
+                </Button>
+
+                <Border Classes="raildiv" />
+
+                <!-- Transform tools (operate on the current selection) -->
+                <Button Classes="rail" Classes.active="{Binding IsMoveActive}"
+                        Command="{Binding ActivateMoveCommand}" ToolTip.Tip="Verschieben  ·  M">
+                    <Path Classes="ico" Data="{StaticResource Icon.Move}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsCopyActive}"
+                        Command="{Binding ActivateCopyCommand}" ToolTip.Tip="Kopieren  ·  Shift+C">
+                    <Path Classes="ico" Data="{StaticResource Icon.Copy}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsRotateActive}"
+                        Command="{Binding ActivateRotateCommand}" ToolTip.Tip="Drehen  ·  Shift+R">
+                    <Path Classes="ico" Data="{StaticResource Icon.Rotate}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsMirrorActive}"
+                        Command="{Binding ActivateMirrorCommand}" ToolTip.Tip="Spiegeln  ·  Shift+M">
+                    <Path Classes="ico" Data="{StaticResource Icon.Mirror}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsScaleActive}"
+                        Command="{Binding ActivateScaleCommand}" ToolTip.Tip="Skalieren  ·  Shift+S">
+                    <Path Classes="ico" Data="{StaticResource Icon.Scale}" />
                 </Button>
 
                 <Border Classes="raildiv" />
