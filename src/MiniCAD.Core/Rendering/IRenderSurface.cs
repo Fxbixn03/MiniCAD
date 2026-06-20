@@ -12,6 +12,12 @@ namespace MiniCAD.Core.Rendering;
 /// </summary>
 public interface IRenderSurface
 {
+    /// <summary>
+    /// Scale factor for scale-dependent fills (hatch) relative to the 1:100 base, set per Teilbild
+    /// from its reference scale. Defaults to 1 for surfaces that don't vary it.
+    /// </summary>
+    double ModelScale => 1.0;
+
     void DrawLine(Point2D a, Point2D b, in StrokeStyle stroke);
 
     void DrawPolyline(IReadOnlyList<Point2D> points, bool closed, in StrokeStyle stroke);

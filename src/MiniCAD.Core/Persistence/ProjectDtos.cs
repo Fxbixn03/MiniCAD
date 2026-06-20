@@ -69,6 +69,9 @@ public sealed class PartialDrawingDto
     /// <summary>Active / Locked / Off.</summary>
     public ElementState? State { get; set; }
 
+    /// <summary>Reference scale denominator (e.g. 100 for 1:100).</summary>
+    public double ReferenceScale { get; set; } = 100.0;
+
     // Legacy field (pre-state files). Read for backward compatibility, never written.
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? Visible { get; set; }

@@ -133,11 +133,13 @@ public static class DocumentMapper
         Id = partialDrawing.Id,
         Name = partialDrawing.Name,
         State = partialDrawing.State,
+        ReferenceScale = partialDrawing.ReferenceScale,
     };
 
     private static PartialDrawing FromDto(PartialDrawingDto dto) => new(dto.Id, dto.Name)
     {
         State = dto.State ?? DeriveState(dto.Visible, locked: false),
+        ReferenceScale = dto.ReferenceScale,
     };
 
     // Maps legacy visible/locked flags onto the three-state model for older files.

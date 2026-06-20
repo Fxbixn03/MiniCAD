@@ -107,7 +107,7 @@ public sealed class PolylineEntity : Entity, IEditableEntity
         if (IsClosed && Fill is { } fill && _points.Count >= 3)
         {
             StrokeStyle hatchStroke = fill.Stroke;
-            foreach ((Point2D a, Point2D b) in HatchGeometry.Generate(_points, fill))
+            foreach ((Point2D a, Point2D b) in HatchGeometry.Generate(_points, fill, surface.ModelScale))
                 surface.DrawLine(a, b, hatchStroke);
         }
 

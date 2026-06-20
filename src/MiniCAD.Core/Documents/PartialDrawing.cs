@@ -25,6 +25,22 @@ public sealed class PartialDrawing
     /// <summary>Active / Locked / Off — see <see cref="ElementState"/>.</summary>
     public ElementState State { get; set; } = ElementState.Active;
 
+    /// <summary>
+    /// The Teilbild's reference scale denominator (e.g. 100 for 1:100). Scale-dependent display
+    /// (hatch density, and later text/dimensions) is sized relative to a 1:100 base, so a smaller
+    /// denominator renders denser. Always positive.
+    /// </summary>
+    private double _referenceScale = 100.0;
+
+    public double ReferenceScale
+    {
+        get => _referenceScale;
+        set => _referenceScale = value > 0 ? value : 100.0;
+    }
+
+    /// <summary>Hatch/annotation size factor relative to the 1:100 authoring base.</summary>
+    public double ModelScaleFactor => ReferenceScale / 100.0;
+
     /// <summary>Shown (Active or Locked).</summary>
     public bool IsVisible => State != ElementState.Off;
 

@@ -15,14 +15,28 @@ public static class HatchGeometry
 
     /// <summary>Generates every clipped segment for all line families of <paramref name="pattern"/>.</summary>
     public static List<(Point2D A, Point2D B)> Generate(IReadOnlyList<Point2D> polygon, HatchPattern pattern)
+        => Generate(polygon, pattern, spacingScale: 1.0);
+
+    /// <summary>
+    /// As <see cref="Generate(IReadOnlyList{Point2D}, HatchPattern)"/>, but scales every family's
+    /// spacing/offset by <paramref name="spacingScale"/> (used for a Teilbild's reference scale,
+    /// so the same pattern renders denser or coarser depending on 1:n).
+    /// </summary>
+    public static List<(Point2D A, Point2D B)> Generate(IReadOnlyList<Point2D> polygon, HatchPattern pattern, double spacingScale)
     {
         ArgumentNullException.ThrowIfNull(pattern);
         var segments = new List<(Point2D, Point2D)>();
         if (polygon.Count < 3)
             return segments;
 
+        bool scaled = Math.Abs(spacingScale - 1.0) > GeometryMath.Epsilon && spacingScale > 0;
         foreach (HatchLineDefinition family in pattern.Lines)
-            Generate(polygon, family, segments);
+        {
+            HatchLineDefinition resolved = scaled
+                ? family with { Spacing = family.Spacing * spacingScale, Offset = family.Offset * spacingScale }
+                : family;
+            Generate(polygon, resolved, segments);
+        }
 
         return segments;
     }

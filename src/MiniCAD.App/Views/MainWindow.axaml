@@ -465,6 +465,12 @@
                                                 <ComboBoxItem>Passiv</ComboBoxItem>
                                                 <ComboBoxItem>Aus</ComboBoxItem>
                                             </ComboBox>
+                                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2"
+                                                        VerticalAlignment="Center" Margin="6,0,0,0"
+                                                        ToolTip.Tip="Bezugsmaßstab 1:n (skaliert die Schraffurdichte)">
+                                                <TextBlock Text="1:" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                                                <TextBox Text="{Binding ScaleDenominator}" Width="44" FontFamily="{StaticResource Font.Mono}" />
+                                            </StackPanel>
                                             <Border DockPanel.Dock="Right" Classes="badge brand" Margin="6,0,0,0"
                                                     VerticalAlignment="Center" IsVisible="{Binding IsCurrent}"
                                                     ToolTip.Tip="Aktuelles Teilbild – neue Geometrie landet hier">

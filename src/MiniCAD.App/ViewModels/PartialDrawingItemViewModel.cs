@@ -14,6 +14,7 @@ public partial class PartialDrawingItemViewModel : ViewModelBase
         Model = model;
         _name = model.Name;
         _state = model.State;
+        _scaleDenominator = (int)model.ReferenceScale;
     }
 
     public PartialDrawing Model { get; }
@@ -23,6 +24,16 @@ public partial class PartialDrawingItemViewModel : ViewModelBase
 
     [ObservableProperty]
     private ElementState _state;
+
+    /// <summary>Reference scale denominator (the "n" in 1:n) for this Teilbild.</summary>
+    [ObservableProperty]
+    private int _scaleDenominator;
+
+    partial void OnScaleDenominatorChanged(int value)
+    {
+        if (value > 0)
+            _document.SetPartialDrawingReferenceScale(Model, value);
+    }
 
     /// <summary>State as a 0/1/2 index for the dropdown (Aktiv / Passiv / Aus).</summary>
     public int StateIndex

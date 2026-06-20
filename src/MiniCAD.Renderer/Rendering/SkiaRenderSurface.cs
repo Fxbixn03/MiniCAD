@@ -30,6 +30,9 @@ internal sealed class SkiaRenderSurface : IRenderSurface, IDisposable
         };
     }
 
+    /// <summary>Scale-dependent fill factor (set per Teilbild from its reference scale).</summary>
+    public double ModelScale { get; set; } = 1.0;
+
     public void DrawLine(Point2D a, Point2D b, in StrokeStyle stroke)
     {
         ApplyStroke(stroke);

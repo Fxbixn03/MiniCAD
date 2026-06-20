@@ -207,6 +207,16 @@ public sealed class CadDocument : ICadDocument
         Raise(DocumentChangedEventArgs.ForPartialDrawing(DocumentChangeKind.PartialDrawingModified, partialDrawing));
     }
 
+    /// <summary>Sets a Teilbild's reference scale denominator (e.g. 50 for 1:50) and notifies.</summary>
+    public void SetPartialDrawingReferenceScale(PartialDrawing partialDrawing, double referenceScale)
+    {
+        if (partialDrawing.ReferenceScale == referenceScale)
+            return;
+
+        partialDrawing.ReferenceScale = referenceScale;
+        Raise(DocumentChangedEventArgs.ForPartialDrawing(DocumentChangeKind.PartialDrawingModified, partialDrawing));
+    }
+
     public void RenamePartialDrawing(PartialDrawing partialDrawing, string name)
     {
         partialDrawing.Name = name;

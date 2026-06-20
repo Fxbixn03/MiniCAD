@@ -83,6 +83,7 @@ public sealed class SkiaSceneRenderer
                     continue;
 
                 bool teilbildPassive = partialDrawing.State == ElementState.Locked;
+                surface.ModelScale = partialDrawing.ModelScaleFactor; // scales hatch density per 1:n
 
                 foreach (IEntity entity in document.Entities)
                 {
