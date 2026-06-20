@@ -497,4 +497,44 @@ public class ToolTests
 
         OffsetGeometry.Offset(line, new Point2D(4, 0)).Should().BeNull();
     }
+
+    /// <summary>Runs the four-click stretch gesture: window corners, then base and target.</summary>
+    private static void StretchGesture(StretchTool tool, Point2D c1, Point2D c2, Point2D basePoint, Point2D target)
+    {
+        tool.PointerDown(Click(c1.X, c1.Y));
+        tool.PointerDown(Click(c2.X, c2.Y));
+        tool.PointerDown(Click(basePoint.X, basePoint.Y));
+        tool.PointerDown(Click(target.X, target.Y));
+    }
+
+    [Fact]
+    public void StretchTool_MovesOnlyVerticesInsideWindow()
+    {
+        (CadDocument doc, TestToolContext ctx) = Setup<StretchTool>(out StretchTool tool);
+        var line = new LineEntity(new Point2D(0, 0), new Point2D(10, 0));
+        doc.AddEntity(line);
+
+        // Window encloses only the right endpoint; drag it up by 4.
+        StretchGesture(tool, new Point2D(8, -2), new Point2D(12, 2), new Point2D(10, 0), new Point2D(10, 4));
+
+        line.Start.Should().Be(new Point2D(0, 0));   // outside the window: fixed
+        line.End.Should().Be(new Point2D(10, 4));    // inside the window: moved
+
+        ctx.Commands.Undo();
+        line.End.Should().Be(new Point2D(10, 0));    // single undoable step
+    }
+
+    [Fact]
+    public void StretchTool_FullyEnclosed_MovesWholeObject()
+    {
+        (CadDocument doc, _) = Setup<StretchTool>(out StretchTool tool);
+        var line = new LineEntity(new Point2D(0, 0), new Point2D(2, 0));
+        doc.AddEntity(line);
+
+        // Window encloses both endpoints -> the whole line shifts by the displacement.
+        StretchGesture(tool, new Point2D(-1, -1), new Point2D(3, 1), new Point2D(0, 0), new Point2D(5, 5));
+
+        line.Start.Should().Be(new Point2D(5, 5));
+        line.End.Should().Be(new Point2D(7, 5));
+    }
 }

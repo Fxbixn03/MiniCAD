@@ -36,6 +36,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly ScaleTool _scaleTool = new();
     private readonly OffsetTool _offsetTool = new();
     private readonly TrimExtendTool _trimTool = new();
+    private readonly StretchTool _stretchTool = new();
 
     private string? _filePath;
 
@@ -194,6 +195,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsScaleActive => Tools.ActiveTool == _scaleTool;
     public bool IsOffsetActive => Tools.ActiveTool == _offsetTool;
     public bool IsTrimActive => Tools.ActiveTool == _trimTool;
+    public bool IsStretchActive => Tools.ActiveTool == _stretchTool;
 
     private void RaiseActiveToolFlags()
     {
@@ -211,6 +213,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsScaleActive));
         OnPropertyChanged(nameof(IsOffsetActive));
         OnPropertyChanged(nameof(IsTrimActive));
+        OnPropertyChanged(nameof(IsStretchActive));
     }
 
     partial void OnProjectNameChanged(string value) => OnPropertyChanged(nameof(Title));
@@ -329,6 +332,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ActivateTrim() => Tools.SetActiveTool(_trimTool);
 
+    /// <summary>Stretch captures its own crossing window, so it needs no prior selection.</summary>
+    [RelayCommand]
+    private void ActivateStretch() => Tools.SetActiveTool(_stretchTool);
+
     /// <summary>True while at least one entity is selected (gates the editing tools).</summary>
     private bool HasSelection => !Tools.Selection.IsEmpty;
 
@@ -428,6 +435,7 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Scale: ActivateScaleCommand.Execute(null); return true;
             case ShortcutAction.Offset: ActivateOffsetCommand.Execute(null); return true;
             case ShortcutAction.Trim: ActivateTrimCommand.Execute(null); return true;
+            case ShortcutAction.Stretch: ActivateStretchCommand.Execute(null); return true;
             case ShortcutAction.Delete: DeleteSelectionCommand.Execute(null); return true;
             case ShortcutAction.Undo: UndoCommand.Execute(null); return true;
             case ShortcutAction.Redo: RedoCommand.Execute(null); return true;

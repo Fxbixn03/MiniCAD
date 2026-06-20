@@ -28,4 +28,5 @@ public enum ShortcutAction
     Scale,
     Offset,
     Trim,
+    Stretch,
 }

@@ -71,6 +71,7 @@
                             <MenuItem Header="S_kalieren" Command="{Binding ActivateScaleCommand}" InputGesture="Shift+S" />
                             <MenuItem Header="_Parallele (Offset)" Command="{Binding ActivateOffsetCommand}" InputGesture="O" />
                             <MenuItem Header="S_tutzen / Dehnen" Command="{Binding ActivateTrimCommand}" InputGesture="T" />
+                            <MenuItem Header="_Dehnen (Fenster)" Command="{Binding ActivateStretchCommand}" InputGesture="S" />
                             <Separator />
                             <MenuItem Header="_Löschen" Command="{Binding DeleteSelectionCommand}" InputGesture="Delete" />
                         </MenuItem>
@@ -206,6 +207,10 @@
                 <Button Classes="rail" Classes.active="{Binding IsTrimActive}"
                         Command="{Binding ActivateTrimCommand}" ToolTip.Tip="Stutzen / Dehnen (Shift)  ·  T">
                     <Path Classes="ico" Data="{StaticResource Icon.Trim}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsStretchActive}"
+                        Command="{Binding ActivateStretchCommand}" ToolTip.Tip="Dehnen mit Kreuzungsfenster  ·  S">
+                    <Path Classes="ico" Data="{StaticResource Icon.Stretch}" />
                 </Button>
 
                 <Border Classes="raildiv" />
