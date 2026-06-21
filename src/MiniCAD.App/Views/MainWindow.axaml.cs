@@ -364,6 +364,15 @@ public partial class MainWindow : Window
         window.Show(this);
     }
 
+    private void OnMassTakeoff(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel is not { } viewModel)
+            return;
+
+        var rows = MiniCAD.Core.Model3D.MassTakeoff.Compute(viewModel.Document.Models);
+        new MassTakeoffWindow(rows).Show(this);
+    }
+
     private void OnExit(object? sender, RoutedEventArgs e) => Close();
 
     private void OnPartialDrawingSelection(object? sender, RoutedEventArgs e)

@@ -129,6 +129,7 @@
                             <MenuItem Header="_Schnittzeichen platzieren" Command="{Binding PlaceSectionMarkCommand}" />
                             <MenuItem Header="_Detailzeichen platzieren" Command="{Binding PlaceDetailMarkCommand}" />
                             <MenuItem Header="Schnitt aus _Modell erzeugen (#93)" Command="{Binding GenerateSectionCommand}" />
+                            <MenuItem Header="_Massenauszug (3D)…" Click="OnMassTakeoff" />
                             <Separator />
                             <MenuItem Header="_Teilbild-Auswahl…" Click="OnPartialDrawingSelection" />
                             <Separator />

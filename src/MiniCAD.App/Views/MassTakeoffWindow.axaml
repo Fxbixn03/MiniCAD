@@ -1,0 +1,42 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:m3d="using:MiniCAD.Core.Model3D"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="520" d:DesignHeight="420"
+        x:Class="MiniCAD.App.Views.MassTakeoffWindow"
+        Title="Massenauszug (3D)"
+        Width="520" Height="420"
+        Background="{DynamicResource Brush.SurfaceApp}"
+        Foreground="{DynamicResource Brush.TextBody}"
+        CanResize="True" WindowStartupLocation="CenterOwner">
+    <DockPanel Margin="14">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="CSV in Zwischenablage" Click="OnCopyCsv" />
+            <Button Content="Schließen" Click="OnClose" />
+        </StackPanel>
+
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,70,110,110" Margin="0,0,0,6">
+            <TextBlock Grid.Column="0" Text="Material" FontWeight="SemiBold" Foreground="{DynamicResource Brush.TextMuted}" />
+            <TextBlock Grid.Column="1" Text="Anzahl" FontWeight="SemiBold" Foreground="{DynamicResource Brush.TextMuted}" HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="2" Text="Volumen [m³]" FontWeight="SemiBold" Foreground="{DynamicResource Brush.TextMuted}" HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="3" Text="Masse [kg]" FontWeight="SemiBold" Foreground="{DynamicResource Brush.TextMuted}" HorizontalAlignment="Right" />
+        </Grid>
+        <Border DockPanel.Dock="Top" Height="1" Background="{DynamicResource Brush.BorderSubtle}" Margin="0,0,0,4" />
+
+        <ScrollViewer>
+            <ItemsControl x:Name="RowsHost">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="m3d:MassTakeoffRow">
+                        <Grid ColumnDefinitions="*,70,110,110" Margin="0,3">
+                            <TextBlock Grid.Column="0" Text="{Binding Material}" />
+                            <TextBlock Grid.Column="1" Text="{Binding Count}" HorizontalAlignment="Right" />
+                            <TextBlock Grid.Column="2" Text="{Binding VolumeM3, StringFormat='{}{0:0.###}'}" HorizontalAlignment="Right" />
+                            <TextBlock Grid.Column="3" Text="{Binding MassKg, StringFormat='{}{0:0.#}'}" HorizontalAlignment="Right" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

@@ -1247,6 +1247,21 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private Model3DObject? _selected3DModel;
 
+    /// <summary>Shows volume / surface area / mass of the picked body (3D measure, #268/#270).</summary>
+    partial void OnSelected3DModelChanged(Model3DObject? value)
+    {
+        if (value is null)
+            return;
+
+        MeshMetrics m = MeshMetrics.Compute(value.WorldMesh());
+        double volumeM3 = m.Volume * 1e-9;   // mm³ → m³
+        double areaM2 = m.SurfaceArea * 1e-6; // mm² → m²
+        string mass = value.Material is { Density: > 0 } mat
+            ? $" · {volumeM3 * mat.Density:0.#} kg"
+            : string.Empty;
+        StatusMessage = $"{value.Name}: V {volumeM3:0.###} m³ · A {areaM2:0.##} m²{mass}";
+    }
+
     private const double Move3DStep = 250.0;
 
     /// <summary>True if a manually-created (non-derived) 3D solid is selected and can be edited.</summary>
