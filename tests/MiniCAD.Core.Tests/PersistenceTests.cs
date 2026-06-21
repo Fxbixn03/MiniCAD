@@ -61,6 +61,21 @@ public class PersistenceTests
     }
 
     [Fact]
+    public void RoundTrip_PreservesPolylineBulges()
+    {
+        var source = new CadDocument();
+        var poly = new PolylineEntity(new[] { new Point2D(0, 0), new Point2D(10, 0), new Point2D(10, 10) });
+        poly.SetBulge(0, 0.5);
+        source.AddEntity(poly);
+
+        CadDocument restored = RoundTrip(source);
+
+        var restoredPoly = restored.Entities.OfType<PolylineEntity>().Single();
+        restoredPoly.GetBulge(0).Should().BeApproximately(0.5, 1e-9);
+        restoredPoly.GetBulge(1).Should().Be(0.0);
+    }
+
+    [Fact]
     public void RoundTrip_PreservesSectionAndDetailMarks()
     {
         var source = new CadDocument();

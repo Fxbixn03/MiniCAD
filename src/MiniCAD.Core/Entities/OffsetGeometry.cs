@@ -95,7 +95,7 @@ public static class OffsetGeometry
         }
 
         var clone = (PolylineEntity)polyline.Clone();
-        clone.RestoreState((result, polyline.IsClosed, polyline.SolidFill));
+        clone.RestoreState((result, polyline.IsClosed, polyline.SolidFill, new List<double>()));
         return clone;
     }
 

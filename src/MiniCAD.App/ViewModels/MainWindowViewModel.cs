@@ -54,6 +54,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly ScaleTool _scaleTool = new();
     private readonly OffsetTool _offsetTool = new();
     private readonly BreakTool _breakTool = new();
+    private readonly PolylineEditTool _polylineEditTool = new();
     private readonly TrimExtendTool _trimTool = new();
     private readonly StretchTool _stretchTool = new();
     private readonly FilletTool _filletTool = new();
@@ -752,6 +753,26 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _breakTool.TwoPoint = true;
         Tools.SetActiveTool(_breakTool);
+    }
+
+    /// <summary>Activates the polyline vertex editor in the given mode (#188).</summary>
+    [RelayCommand]
+    private void EditPolyline(string mode)
+    {
+        _polylineEditTool.Mode = mode switch
+        {
+            "Remove" => PolylineEditMode.RemoveVertex,
+            "Arc" => PolylineEditMode.ToggleArc,
+            _ => PolylineEditMode.AddVertex,
+        };
+        _polylineEditTool.InitialTarget = Tools.Selection.Items.OfType<PolylineEntity>().FirstOrDefault();
+        Tools.SetActiveTool(_polylineEditTool);
+        StatusMessage = _polylineEditTool.Mode switch
+        {
+            PolylineEditMode.RemoveVertex => "Polylinie: Stützpunkt anklicken zum Löschen.",
+            PolylineEditMode.ToggleArc => "Polylinie: Segment anklicken, um Gerade/Bogen umzuschalten.",
+            _ => "Polylinie: auf ein Segment klicken, um einen Stützpunkt einzufügen.",
+        };
     }
 
     /// <summary>Array repeats the current selection; needs something selected first.</summary>

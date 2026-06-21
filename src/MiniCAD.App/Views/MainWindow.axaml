@@ -78,6 +78,11 @@
                             <MenuItem Header="_Abrundung / Fase" Command="{Binding ActivateFilletCommand}" InputGesture="Shift+F" />
                             <MenuItem Header="Trennen am _Punkt" Command="{Binding ActivateBreakAtPointCommand}" />
                             <MenuItem Header="_Bruch (zwei Punkte)" Command="{Binding ActivateBreakCommand}" />
+                            <MenuItem Header="Polylinie bearbeiten">
+                                <MenuItem Header="Stützpunkt _hinzufügen" Command="{Binding EditPolylineCommand}" CommandParameter="Add" />
+                                <MenuItem Header="Stützpunkt _löschen" Command="{Binding EditPolylineCommand}" CommandParameter="Remove" />
+                                <MenuItem Header="Gerade/_Bogen umschalten" Command="{Binding EditPolylineCommand}" CommandParameter="Arc" />
+                            </MenuItem>
                             <MenuItem Header="_Array (Raster / polar)" Command="{Binding ActivateArrayCommand}" InputGesture="Shift+A" />
                             <Separator />
                             <MenuItem Header="_Gruppieren" Command="{Binding GroupSelectionCommand}" InputGesture="Ctrl+G" />

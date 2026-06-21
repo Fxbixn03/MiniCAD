@@ -287,6 +287,9 @@ public sealed class PolylineDto : EntityDto
     public List<PointDto> Points { get; set; } = new();
     public bool Closed { get; set; }
 
+    /// <summary>Per-segment bulges (arc factor; 0 = straight). Empty/short = all straight.</summary>
+    public List<double> Bulges { get; set; } = new();
+
     /// <summary>Id of the hatch pattern filling the region, or <c>null</c> for no fill.</summary>
     public Guid? FillPatternId { get; set; }
 

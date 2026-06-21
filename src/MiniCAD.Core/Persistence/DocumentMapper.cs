@@ -342,6 +342,7 @@ public static class DocumentMapper
             PolylineEntity poly => new PolylineDto
             {
                 Points = poly.Points.Select(ToDto).ToList(),
+                Bulges = poly.Bulges.Any(b => b != 0.0) ? poly.Bulges.ToList() : new List<double>(),
                 Closed = poly.IsClosed,
                 FillPatternId = poly.Fill?.Id,
                 Filled = poly.SolidFill.HasValue,
@@ -489,7 +490,7 @@ public static class DocumentMapper
             LineDto line => new LineEntity(FromDto(line.Start), FromDto(line.End)),
             CircleDto circle => new CircleEntity(FromDto(circle.Center), circle.Radius),
             ArcDto arc => new ArcEntity(FromDto(arc.Center), arc.Radius, arc.StartAngle, arc.SweepAngle),
-            PolylineDto poly => new PolylineEntity(poly.Points.Select(FromDto), poly.Closed)
+            PolylineDto poly => new PolylineEntity(poly.Points.Select(FromDto), poly.Bulges, poly.Closed)
             {
                 SolidFill = poly.Filled
                     ? new FillStyle(FromDto(poly.FillColor), FromDto(poly.FillColor2), poly.FillGradient, poly.FillAngle)
