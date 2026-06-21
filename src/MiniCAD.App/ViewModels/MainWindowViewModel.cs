@@ -56,6 +56,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly OffsetTool _offsetTool = new();
     private readonly BreakTool _breakTool = new();
     private readonly PolylineEditTool _polylineEditTool = new();
+    private readonly Services.ArchModelSync _archModelSync;
     private readonly TrimExtendTool _trimTool = new();
     private readonly StretchTool _stretchTool = new();
     private readonly FilletTool _filletTool = new();
@@ -66,6 +67,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         Document = new CadDocument();
+        _archModelSync = new Services.ArchModelSync(Document); // live 3D from 2D architectural entities (#73)
         Tools = new ToolManager(Document, _commands, Viewport) { DefaultTool = _selectTool };
         Settings = new SettingsViewModel(Shortcuts);
         Attributes = new AttributesViewModel(Document, Tools.Selection, _commands);

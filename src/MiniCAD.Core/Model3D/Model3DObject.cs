@@ -36,6 +36,12 @@ public sealed class Model3DObject
 
     public Color Color { get; set; }
 
+    /// <summary>
+    /// True for models generated live from 2D source entities (e.g. walls). Derived models are
+    /// rebuilt on every document change and are not persisted — they regenerate on load.
+    /// </summary>
+    public bool IsDerived { get; set; }
+
     /// <summary>The mesh placed into world coordinates.</summary>
     public Mesh3D WorldMesh() => Mesh.Transformed(Transform);
 

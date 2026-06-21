@@ -49,7 +49,8 @@ public static class DocumentMapper
             dto.BlockDefinitions.Add(ToDto(definition));
 
         foreach (Model3DObject model in document.Models)
-            dto.Models.Add(ToDto(model));
+            if (!model.IsDerived) // derived models (e.g. walls) regenerate from their 2D source
+                dto.Models.Add(ToDto(model));
 
         foreach (PartialDrawing partialDrawing in document.PartialDrawings)
             dto.PartialDrawings.Add(ToDto(partialDrawing));
