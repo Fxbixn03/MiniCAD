@@ -12,6 +12,7 @@ using MiniCAD.App.Input;
 using MiniCAD.App.ViewModels;
 using MiniCAD.App.ViewModels.Toolbar;
 using MiniCAD.Core.Geometry;
+using MiniCAD.Core.Interop;
 using MiniCAD.Core.Tools;
 
 namespace MiniCAD.App.Views;
@@ -20,6 +21,9 @@ public partial class MainWindow : Window
 {
     private static readonly FilePickerFileType ProjectFileType =
         new("MiniCAD Projekt") { Patterns = new[] { "*.mcad" } };
+
+    private static readonly FilePickerFileType StlFileType = new("STL") { Patterns = new[] { "*.stl" } };
+    private static readonly FilePickerFileType ObjFileType = new("Wavefront OBJ") { Patterns = new[] { "*.obj" } };
 
     private static readonly FilePickerFileType ImageFileType =
         new("Bilder") { Patterns = new[] { "*.png", "*.jpg", "*.jpeg", "*.bmp", "*.gif" } };
@@ -362,6 +366,80 @@ public partial class MainWindow : Window
         // Same document (live model) and render mode, independent camera.
         var window = new View3DWindow(viewModel, viewModel.Document, new MiniCAD.Core.Viewing.Camera3D());
         window.Show(this);
+    }
+
+    private void OnExportMesh(object? sender, RoutedEventArgs e) => _ = ExportMeshAsync();
+    private void OnImportMesh(object? sender, RoutedEventArgs e) => _ = ImportMeshAsync();
+
+    private async Task ExportMeshAsync()
+    {
+        if (ViewModel is not { } viewModel || StorageProvider is not { } storage)
+            return;
+        if (viewModel.Document.Models.Count == 0)
+        {
+            viewModel.StatusMessage = "Kein 3D-Modell zum Exportieren vorhanden.";
+            return;
+        }
+
+        Avalonia.Platform.Storage.IStorageFile? file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "3D-Modell exportieren",
+            FileTypeChoices = new[] { StlFileType, ObjFileType },
+            DefaultExtension = "stl",
+            SuggestedFileName = "modell",
+        });
+        if (file is null)
+            return;
+
+        try
+        {
+            var worldMeshes = viewModel.Document.Models.Select(m => m.WorldMesh()).ToList();
+            string path = file.Path.LocalPath;
+            string content = path.EndsWith(".obj", StringComparison.OrdinalIgnoreCase)
+                ? MeshExchange.WriteObj(viewModel.Document.Models.Select(m => (m.WorldMesh(), m.Name)).ToList())
+                : MeshExchange.WriteStl(MeshExchange.Combine(worldMeshes));
+
+            await using Stream output = await file.OpenWriteAsync();
+            await using var writer = new StreamWriter(output);
+            await writer.WriteAsync(content);
+            viewModel.StatusMessage = $"Modell exportiert: {path}";
+        }
+        catch (Exception ex)
+        {
+            viewModel.StatusMessage = $"Export fehlgeschlagen: {ex.Message}";
+        }
+    }
+
+    private async Task ImportMeshAsync()
+    {
+        if (ViewModel is not { } viewModel || StorageProvider is not { } storage)
+            return;
+
+        var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "3D-Mesh importieren",
+            AllowMultiple = false,
+            FileTypeFilter = new[] { StlFileType, ObjFileType },
+        });
+        if (files.Count == 0)
+            return;
+
+        try
+        {
+            await using Stream source = await files[0].OpenReadAsync();
+            using var reader = new StreamReader(source);
+            string text = await reader.ReadToEndAsync();
+            string name = files[0].Name;
+
+            MiniCAD.Core.Model3D.Mesh3D mesh = name.EndsWith(".obj", StringComparison.OrdinalIgnoreCase)
+                ? MeshExchange.ReadObj(text)
+                : MeshExchange.ReadStl(text);
+            viewModel.AddImportedModel(mesh, name);
+        }
+        catch (Exception ex)
+        {
+            viewModel.StatusMessage = $"Import fehlgeschlagen: {ex.Message}";
+        }
     }
 
     private void OnMassTakeoff(object? sender, RoutedEventArgs e)

@@ -62,6 +62,9 @@
                             <MenuItem Header="_Speichern" Click="OnSaveProject" InputGesture="Ctrl+S" />
                             <MenuItem Header="Speichern _unter…" Click="OnSaveProjectAs" InputGesture="Ctrl+Shift+S" />
                             <Separator />
+                            <MenuItem Header="3D-Mesh _importieren (STL/OBJ)…" Click="OnImportMesh" />
+                            <MenuItem Header="3D-Modell _exportieren (STL/OBJ)…" Click="OnExportMesh" />
+                            <Separator />
                             <MenuItem Header="_Beenden" Click="OnExit" />
                         </MenuItem>
                         <MenuItem Header="_Ansicht">

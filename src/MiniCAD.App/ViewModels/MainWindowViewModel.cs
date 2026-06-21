@@ -1451,6 +1451,23 @@ public partial class MainWindowViewModel : ViewModelBase
         StatusMessage = $"Vorlage „{item.Name}“ aktiv.";
     }
 
+    /// <summary>Adds an imported mesh as a manual 3D model object (undoable).</summary>
+    public void AddImportedModel(Mesh3D mesh, string name)
+    {
+        if (mesh.Indices.Count == 0)
+        {
+            StatusMessage = "Import enthielt keine Geometrie.";
+            return;
+        }
+
+        var model = new Model3DObject(mesh, name) { Color = new Core.Styling.Color(170, 195, 225) };
+        _commands.Execute(new AddModelCommand(Document, model));
+        if (Document.GetModelBounds() is { } bounds)
+            Camera3D.ZoomToFit(bounds);
+        Selected3DModel = model;
+        StatusMessage = $"Mesh importiert: {name} ({mesh.Indices.Count / 3} Dreiecke).";
+    }
+
     /// <summary>Finds the layer with <paramref name="name"/> or creates it (with the template stroke).</summary>
     private Layer EnsureLayer(string name, Core.Styling.StrokeStyle? stroke)
     {
