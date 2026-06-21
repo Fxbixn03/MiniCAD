@@ -46,27 +46,41 @@ public partial class AssistantViewModel : ViewModelBase
 
     public void UseSelected() => Use(SelectedTemplate);
 
-    /// <summary>Captures an entity's tool kind and stroke as a new, persisted template.</summary>
-    public void AddFromEntity(IEntity entity, CoreStroke resolvedStroke)
+    /// <summary>Captures an entity (incl. architectural elements) as a new, persisted template.</summary>
+    public void AddFromEntity(IEntity entity, CoreStroke resolvedStroke, string? layerName)
     {
-        AssistantToolKind? kind = entity switch
+        CoreStroke stroke = entity.StrokeOverride ?? resolvedStroke;
+
+        AssistantItemViewModel? item = entity switch
         {
-            LineEntity => AssistantToolKind.Line,
-            CircleEntity => AssistantToolKind.Circle,
-            PolylineEntity { IsClosed: true } => AssistantToolKind.Rectangle,
-            PolylineEntity => AssistantToolKind.Polyline,
+            WallEntity w => new AssistantItemViewModel($"Wand {(int)w.Thickness}", AssistantToolKind.Wall, stroke, false,
+                layerName, thickness: w.Thickness, height: w.Height, baseElevation: w.BaseElevation),
+            OpeningEntity o => new AssistantItemViewModel($"Aussparung H{(int)o.Height}", AssistantToolKind.Opening, stroke, false,
+                layerName, width: o.Width, height: o.Height, baseElevation: o.BaseElevation),
+            ColumnEntity c => new AssistantItemViewModel(
+                c.Round ? $"Rundstütze ⌀{(int)c.Width}" : $"Stütze {(int)c.Width}×{(int)c.Depth}",
+                AssistantToolKind.Column, stroke, false, layerName,
+                round: c.Round, width: c.Width, depth: c.Depth, height: c.Height, baseElevation: c.BaseElevation),
+            SlabEntity s => new AssistantItemViewModel($"Decke {(int)s.Thickness}", AssistantToolKind.Slab, stroke, false,
+                layerName, thickness: s.Thickness, baseElevation: s.BaseElevation),
+            BeamEntity b => new AssistantItemViewModel($"Unterzug {(int)b.Width}×{(int)b.Height}", AssistantToolKind.Beam, stroke, false,
+                layerName, width: b.Width, height: b.Height, baseElevation: b.BaseElevation),
+            LineEntity => Make(AssistantToolKind.Line, stroke, layerName),
+            CircleEntity => Make(AssistantToolKind.Circle, stroke, layerName),
+            PolylineEntity { IsClosed: true } => Make(AssistantToolKind.Rectangle, stroke, layerName),
+            PolylineEntity => Make(AssistantToolKind.Polyline, stroke, layerName),
             _ => null,
         };
-        if (kind is not { } toolKind)
+        if (item is null)
             return;
 
-        CoreStroke stroke = entity.StrokeOverride ?? resolvedStroke;
-        string name = $"{ToolLabel(toolKind)} {(int)stroke.Width}px";
-        var item = new AssistantItemViewModel(name, toolKind, stroke, isBuiltIn: false);
         Templates.Add(item);
         SelectedTemplate = item;
         SaveUserTemplates();
     }
+
+    private static AssistantItemViewModel Make(AssistantToolKind kind, CoreStroke stroke, string? layerName)
+        => new($"{ToolLabel(kind)} {(int)stroke.Width}px", kind, stroke, isBuiltIn: false, layerName: layerName);
 
     [RelayCommand]
     private void RemoveSelected()
@@ -88,6 +102,27 @@ public partial class AssistantViewModel : ViewModelBase
         yield return new AssistantItemViewModel("Hilfslinie", AssistantToolKind.Line, new CoreStroke(new CoreColor(120, 120, 140), 0.5), true);
         yield return new AssistantItemViewModel("Rechteck", AssistantToolKind.Rectangle, new CoreStroke(white, 1.5), true);
         yield return new AssistantItemViewModel("Kreis", AssistantToolKind.Circle, new CoreStroke(white, 1.5), true);
+
+        // Architectural elements (Allplan-style assistants): full geometry + layer + line weight.
+        var wallColor = new CoreColor(210, 205, 195);
+        yield return new AssistantItemViewModel("Außenwand 36,5", AssistantToolKind.Wall, new CoreStroke(wallColor, 2.0), true,
+            layerName: "Wände tragend", thickness: 365, height: 2750);
+        yield return new AssistantItemViewModel("Tragwand 24", AssistantToolKind.Wall, new CoreStroke(wallColor, 2.0), true,
+            layerName: "Wände tragend", thickness: 240, height: 2750);
+        yield return new AssistantItemViewModel("Innenwand 11,5", AssistantToolKind.Wall, new CoreStroke(wallColor, 1.0), true,
+            layerName: "Wände nichttragend", thickness: 115, height: 2750);
+        yield return new AssistantItemViewModel("Tür 2,01", AssistantToolKind.Opening, new CoreStroke(white, 1.0), true,
+            layerName: "Türen", width: 400, height: 2010, baseElevation: 0);
+        yield return new AssistantItemViewModel("Fenster 1,26", AssistantToolKind.Opening, new CoreStroke(white, 1.0), true,
+            layerName: "Fenster", width: 400, height: 1260, baseElevation: 900);
+        yield return new AssistantItemViewModel("Stütze 30×30", AssistantToolKind.Column, new CoreStroke(wallColor, 1.5), true,
+            layerName: "Stützen", width: 300, depth: 300, height: 2750);
+        yield return new AssistantItemViewModel("Rundstütze ⌀30", AssistantToolKind.Column, new CoreStroke(wallColor, 1.5), true,
+            layerName: "Stützen", round: true, width: 300, height: 2750);
+        yield return new AssistantItemViewModel("Decke 20", AssistantToolKind.Slab, new CoreStroke(wallColor, 1.5), true,
+            layerName: "Decken", thickness: 200, baseElevation: 0);
+        yield return new AssistantItemViewModel("Unterzug 24/40", AssistantToolKind.Beam, new CoreStroke(wallColor, 1.5), true,
+            layerName: "Unterzüge", width: 240, height: 400, baseElevation: 2750);
     }
 
     private static string ToolLabel(AssistantToolKind kind) => kind switch
@@ -101,7 +136,9 @@ public partial class AssistantViewModel : ViewModelBase
 
     // ----- Persistence -----
 
-    private sealed record TemplateDto(string Name, AssistantToolKind Tool, byte R, byte G, byte B, byte A, double Width);
+    private sealed record TemplateDto(string Name, AssistantToolKind Tool, byte R, byte G, byte B, byte A, double Width,
+        string? LayerName = null, bool Round = false, double Thickness = 0, double Height = 0,
+        double BaseElevation = 0, double ArchWidth = 0, double Depth = 0);
 
     private static IEnumerable<AssistantItemViewModel> LoadUserTemplates()
     {
@@ -123,7 +160,9 @@ public partial class AssistantViewModel : ViewModelBase
             yield break;
 
         foreach (TemplateDto dto in dtos)
-            yield return new AssistantItemViewModel(dto.Name, dto.Tool, new CoreStroke(new CoreColor(dto.R, dto.G, dto.B, dto.A), dto.Width), isBuiltIn: false);
+            yield return new AssistantItemViewModel(dto.Name, dto.Tool,
+                new CoreStroke(new CoreColor(dto.R, dto.G, dto.B, dto.A), dto.Width), isBuiltIn: false,
+                dto.LayerName, dto.Round, dto.Thickness, dto.Height, dto.BaseElevation, dto.ArchWidth, dto.Depth);
     }
 
     private void SaveUserTemplates()
@@ -133,7 +172,8 @@ public partial class AssistantViewModel : ViewModelBase
             .Select(t =>
             {
                 CoreStroke s = t.Stroke!.Value;
-                return new TemplateDto(t.Name, t.ToolKind, s.Color.R, s.Color.G, s.Color.B, s.Color.A, s.Width);
+                return new TemplateDto(t.Name, t.ToolKind, s.Color.R, s.Color.G, s.Color.B, s.Color.A, s.Width,
+                    t.LayerName, t.Round, t.Thickness, t.Height, t.BaseElevation, t.Width, t.Depth);
             })
             .ToArray();
 

@@ -1195,7 +1195,7 @@
                         </TabItem.Header>
                         <DockPanel Margin="10">
                             <TextBlock DockPanel.Dock="Top" Margin="0,0,0,6" Foreground="{DynamicResource Brush.TextMuted}" TextWrapping="Wrap"
-                                       Text="Doppelklick auf eine Vorlage übernimmt Werkzeug und Linienstil." />
+                                       Text="Doppelklick auf eine Vorlage übernimmt Werkzeug, Bauteil-Maße (Dicke/Höhe/Z), Layer und Linienstil." />
                             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="4" Margin="0,8,0,0">
                                 <Button Content="Auswahl als Vorlage" Command="{Binding AddSelectionAsTemplateCommand}" />
                                 <Button Content="Entfernen" Command="{Binding Assistant.RemoveSelectedCommand}" />
@@ -1211,7 +1211,11 @@
                                                     Height="{Binding PreviewWidth}" Background="{Binding PreviewBrush}" />
                                             <TextBlock DockPanel.Dock="Right" Text="{Binding ToolLabel}" Foreground="{DynamicResource Brush.TextFaint}"
                                                        VerticalAlignment="Center" Margin="8,0,0,0" />
-                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" />
+                                                <TextBlock Text="{Binding Detail}" FontSize="11"
+                                                           Foreground="{DynamicResource Brush.TextFaint}" />
+                                            </StackPanel>
                                         </DockPanel>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>

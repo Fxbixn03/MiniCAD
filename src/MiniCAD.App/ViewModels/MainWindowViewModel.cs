@@ -1366,7 +1366,8 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
 
         IEntity entity = Tools.Selection.Items[0];
-        Assistant.AddFromEntity(entity, Document.ResolveStroke(entity));
+        string? layerName = Document.FindLayer(entity.LayerId)?.Name;
+        Assistant.AddFromEntity(entity, Document.ResolveStroke(entity), layerName);
         StatusMessage = "Vorlage zum Assistenten hinzugefügt.";
     }
 
@@ -1381,12 +1382,63 @@ public partial class MainWindowViewModel : ViewModelBase
             AssistantToolKind.Rectangle => _rectangleTool,
             AssistantToolKind.Circle => _circleTool,
             AssistantToolKind.Polyline => _polylineTool,
+            AssistantToolKind.Wall => _wallTool,
+            AssistantToolKind.Opening => _openingTool,
+            AssistantToolKind.Column => _columnTool,
+            AssistantToolKind.Slab => _slabTool,
+            AssistantToolKind.Beam => _beamTool,
             _ => _lineTool,
         };
+
+        // Architectural templates carry full geometry: push it onto the matching tool.
+        switch (item.ToolKind)
+        {
+            case AssistantToolKind.Wall:
+                _wallTool.Thickness = item.Thickness;
+                _wallTool.Height = item.Height;
+                _wallTool.BaseElevation = item.BaseElevation;
+                WallOptions.ThicknessText = item.Thickness.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+                WallOptions.HeightText = item.Height.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+                break;
+            case AssistantToolKind.Opening:
+                _openingTool.Width = item.Width;
+                _openingTool.Height = item.Height;
+                _openingTool.BaseElevation = item.BaseElevation;
+                break;
+            case AssistantToolKind.Column:
+                _columnTool.Round = item.Round;
+                _columnTool.Width = item.Width;
+                _columnTool.Depth = item.Depth;
+                _columnTool.Height = item.Height;
+                _columnTool.BaseElevation = item.BaseElevation;
+                break;
+            case AssistantToolKind.Slab:
+                _slabTool.Thickness = item.Thickness;
+                _slabTool.BaseElevation = item.BaseElevation;
+                break;
+            case AssistantToolKind.Beam:
+                _beamTool.Width = item.Width;
+                _beamTool.Height = item.Height;
+                _beamTool.BaseElevation = item.BaseElevation;
+                break;
+        }
+
+        // The template's layer (created on demand) becomes the active layer.
+        if (item.LayerName is { Length: > 0 } layerName)
+            Document.ActiveLayer = EnsureLayer(layerName, item.Stroke);
 
         Tools.DefaultStrokeOverride = item.Stroke;
         Tools.SetActiveTool(tool);
         StatusMessage = $"Vorlage „{item.Name}“ aktiv.";
+    }
+
+    /// <summary>Finds the layer with <paramref name="name"/> or creates it (with the template stroke).</summary>
+    private Layer EnsureLayer(string name, Core.Styling.StrokeStyle? stroke)
+    {
+        foreach (Layer layer in Document.Layers)
+            if (string.Equals(layer.Name, name, StringComparison.OrdinalIgnoreCase))
+                return layer;
+        return Document.AddLayer(name, stroke ?? new Core.Styling.StrokeStyle(Core.Styling.Color.White, 1.0));
     }
 
     [RelayCommand]
