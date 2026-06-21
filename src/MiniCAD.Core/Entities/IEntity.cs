@@ -20,6 +20,9 @@ public interface IEntity
     /// <summary>The id of the owning <c>PartialDrawing</c> (Teilbild); <see cref="Guid.Empty"/> means "the active Teilbild".</summary>
     Guid PartialDrawingId { get; set; }
 
+    /// <summary>Group membership; entities sharing a non-empty id are selected/moved as a unit.</summary>
+    Guid GroupId { get; set; }
+
     /// <summary>An optional per-entity stroke that overrides the layer default when set.</summary>
     StrokeStyle? StrokeOverride { get; set; }
 

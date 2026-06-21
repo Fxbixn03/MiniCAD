@@ -56,10 +56,16 @@ public sealed class SelectTool : ToolBase
             return;
         }
 
+        IReadOnlyList<IEntity> group = ResolveGroup(hit);
         if (input.HasShift)
-            Context.Selection.Toggle(hit);
+        {
+            foreach (IEntity member in group)
+                Context.Selection.Toggle(member);
+        }
         else if (!Context.Selection.Contains(hit))
-            Context.Selection.Set(hit);
+        {
+            Context.Selection.Set(group);
+        }
 
         if (Context.Selection.Contains(hit))
         {
@@ -226,7 +232,38 @@ public sealed class SelectTool : ToolBase
                 Context.Selection.Add(entity);
         }
 
+        ExpandSelectionToGroups();
         Context.RequestRedraw();
+    }
+
+    /// <summary>Pulls in every member of any group a selected entity belongs to.</summary>
+    private void ExpandSelectionToGroups()
+    {
+        var groupIds = Context.Selection.Items
+            .Select(e => e.GroupId)
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        foreach (Guid groupId in groupIds)
+        {
+            foreach (IEntity entity in Context.Document.Entities)
+            {
+                if (entity.GroupId == groupId && Context.Document.IsEntityEditable(entity))
+                    Context.Selection.Add(entity);
+            }
+        }
+    }
+
+    /// <summary>The hit entity plus every other entity sharing its (non-empty) group id.</summary>
+    private IReadOnlyList<IEntity> ResolveGroup(IEntity hit)
+    {
+        if (hit.GroupId == Guid.Empty)
+            return new[] { hit };
+
+        return Context.Document.Entities
+            .Where(e => e.GroupId == hit.GroupId && Context.Document.IsEntityEditable(e))
+            .ToList();
     }
 
     private bool TryStartGripDrag(Point2D world)

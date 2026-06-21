@@ -27,6 +27,19 @@ public sealed class Selection
         OnChanged();
     }
 
+    /// <summary>Replaces the selection with the given entities (one change notification).</summary>
+    public void Set(IEnumerable<IEntity> entities)
+    {
+        _items.Clear();
+        foreach (IEntity entity in entities)
+        {
+            if (!_items.Contains(entity))
+                _items.Add(entity);
+        }
+
+        OnChanged();
+    }
+
     public void Add(IEntity entity)
     {
         if (_items.Contains(entity))

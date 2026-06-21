@@ -97,6 +97,8 @@ public partial class MainWindowViewModel : ViewModelBase
             ActivateScaleCommand.NotifyCanExecuteChanged();
             ActivateArrayCommand.NotifyCanExecuteChanged();
             ConvertConstructionCommand.NotifyCanExecuteChanged();
+            GroupSelectionCommand.NotifyCanExecuteChanged();
+            UngroupSelectionCommand.NotifyCanExecuteChanged();
         };
         Tools.ActiveToolChanged += (_, _) =>
         {
@@ -391,6 +393,45 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Tools.ConstructionMode = value;
         StatusMessage = value ? "Hilfskonstruktion: neue Elemente werden als Konstruktion gezeichnet." : string.Empty;
+    }
+
+    /// <summary>Groups the selected entities so they select and move as a unit.</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void GroupSelection()
+    {
+        if (Tools.Selection.Count < 2)
+            return;
+
+        var groupId = Guid.NewGuid();
+        var commands = Tools.Selection.Items.Select(entity =>
+        {
+            IEntity captured = entity;
+            Guid old = captured.GroupId;
+            return (IUndoableCommand)new SetEntityPropertyCommand("Gruppieren", Document, captured,
+                () => captured.GroupId = groupId, () => captured.GroupId = old);
+        }).ToList();
+
+        _commands.Execute(new CompositeCommand("Gruppieren", commands));
+    }
+
+    /// <summary>Removes the selected entities from their group.</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void UngroupSelection()
+    {
+        var commands = Tools.Selection.Items
+            .Where(e => e.GroupId != Guid.Empty)
+            .Select(entity =>
+            {
+                IEntity captured = entity;
+                Guid old = captured.GroupId;
+                return (IUndoableCommand)new SetEntityPropertyCommand("Gruppierung aufheben", Document, captured,
+                    () => captured.GroupId = Guid.Empty, () => captured.GroupId = old);
+            }).ToList();
+
+        if (commands.Count == 0)
+            return;
+
+        _commands.Execute(commands.Count == 1 ? commands[0] : new CompositeCommand("Gruppierung aufheben", commands));
     }
 
     /// <summary>Toggles the selected entities between normal geometry and Hilfskonstruktion.</summary>
@@ -739,6 +780,8 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Stretch: ActivateStretchCommand.Execute(null); return true;
             case ShortcutAction.Fillet: ActivateFilletCommand.Execute(null); return true;
             case ShortcutAction.Array: ActivateArrayCommand.Execute(null); return true;
+            case ShortcutAction.Group: GroupSelectionCommand.Execute(null); return true;
+            case ShortcutAction.Ungroup: UngroupSelectionCommand.Execute(null); return true;
             case ShortcutAction.Delete: DeleteSelectionCommand.Execute(null); return true;
             case ShortcutAction.Undo: UndoCommand.Execute(null); return true;
             case ShortcutAction.Redo: RedoCommand.Execute(null); return true;

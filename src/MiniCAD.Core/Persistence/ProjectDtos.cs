@@ -215,6 +215,9 @@ public abstract class EntityDto
 
     public Guid PartialDrawingId { get; set; }
 
+    /// <summary>Group membership id (empty = ungrouped).</summary>
+    public Guid GroupId { get; set; }
+
     /// <summary>Optional per-entity stroke override.</summary>
     public StrokeDto? Stroke { get; set; }
 

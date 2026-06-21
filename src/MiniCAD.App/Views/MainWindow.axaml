@@ -78,6 +78,8 @@
                             <MenuItem Header="_Abrundung / Fase" Command="{Binding ActivateFilletCommand}" InputGesture="Shift+F" />
                             <MenuItem Header="_Array (Raster / polar)" Command="{Binding ActivateArrayCommand}" InputGesture="Shift+A" />
                             <Separator />
+                            <MenuItem Header="_Gruppieren" Command="{Binding GroupSelectionCommand}" InputGesture="Ctrl+G" />
+                            <MenuItem Header="Gruppierung auf_heben" Command="{Binding UngroupSelectionCommand}" InputGesture="Ctrl+Shift+G" />
                             <MenuItem Header="In _Hilfskonstruktion umwandeln" Command="{Binding ConvertConstructionCommand}" />
                             <Separator />
                             <MenuItem Header="_Löschen" Command="{Binding DeleteSelectionCommand}" InputGesture="Delete" />

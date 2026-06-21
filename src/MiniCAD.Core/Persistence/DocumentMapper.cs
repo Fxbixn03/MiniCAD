@@ -410,6 +410,7 @@ public static class DocumentMapper
 
         dto.LayerId = entity.LayerId;
         dto.PartialDrawingId = entity.PartialDrawingId;
+        dto.GroupId = entity.GroupId;
         dto.Stroke = entity.StrokeOverride is { } stroke ? ToDto(stroke) : null;
         dto.IsConstruction = entity.IsConstruction;
         return dto;
@@ -473,6 +474,7 @@ public static class DocumentMapper
 
         entity.LayerId = dto.LayerId;
         entity.PartialDrawingId = dto.PartialDrawingId;
+        entity.GroupId = dto.GroupId;
         entity.StrokeOverride = dto.Stroke is { } stroke ? FromDto(stroke) : null;
         entity.IsConstruction = dto.IsConstruction;
         return entity;

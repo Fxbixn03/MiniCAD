@@ -42,6 +42,8 @@ public enum ShortcutAction
     Stretch,
     Fillet,
     Array,
+    Group,
+    Ungroup,
     Ortho,
     Polar,
 }

@@ -43,6 +43,8 @@ public sealed class KeyboardShortcuts
         (ShortcutAction.Stretch, "Dehnen (Fenster)", "S"),
         (ShortcutAction.Fillet, "Abrundung/Fase", "Shift+F"),
         (ShortcutAction.Array, "Array", "Shift+A"),
+        (ShortcutAction.Group, "Gruppieren", "Ctrl+G"),
+        (ShortcutAction.Ungroup, "Gruppierung aufheben", "Ctrl+Shift+G"),
         (ShortcutAction.Delete, "Löschen", "Delete"),
         (ShortcutAction.Undo, "Rückgängig", "Ctrl+Z"),
         (ShortcutAction.Redo, "Wiederholen", "Ctrl+Y"),
