@@ -161,6 +161,18 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>The shared 3D camera for the model-space view(s).</summary>
     public Camera3D Camera3D { get; } = new();
 
+    /// <summary>The 3D view's render mode (wireframe / hidden-line / shaded).</summary>
+    [ObservableProperty]
+    private Render3DMode _view3DMode = Render3DMode.Shaded;
+
+    [RelayCommand]
+    private void SetRenderMode(string mode) => View3DMode = mode switch
+    {
+        "Wireframe" => Render3DMode.Wireframe,
+        "HiddenLine" => Render3DMode.HiddenLine,
+        _ => Render3DMode.Shaded,
+    };
+
     public ToolManager Tools { get; }
 
     /// <summary>The customizable keyboard shortcuts, shared with the settings dialog.</summary>

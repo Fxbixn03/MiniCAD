@@ -8,17 +8,20 @@ using SkiaSharp;
 namespace MiniCAD.Renderer.Rendering;
 
 /// <summary>
-/// Renders the document's 3D model space as a wireframe through a <see cref="Camera3D"/>
-/// (#122). Edges are projected to device pixels by <see cref="WireframeProjector"/> and drawn
-/// with the existing 2D <c>DrawLine</c> — the render surface is given an identity world→screen
-/// transform so the already-projected pixel coordinates pass through unchanged.
+/// Renders the document's 3D model space through a <see cref="Camera3D"/> in one of three modes
+/// (#122/#92/#123): wireframe, hidden-line (faces occlude edges) or flat-shaded with depth
+/// sorting and a light. Everything is projected to device pixels and drawn with the existing 2D
+/// primitives on a surface with an identity world→screen transform.
 /// </summary>
 public sealed class Skia3DSceneRenderer
 {
     private static readonly Color HighlightColor = new(255, 170, 40);
 
+    // Fixed world light direction (from the upper-front) for flat shading.
+    private static readonly Vector3D Light = new Vector3D(0.4, 0.5, 1.0).Normalized();
+
     public void Render(ICadDocument document, Camera3D camera, nint pixelBuffer, int width, int height, int rowBytes,
-        Color background, Model3DObject? selected = null)
+        Color background, Model3DObject? selected = null, Render3DMode mode = Render3DMode.Wireframe)
     {
         if (width <= 0 || height <= 0 || pixelBuffer == nint.Zero)
             return;
@@ -34,13 +37,10 @@ public sealed class Skia3DSceneRenderer
         try
         {
             IReadOnlyList<Model3DObject> models = document.Models;
-            foreach (WireframeProjector.Segment segment in WireframeProjector.Project(camera, models))
-            {
-                Model3DObject model = models[segment.ObjectIndex];
-                bool isSelected = ReferenceEquals(model, selected);
-                Color color = isSelected ? HighlightColor : model.Color;
-                drawSurface.DrawLine(segment.A, segment.B, new StrokeStyle(color, isSelected ? 2.2 : 1.2));
-            }
+            if (mode == Render3DMode.Wireframe)
+                RenderWireframe(drawSurface, camera, models, selected);
+            else
+                RenderSolid(drawSurface, camera, models, selected, background, mode);
         }
         finally
         {
@@ -48,5 +48,71 @@ public sealed class Skia3DSceneRenderer
         }
 
         surface.Canvas.Flush();
+    }
+
+    private static void RenderWireframe(SkiaRenderSurface surface, Camera3D camera, IReadOnlyList<Model3DObject> models, Model3DObject? selected)
+    {
+        foreach (WireframeProjector.Segment segment in WireframeProjector.Project(camera, models))
+        {
+            Model3DObject model = models[segment.ObjectIndex];
+            bool isSelected = ReferenceEquals(model, selected);
+            Color color = isSelected ? HighlightColor : model.Color;
+            surface.DrawLine(segment.A, segment.B, new StrokeStyle(color, isSelected ? 2.2 : 1.2));
+        }
+    }
+
+    private readonly record struct Face(Point2D A, Point2D B, Point2D C, double Depth, Color Color, bool Selected);
+
+    private static void RenderSolid(SkiaRenderSurface surface, Camera3D camera, IReadOnlyList<Model3DObject> models,
+        Model3DObject? selected, Color background, Render3DMode mode)
+    {
+        Matrix4 view = camera.ViewMatrix;
+        var faces = new List<Face>();
+
+        foreach (Model3DObject model in models)
+        {
+            bool isSelected = ReferenceEquals(model, selected);
+            Mesh3D mesh = model.WorldMesh();
+            IReadOnlyList<Point3D> v = mesh.Vertices;
+            IReadOnlyList<int> idx = mesh.Indices;
+            for (int i = 0; i + 2 < idx.Count; i += 3)
+            {
+                Point3D wa = v[idx[i]], wb = v[idx[i + 1]], wc = v[idx[i + 2]];
+                Point2D pa = camera.Project(wa, out bool fa);
+                Point2D pb = camera.Project(wb, out bool fb);
+                Point2D pc = camera.Project(wc, out bool fc);
+                if (!fa || !fb || !fc)
+                    continue; // skip triangles crossing behind the camera
+
+                double depth = (view.Transform(wa).Z + view.Transform(wb).Z + view.Transform(wc).Z) / 3.0;
+                Color color = mode == Render3DMode.HiddenLine
+                    ? background
+                    : Shade(isSelected ? HighlightColor : model.Color, wa, wb, wc);
+                faces.Add(new Face(pa, pb, pc, depth, color, isSelected));
+            }
+        }
+
+        faces.Sort((x, y) => y.Depth.CompareTo(x.Depth)); // back (large z) to front
+
+        foreach (Face f in faces)
+        {
+            var poly = new[] { f.A, f.B, f.C };
+            surface.DrawFilledPolygon(poly, FillStyle.Solid(f.Color));
+            if (mode == Render3DMode.HiddenLine)
+            {
+                var stroke = new StrokeStyle(f.Selected ? HighlightColor : new Color(210, 220, 235), f.Selected ? 2.0 : 1.0);
+                surface.DrawPolyline(poly, closed: true, stroke);
+            }
+        }
+    }
+
+    private static Color Shade(Color baseColor, Point3D a, Point3D b, Point3D c)
+    {
+        Vector3D normal = (b - a).Cross(c - a).Normalized();
+        double factor = 0.35 + 0.65 * Math.Abs(normal.Dot(Light));
+        return new Color(
+            (byte)Math.Clamp(baseColor.R * factor, 0, 255),
+            (byte)Math.Clamp(baseColor.G * factor, 0, 255),
+            (byte)Math.Clamp(baseColor.B * factor, 0, 255));
     }
 }

@@ -27,6 +27,9 @@ public sealed class Cad3DView : Control
     public static readonly StyledProperty<Camera3D?> CameraProperty =
         AvaloniaProperty.Register<Cad3DView, Camera3D?>(nameof(Camera));
 
+    public static readonly StyledProperty<Render3DMode> ModeProperty =
+        AvaloniaProperty.Register<Cad3DView, Render3DMode>(nameof(Mode), Render3DMode.Wireframe);
+
     private static readonly CoreColor Background = new(12, 16, 30);
 
     private readonly Skia3DSceneRenderer _renderer = new();
@@ -60,6 +63,12 @@ public sealed class Cad3DView : Control
         set => SetValue(CameraProperty, value);
     }
 
+    public Render3DMode Mode
+    {
+        get => GetValue(ModeProperty);
+        set => SetValue(ModeProperty, value);
+    }
+
     private double Scaling => TopLevel.GetTopLevel(this)?.RenderScaling ?? 1.0;
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -86,6 +95,10 @@ public sealed class Cad3DView : Control
         else if (change.Property == BoundsProperty)
         {
             UpdateCameraSize();
+        }
+        else if (change.Property == ModeProperty)
+        {
+            Invalidate();
         }
     }
 
@@ -133,7 +146,7 @@ public sealed class Cad3DView : Control
         if (_sceneInvalid)
         {
             using (ILockedFramebuffer fb = _bitmap!.Lock())
-                _renderer.Render(document, camera, fb.Address, fb.Size.Width, fb.Size.Height, fb.RowBytes, Background, SelectedModel);
+                _renderer.Render(document, camera, fb.Address, fb.Size.Width, fb.Size.Height, fb.RowBytes, Background, SelectedModel, Mode);
             _sceneInvalid = false;
         }
 
