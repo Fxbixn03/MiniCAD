@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MiniCAD.App.Configuration;
 using MiniCAD.App.Input;
+using MiniCAD.App.ViewModels.Toolbar;
 using MiniCAD.Core.Commands;
 using MiniCAD.Core.Documents;
 using MiniCAD.Core.Entities;
@@ -124,6 +125,7 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(StatusText));
             CoordinateInput.IsEnabled = IsCoordinateTool(Tools.ActiveTool);
             RaiseActiveToolFlags();
+            Toolbar?.RefreshAll();
         };
         _commands.StateChanged += (_, _) =>
         {
@@ -163,7 +165,95 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<BlockReferenceEntity>(_blockInsertTool);
         Tools.RegisterQuickSelectTool<ParametricSymbolEntity>(_parametricInsertTool);
 
+        Toolbar = BuildToolbar();
+
         Tools.SetActiveTool(_selectTool);
+        Toolbar.RefreshAll();
+
+        // Keep toolbar toggle states in sync when changed from menus/shortcuts.
+        PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(SnapEnabled) or nameof(OrthoEnabled)
+                or nameof(PolarEnabled) or nameof(ConstructionMode))
+                Toolbar.RefreshAll();
+        };
+    }
+
+    /// <summary>The configurable tool rail (blocks, dock edge, per-tool visibility).</summary>
+    public ToolbarViewModel Toolbar { get; }
+
+    /// <summary>Docks the toolbar to an edge (Left/Right/Top/Bottom).</summary>
+    [RelayCommand]
+    private void SetToolbarDock(string dock) => Toolbar.Dock = dock switch
+    {
+        "Right" => ToolbarDock.Right,
+        "Top" => ToolbarDock.Top,
+        "Bottom" => ToolbarDock.Bottom,
+        _ => ToolbarDock.Left,
+    };
+
+    private ToolbarViewModel BuildToolbar()
+    {
+        ToolbarItemViewModel Btn(string id, string label, string tip, string icon,
+            System.Windows.Input.ICommand cmd, System.Func<bool>? active = null)
+            => new(id, label, tip, icon, cmd, active);
+        ToolbarItemViewModel Tgl(string id, string label, string tip, string icon,
+            System.Func<bool> get, System.Action<bool> set)
+            => new(id, label, tip, icon, get, set);
+
+        var draw = new ToolGroupViewModel("draw", "Zeichnen", new[]
+        {
+            Btn("select", "Auswahl", "Auswahl  ·  V", "Icon.Select", ActivateSelectCommand, () => IsSelectActive),
+            Btn("line", "Linie", "Linie  ·  L", "Icon.Line", ActivateLineCommand, () => IsLineActive),
+            Btn("wall", "Wand", "Wand (Architektur)", "M3,5 H21 V9 H3 Z M3,15 H21 V19 H3 Z", ActivateWallCommand, () => IsWallActive),
+            Btn("opening", "Aussparung", "Aussparung / Öffnung", "M3,4 H21 V20 H3 Z M3,4 L21,20 M21,4 L3,20", ActivateOpeningCommand, () => IsOpeningActive),
+            Btn("column", "Stütze", "Stütze (rund/rechteckig)", "M7,4 H17 V20 H7 Z", ActivateColumnCommand, () => IsColumnActive),
+            Btn("slab", "Decke", "Decke / Platte", "M3,7 H21 V17 H3 Z M3,7 L7,3 H21 M21,7 V17", ActivateSlabCommand, () => IsSlabActive),
+            Btn("beam", "Unterzug", "Unterzug / Träger", "M3,9 H21 V15 H3 Z M3,9 L21,15 M21,9 L3,15", ActivateBeamCommand, () => IsBeamActive),
+            Btn("rectangle", "Rechteck", "Rechteck  ·  R", "Icon.Rectangle", ActivateRectangleCommand, () => IsRectangleActive),
+            Btn("circle", "Kreis", "Kreis  ·  C", "Icon.Circle", ActivateCircleCommand, () => IsCircleActive),
+            Btn("arc", "Bogen", "Bogen  ·  A", "Icon.Arc", ActivateArcCommand, () => IsArcActive),
+            Btn("ellipse", "Ellipse", "Ellipse  ·  E", "Icon.Ellipse", ActivateEllipseCommand, () => IsEllipseActive),
+            Btn("polyline", "Polylinie", "Polylinie  ·  P", "Icon.Polyline", ActivatePolylineCommand, () => IsPolylineActive),
+            Btn("spline", "Spline", "Spline  ·  K", "Icon.Spline", ActivateSplineCommand, () => IsSplineActive),
+            Btn("point", "Punkt", "Punkt / Knoten  ·  N", "Icon.Point", ActivatePointCommand, () => IsPointActive),
+            Btn("text", "Text", "Text / Beschriftung  ·  X", "Icon.Text", ActivateTextCommand, () => IsTextActive),
+            Btn("leader", "Führungslinie", "Führungslinie / Callout  ·  G", "Icon.Leader", ActivateLeaderCommand, () => IsLeaderActive),
+            Btn("lineardim", "Maß", "Maß (linear / ausgerichtet)  ·  D", "Icon.Dimension", ActivateLinearDimensionCommand, () => IsLinearDimensionActive),
+        });
+
+        var transform = new ToolGroupViewModel("transform", "Bearbeiten", new[]
+        {
+            Btn("move", "Verschieben", "Verschieben  ·  M", "Icon.Move", ActivateMoveCommand, () => IsMoveActive),
+            Btn("copy", "Kopieren", "Kopieren  ·  Shift+C", "Icon.Copy", ActivateCopyCommand, () => IsCopyActive),
+            Btn("rotate", "Drehen", "Drehen  ·  Shift+R", "Icon.Rotate", ActivateRotateCommand, () => IsRotateActive),
+            Btn("mirror", "Spiegeln", "Spiegeln  ·  Shift+M", "Icon.Mirror", ActivateMirrorCommand, () => IsMirrorActive),
+            Btn("scale", "Skalieren", "Skalieren  ·  Shift+S", "Icon.Scale", ActivateScaleCommand, () => IsScaleActive),
+            Btn("offset", "Parallele", "Parallele (Offset)  ·  O", "Icon.Offset", ActivateOffsetCommand, () => IsOffsetActive),
+            Btn("trim", "Stutzen", "Stutzen / Dehnen  ·  T", "Icon.Trim", ActivateTrimCommand, () => IsTrimActive),
+            Btn("stretch", "Dehnen", "Dehnen (Kreuzungsfenster)  ·  S", "Icon.Stretch", ActivateStretchCommand, () => IsStretchActive),
+            Btn("fillet", "Abrundung", "Abrundung / Fase  ·  Shift+F", "Icon.Fillet", ActivateFilletCommand, () => IsFilletActive),
+            Btn("array", "Array", "Array (rechteckig / polar)  ·  Shift+A", "Icon.Array", ActivateArrayCommand, () => IsArrayActive),
+        });
+
+        var history = new ToolGroupViewModel("history", "Verlauf", new[]
+        {
+            Btn("delete", "Löschen", "Löschen  ·  Entf", "Icon.Delete", DeleteSelectionCommand),
+            Btn("undo", "Rückgängig", "Rückgängig  ·  Ctrl+Z", "Icon.Undo", UndoCommand),
+            Btn("redo", "Wiederholen", "Wiederholen  ·  Ctrl+Y", "Icon.Redo", RedoCommand),
+        });
+
+        var view = new ToolGroupViewModel("view", "Fang & Ansicht", new[]
+        {
+            Tgl("snap", "Fang", "Objekt- und Rasterfang ein/aus", "Icon.Snap", () => SnapEnabled, v => SnapEnabled = v),
+            Tgl("ortho", "Ortho", "Ortho (horizontal/vertikal)  ·  F8", "Icon.Ortho", () => OrthoEnabled, v => OrthoEnabled = v),
+            Tgl("polar", "Polar", "Polar-Tracking  ·  F10", "Icon.Polar", () => PolarEnabled, v => PolarEnabled = v),
+            Tgl("construction", "Hilfskonstruktion", "Hilfskonstruktion (nicht druckbar)", "Icon.Construction", () => ConstructionMode, v => ConstructionMode = v),
+            Btn("nullpoint", "Nullpunkt", "Nullpunkt (Ursprung) per Klick setzen", "Icon.Origin", ActivateSetNullPointCommand, () => IsSetNullPointActive),
+            Btn("zoomfit", "Zoom anpassen", "Zoom anpassen", "Icon.ZoomFit", ZoomToFitCommand),
+        });
+
+        return new ToolbarViewModel(new[] { draw, transform, history, view });
     }
 
     private void OnSettingsChanged(object? sender, PropertyChangedEventArgs e)

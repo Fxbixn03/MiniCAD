@@ -40,4 +40,8 @@ public interface IAppConfig
     /// <summary>User-defined Assistant templates ("Vorlagen") as a JSON array.</summary>
     [Option(DefaultValue = "")]
     string AssistantTemplates { get; set; }
+
+    /// <summary>Toolbar layout (dock edge, block order, hidden tools) as JSON.</summary>
+    [Option(DefaultValue = "")]
+    string ToolbarLayout { get; set; }
 }

@@ -79,6 +79,13 @@ public sealed class AppConfig
         set => _config.AssistantTemplates = value;
     }
 
+    /// <summary>Toolbar layout (dock edge, block order, hidden tools) serialized as JSON.</summary>
+    public string ToolbarLayout
+    {
+        get => _config.ToolbarLayout;
+        set => _config.ToolbarLayout = value;
+    }
+
     /// <summary>Recent project paths, most-recent first.</summary>
     public IReadOnlyList<string> RecentProjects => Parse(_config.RecentProjects);
 

@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:MiniCAD.App.ViewModels"
+        xmlns:toolbar="using:MiniCAD.App.ViewModels.Toolbar"
         xmlns:documents="using:MiniCAD.Core.Documents"
         xmlns:conv="using:MiniCAD.App.Converters"
         xmlns:sys="using:System"
@@ -360,166 +361,58 @@
             </StackPanel>
         </Border>
 
-        <!-- ===== Left: vertical icon tool rail (Allplan-style) ===== -->
-        <Border DockPanel.Dock="Left" Background="{DynamicResource Brush.SurfaceChrome}"
-                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,0,1,0">
-            <StackPanel Orientation="Vertical" Spacing="2" Margin="4,8" HorizontalAlignment="Center">
-
-                <!-- Drawing tools -->
-                <Button Classes="rail" Classes.active="{Binding IsSelectActive}"
-                        Command="{Binding ActivateSelectCommand}" ToolTip.Tip="Auswahl  ·  V">
-                    <Path Classes="ico" Data="{StaticResource Icon.Select}" />
+        <!-- ===== Configurable tool rail (dockable + scrollable, data-driven) ===== -->
+        <Border DockPanel.Dock="{Binding Toolbar.PanelDock}" Background="{DynamicResource Brush.SurfaceChrome}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="1">
+            <DockPanel>
+                <Button DockPanel.Dock="{Binding Toolbar.HandleDock}" Classes="rail" Margin="2"
+                        ToolTip.Tip="Toolbar andocken (Links/Rechts/Oben/Unten)">
+                    <Path Classes="ico" Data="M5,4 H19 M5,9 H19 M5,14 H19 M5,19 H19" />
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuItem Header="Andocken: _Links" Command="{Binding SetToolbarDockCommand}" CommandParameter="Left" />
+                            <MenuItem Header="Andocken: _Rechts" Command="{Binding SetToolbarDockCommand}" CommandParameter="Right" />
+                            <MenuItem Header="Andocken: _Oben" Command="{Binding SetToolbarDockCommand}" CommandParameter="Top" />
+                            <MenuItem Header="Andocken: _Unten" Command="{Binding SetToolbarDockCommand}" CommandParameter="Bottom" />
+                        </MenuFlyout>
+                    </Button.Flyout>
                 </Button>
-                <Button Classes="rail" Classes.active="{Binding IsLineActive}"
-                        Command="{Binding ActivateLineCommand}" ToolTip.Tip="Linie  ·  L">
-                    <Path Classes="ico" Data="{StaticResource Icon.Line}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsWallActive}"
-                        Command="{Binding ActivateWallCommand}" ToolTip.Tip="Wand (Architektur)">
-                    <Path Classes="ico" Data="M3,5 H21 V9 H3 Z M3,15 H21 V19 H3 Z" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsOpeningActive}"
-                        Command="{Binding ActivateOpeningCommand}" ToolTip.Tip="Aussparung / Öffnung (zieht Material aus Wänden ab)">
-                    <Path Classes="ico" Data="M3,4 H21 V20 H3 Z M3,4 L21,20 M21,4 L3,20" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsColumnActive}"
-                        Command="{Binding ActivateColumnCommand}" ToolTip.Tip="Stütze (rund/rechteckig)">
-                    <Path Classes="ico" Data="M7,4 H17 V20 H7 Z" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsSlabActive}"
-                        Command="{Binding ActivateSlabCommand}" ToolTip.Tip="Decke / Platte (Umriss zeichnen)">
-                    <Path Classes="ico" Data="M3,7 H21 V17 H3 Z M3,7 L7,3 H21 M21,7 V17" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsBeamActive}"
-                        Command="{Binding ActivateBeamCommand}" ToolTip.Tip="Unterzug / Träger">
-                    <Path Classes="ico" Data="M3,9 H21 V15 H3 Z M3,9 L21,15 M21,9 L3,15" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsRectangleActive}"
-                        Command="{Binding ActivateRectangleCommand}" ToolTip.Tip="Rechteck  ·  R">
-                    <Path Classes="ico" Data="{StaticResource Icon.Rectangle}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsCircleActive}"
-                        Command="{Binding ActivateCircleCommand}" ToolTip.Tip="Kreis  ·  C">
-                    <Path Classes="ico" Data="{StaticResource Icon.Circle}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsArcActive}"
-                        Command="{Binding ActivateArcCommand}" ToolTip.Tip="Bogen  ·  A">
-                    <Path Classes="ico" Data="{StaticResource Icon.Arc}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsEllipseActive}"
-                        Command="{Binding ActivateEllipseCommand}" ToolTip.Tip="Ellipse  ·  E">
-                    <Path Classes="ico" Data="{StaticResource Icon.Ellipse}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsPolylineActive}"
-                        Command="{Binding ActivatePolylineCommand}" ToolTip.Tip="Polylinie  ·  P">
-                    <Path Classes="ico" Data="{StaticResource Icon.Polyline}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsSplineActive}"
-                        Command="{Binding ActivateSplineCommand}" ToolTip.Tip="Spline  ·  K">
-                    <Path Classes="ico" Data="{StaticResource Icon.Spline}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsPointActive}"
-                        Command="{Binding ActivatePointCommand}" ToolTip.Tip="Punkt / Knoten  ·  N">
-                    <Path Classes="ico" Data="{StaticResource Icon.Point}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsTextActive}"
-                        Command="{Binding ActivateTextCommand}" ToolTip.Tip="Text / Beschriftung  ·  X">
-                    <Path Classes="ico" Data="{StaticResource Icon.Text}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsLeaderActive}"
-                        Command="{Binding ActivateLeaderCommand}" ToolTip.Tip="Führungslinie / Callout  ·  G">
-                    <Path Classes="ico" Data="{StaticResource Icon.Leader}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsLinearDimensionActive}"
-                        Command="{Binding ActivateLinearDimensionCommand}" ToolTip.Tip="Maß (linear / ausgerichtet)  ·  D">
-                    <Path Classes="ico" Data="{StaticResource Icon.Dimension}" />
-                </Button>
-
-                <Border Classes="raildiv" />
-
-                <!-- Transform tools (operate on the current selection) -->
-                <Button Classes="rail" Classes.active="{Binding IsMoveActive}"
-                        Command="{Binding ActivateMoveCommand}" ToolTip.Tip="Verschieben  ·  M">
-                    <Path Classes="ico" Data="{StaticResource Icon.Move}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsCopyActive}"
-                        Command="{Binding ActivateCopyCommand}" ToolTip.Tip="Kopieren  ·  Shift+C">
-                    <Path Classes="ico" Data="{StaticResource Icon.Copy}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsRotateActive}"
-                        Command="{Binding ActivateRotateCommand}" ToolTip.Tip="Drehen  ·  Shift+R">
-                    <Path Classes="ico" Data="{StaticResource Icon.Rotate}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsMirrorActive}"
-                        Command="{Binding ActivateMirrorCommand}" ToolTip.Tip="Spiegeln  ·  Shift+M">
-                    <Path Classes="ico" Data="{StaticResource Icon.Mirror}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsScaleActive}"
-                        Command="{Binding ActivateScaleCommand}" ToolTip.Tip="Skalieren  ·  Shift+S">
-                    <Path Classes="ico" Data="{StaticResource Icon.Scale}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsOffsetActive}"
-                        Command="{Binding ActivateOffsetCommand}" ToolTip.Tip="Parallele (Offset)  ·  O">
-                    <Path Classes="ico" Data="{StaticResource Icon.Offset}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsTrimActive}"
-                        Command="{Binding ActivateTrimCommand}" ToolTip.Tip="Stutzen / Dehnen (Shift)  ·  T">
-                    <Path Classes="ico" Data="{StaticResource Icon.Trim}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsStretchActive}"
-                        Command="{Binding ActivateStretchCommand}" ToolTip.Tip="Dehnen mit Kreuzungsfenster  ·  S">
-                    <Path Classes="ico" Data="{StaticResource Icon.Stretch}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsFilletActive}"
-                        Command="{Binding ActivateFilletCommand}" ToolTip.Tip="Abrundung / Fase  ·  Shift+F">
-                    <Path Classes="ico" Data="{StaticResource Icon.Fillet}" />
-                </Button>
-                <Button Classes="rail" Classes.active="{Binding IsArrayActive}"
-                        Command="{Binding ActivateArrayCommand}" ToolTip.Tip="Array (rechteckig / polar)  ·  Shift+A">
-                    <Path Classes="ico" Data="{StaticResource Icon.Array}" />
-                </Button>
-
-                <Border Classes="raildiv" />
-
-                <!-- Edit / history -->
-                <Button Classes="rail" Command="{Binding DeleteSelectionCommand}" ToolTip.Tip="Löschen  ·  Entf">
-                    <Path Classes="ico" Data="{StaticResource Icon.Delete}" />
-                </Button>
-                <Button Classes="rail" Command="{Binding UndoCommand}" ToolTip.Tip="Rückgängig  ·  Ctrl+Z">
-                    <Path Classes="ico" Data="{StaticResource Icon.Undo}" />
-                </Button>
-                <Button Classes="rail" Command="{Binding RedoCommand}" ToolTip.Tip="Wiederholen  ·  Ctrl+Y">
-                    <Path Classes="ico" Data="{StaticResource Icon.Redo}" />
-                </Button>
-
-                <Border Classes="raildiv" />
-
-                <!-- Snap, origin & view -->
-                <ToggleButton Classes="rail" IsChecked="{Binding SnapEnabled}"
-                              ToolTip.Tip="Objekt- und Rasterfang ein/aus">
-                    <Path Classes="ico" Data="{StaticResource Icon.Snap}" />
-                </ToggleButton>
-                <ToggleButton Classes="rail" IsChecked="{Binding OrthoEnabled}"
-                              ToolTip.Tip="Ortho (horizontal/vertikal)  ·  F8">
-                    <Path Classes="ico" Data="{StaticResource Icon.Ortho}" />
-                </ToggleButton>
-                <ToggleButton Classes="rail" IsChecked="{Binding PolarEnabled}"
-                              ToolTip.Tip="Polar-Tracking (Winkelschritte)  ·  F10">
-                    <Path Classes="ico" Data="{StaticResource Icon.Polar}" />
-                </ToggleButton>
-                <ToggleButton Classes="rail" IsChecked="{Binding ConstructionMode}"
-                              ToolTip.Tip="Hilfskonstruktion (nicht druckbar, snapbar)">
-                    <Path Classes="ico" Data="{StaticResource Icon.Construction}" />
-                </ToggleButton>
-                <Button Classes="rail" Classes.active="{Binding IsSetNullPointActive}"
-                        Command="{Binding ActivateSetNullPointCommand}"
-                        ToolTip.Tip="Nullpunkt (Ursprung) per Klick setzen">
-                    <Path Classes="ico" Data="{StaticResource Icon.Origin}" />
-                </Button>
-                <Button Classes="rail" Command="{Binding ZoomToFitCommand}" ToolTip.Tip="Zoom anpassen">
-                    <Path Classes="ico" Data="{StaticResource Icon.ZoomFit}" />
-                </Button>
-            </StackPanel>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Toolbar.Groups}" Margin="3">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="{Binding Toolbar.Orientation}" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="toolbar:ToolGroupViewModel">
+                                <ItemsControl ItemsSource="{Binding Items}" Margin="1">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="{Binding Orientation}" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="toolbar:ToolbarItemViewModel">
+                                            <Panel IsVisible="{Binding IsVisible}" Margin="2">
+                                                <Button Classes="rail" IsVisible="{Binding !IsToggle}"
+                                                        Classes.active="{Binding IsActive}" Command="{Binding Command}"
+                                                        ToolTip.Tip="{Binding Tooltip}">
+                                                    <Path Classes="ico" Data="{Binding Icon}" />
+                                                </Button>
+                                                <ToggleButton Classes="rail" IsVisible="{Binding IsToggle}"
+                                                              IsChecked="{Binding IsChecked}" ToolTip.Tip="{Binding Tooltip}">
+                                                    <Path Classes="ico" Data="{Binding Icon}" />
+                                                </ToggleButton>
+                                            </Panel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
         </Border>
 
         <!-- ===== Canvas | splitter | docked right palette (resizable in width) ===== -->
