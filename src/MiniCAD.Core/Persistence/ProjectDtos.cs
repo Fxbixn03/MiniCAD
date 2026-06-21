@@ -171,6 +171,8 @@ public sealed class PointDto
 [JsonDerivedType(typeof(LeaderDto), "leader")]
 [JsonDerivedType(typeof(ImageDto), "image")]
 [JsonDerivedType(typeof(LinearDimensionDto), "lineardim")]
+[JsonDerivedType(typeof(AngularDimensionDto), "angulardim")]
+[JsonDerivedType(typeof(RadialDimensionDto), "radialdim")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -318,4 +320,20 @@ public sealed class LinearDimensionDto : DimensionDto
 
     /// <summary>Aligned / Horizontal / Vertical (named to avoid the polymorphic "kind" discriminator).</summary>
     public string Orientation { get; set; } = "Aligned";
+}
+
+public sealed class AngularDimensionDto : DimensionDto
+{
+    public PointDto Vertex { get; set; } = new();
+    public PointDto P1 { get; set; } = new();
+    public PointDto P2 { get; set; } = new();
+    public PointDto ArcPoint { get; set; } = new();
+}
+
+public sealed class RadialDimensionDto : DimensionDto
+{
+    public PointDto Center { get; set; } = new();
+    public PointDto EdgePoint { get; set; } = new();
+    public PointDto TextPoint { get; set; } = new();
+    public bool IsDiameter { get; set; }
 }

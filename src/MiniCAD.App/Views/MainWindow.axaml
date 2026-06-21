@@ -85,6 +85,8 @@
                         <MenuItem Header="_Führungslinie / Callout" Command="{Binding ActivateLeaderCommand}" InputGesture="G" />
                         <MenuItem Header="_Bild als Unterlage…" Click="OnInsertImage" />
                         <MenuItem Header="_Maß (linear / ausgerichtet)" Command="{Binding ActivateLinearDimensionCommand}" InputGesture="D" />
+                        <MenuItem Header="Maß (_Winkel)" Command="{Binding ActivateAngularDimensionCommand}" InputGesture="W" />
+                        <MenuItem Header="Maß (_Radius / Durchmesser)" Command="{Binding ActivateRadialDimensionCommand}" InputGesture="Shift+D" />
                         <Separator />
                         <MenuItem Header="_Nullpunkt setzen" Command="{Binding ActivateSetNullPointCommand}" />
                             <MenuItem Header="Nullpunkt zu_rücksetzen" Command="{Binding ResetNullPointCommand}" />
@@ -239,7 +241,23 @@
                 <TextBlock Classes="eyebrow" Text="MASS" VerticalAlignment="Center" />
                 <TextBlock Text="Art" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
                 <ComboBox MinWidth="120" ItemsSource="{Binding KindOptions}" SelectedItem="{Binding Kind}" />
-                <TextBlock Text="1. Punkt, 2. Punkt, dann Maßlinie platzieren" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+                <TextBlock Text="Folge" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                <ComboBox MinWidth="110" ItemsSource="{Binding ContinueModeOptions}" SelectedItem="{Binding ContinueMode}"
+                          ToolTip.Tip="Einzeln / Kette (fortgesetzt) / Basislinie" />
+                <TextBlock Text="1./2. Punkt, dann Maßlinie · Folge: weiter klicken" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Inline radius/diameter toggle, shown while the radial dimension tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsRadialDimensionActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding RadialDimensionOptions}" x:DataType="vm:RadialDimensionOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="RADIALMASS" VerticalAlignment="Center" />
+                <ToggleButton IsChecked="{Binding IsDiameter}" Content="{Binding ModeLabel}" MinWidth="120"
+                              ToolTip.Tip="Radius R ⟷ Durchmesser ⌀" />
+                <TextBlock Text="Kreis/Bogen wählen, dann Textposition klicken" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
             </StackPanel>
         </Border>
 

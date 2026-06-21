@@ -18,6 +18,8 @@ public enum ShortcutAction
     Text,
     Leader,
     LinearDimension,
+    AngularDimension,
+    RadialDimension,
     Delete,
     Undo,
     Redo,

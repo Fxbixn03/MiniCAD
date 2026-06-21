@@ -35,6 +35,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly TextTool _textTool = new();
     private readonly LeaderTool _leaderTool = new();
     private readonly LinearDimensionTool _linearDimensionTool = new();
+    private readonly AngularDimensionTool _angularDimensionTool = new();
+    private readonly RadialDimensionTool _radialDimensionTool = new();
     private readonly SetNullPointTool _setNullPointTool = new();
 
     // Editing tools operating on the current selection (Epic: Bearbeitungswerkzeuge).
@@ -68,6 +70,7 @@ public partial class MainWindowViewModel : ViewModelBase
         TextOptions = new TextOptionsViewModel(_textTool, Document);
         LeaderOptions = new LeaderOptionsViewModel(_leaderTool);
         DimensionOptions = new DimensionOptionsViewModel(_linearDimensionTool);
+        RadialDimensionOptions = new RadialDimensionOptionsViewModel(_radialDimensionTool);
         TextStyles = new TextStylesViewModel(Document);
 
         // Text and leader tools can't open a UI field themselves; re-raise their requests so the
@@ -121,6 +124,8 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<MTextEntity>(_textTool);
         Tools.RegisterQuickSelectTool<LeaderEntity>(_leaderTool);
         Tools.RegisterQuickSelectTool<LinearDimensionEntity>(_linearDimensionTool);
+        Tools.RegisterQuickSelectTool<AngularDimensionEntity>(_angularDimensionTool);
+        Tools.RegisterQuickSelectTool<RadialDimensionEntity>(_radialDimensionTool);
 
         Tools.SetActiveTool(_selectTool);
     }
@@ -179,6 +184,9 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Inline orientation selector, shown while the linear dimension tool is active.</summary>
     public DimensionOptionsViewModel DimensionOptions { get; }
 
+    /// <summary>Inline radius/diameter toggle, shown while the radial dimension tool is active.</summary>
+    public RadialDimensionOptionsViewModel RadialDimensionOptions { get; }
+
     /// <summary>The text-style management panel (Textstile tab).</summary>
     public TextStylesViewModel TextStyles { get; }
 
@@ -190,7 +198,7 @@ public partial class MainWindowViewModel : ViewModelBase
         => tool == _lineTool || tool == _rectangleTool || tool == _circleTool
         || tool == _arcTool || tool == _ellipseTool || tool == _polylineTool || tool == _splineTool
         || tool == _pointTool || tool == _textTool || tool == _leaderTool
-        || tool == _linearDimensionTool || tool == _setNullPointTool
+        || tool == _linearDimensionTool || tool == _angularDimensionTool || tool == _setNullPointTool
         || tool == _moveTool || tool == _copyTool || tool == _rotateTool
         || tool == _mirrorTool || tool == _scaleTool || tool == _offsetTool;
 
@@ -285,6 +293,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsTextActive => Tools.ActiveTool == _textTool;
     public bool IsLeaderActive => Tools.ActiveTool == _leaderTool;
     public bool IsLinearDimensionActive => Tools.ActiveTool == _linearDimensionTool;
+    public bool IsAngularDimensionActive => Tools.ActiveTool == _angularDimensionTool;
+    public bool IsRadialDimensionActive => Tools.ActiveTool == _radialDimensionTool;
     public bool IsSetNullPointActive => Tools.ActiveTool == _setNullPointTool;
     public bool IsMoveActive => Tools.ActiveTool == _moveTool;
     public bool IsCopyActive => Tools.ActiveTool == _copyTool;
@@ -312,6 +322,8 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsTextActive));
         OnPropertyChanged(nameof(IsLeaderActive));
         OnPropertyChanged(nameof(IsLinearDimensionActive));
+        OnPropertyChanged(nameof(IsAngularDimensionActive));
+        OnPropertyChanged(nameof(IsRadialDimensionActive));
         OnPropertyChanged(nameof(IsSetNullPointActive));
         OnPropertyChanged(nameof(IsMoveActive));
         OnPropertyChanged(nameof(IsCopyActive));
@@ -443,6 +455,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void ActivateLinearDimension() => ActivateDrawingTool(_linearDimensionTool);
+
+    [RelayCommand]
+    private void ActivateAngularDimension() => ActivateDrawingTool(_angularDimensionTool);
+
+    [RelayCommand]
+    private void ActivateRadialDimension() => ActivateDrawingTool(_radialDimensionTool);
 
     /// <summary>
     /// Double-click handler: if a text entity sits under <paramref name="world"/>, switch to the
@@ -638,6 +656,8 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Text: ActivateText(); return true;
             case ShortcutAction.Leader: ActivateLeader(); return true;
             case ShortcutAction.LinearDimension: ActivateLinearDimension(); return true;
+            case ShortcutAction.AngularDimension: ActivateAngularDimension(); return true;
+            case ShortcutAction.RadialDimension: ActivateRadialDimension(); return true;
             case ShortcutAction.Move: ActivateMoveCommand.Execute(null); return true;
             case ShortcutAction.Copy: ActivateCopyCommand.Execute(null); return true;
             case ShortcutAction.Rotate: ActivateRotateCommand.Execute(null); return true;

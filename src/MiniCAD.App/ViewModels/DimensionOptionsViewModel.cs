@@ -14,12 +14,20 @@ public partial class DimensionOptionsViewModel : ViewModelBase
     {
         _tool = tool;
         _tool.Kind = Kind;
+        _tool.ContinueMode = ContinueMode;
     }
 
     public LinearDimensionKind[] KindOptions { get; } = Enum.GetValues<LinearDimensionKind>();
 
+    public DimensionContinueMode[] ContinueModeOptions { get; } = Enum.GetValues<DimensionContinueMode>();
+
     [ObservableProperty]
     private LinearDimensionKind _kind = LinearDimensionKind.Aligned;
 
+    [ObservableProperty]
+    private DimensionContinueMode _continueMode = DimensionContinueMode.None;
+
     partial void OnKindChanged(LinearDimensionKind value) => _tool.Kind = value;
+
+    partial void OnContinueModeChanged(DimensionContinueMode value) => _tool.ContinueMode = value;
 }

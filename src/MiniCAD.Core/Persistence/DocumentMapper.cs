@@ -332,6 +332,20 @@ public static class DocumentMapper
                 DimLinePoint = ToDto(dim.DimLinePoint),
                 Orientation = dim.Kind.ToString(),
             }, dim),
+            AngularDimensionEntity dim => FillDimDto(new AngularDimensionDto
+            {
+                Vertex = ToDto(dim.Vertex),
+                P1 = ToDto(dim.P1),
+                P2 = ToDto(dim.P2),
+                ArcPoint = ToDto(dim.ArcPoint),
+            }, dim),
+            RadialDimensionEntity dim => FillDimDto(new RadialDimensionDto
+            {
+                Center = ToDto(dim.Center),
+                EdgePoint = ToDto(dim.EdgePoint),
+                TextPoint = ToDto(dim.TextPoint),
+                IsDiameter = dim.IsDiameter,
+            }, dim),
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -385,6 +399,10 @@ public static class DocumentMapper
             LinearDimensionDto dim => FillDim(new LinearDimensionEntity(
                 FromDto(dim.P1), FromDto(dim.P2), FromDto(dim.DimLinePoint),
                 Enum.TryParse(dim.Orientation, out LinearDimensionKind kind) ? kind : LinearDimensionKind.Aligned), dim),
+            AngularDimensionDto dim => FillDim(new AngularDimensionEntity(
+                FromDto(dim.Vertex), FromDto(dim.P1), FromDto(dim.P2), FromDto(dim.ArcPoint)), dim),
+            RadialDimensionDto dim => FillDim(new RadialDimensionEntity(
+                FromDto(dim.Center), FromDto(dim.EdgePoint), FromDto(dim.TextPoint), dim.IsDiameter), dim),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 
