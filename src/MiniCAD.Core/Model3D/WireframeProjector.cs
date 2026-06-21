@@ -26,7 +26,7 @@ public static class WireframeProjector
 
         for (int i = 0; i < models.Count; i++)
         {
-            foreach ((Point3D a, Point3D b) in models[i].WorldMesh().Edges())
+            foreach ((Point3D a, Point3D b) in models[i].WorldMesh().FeatureEdges())
             {
                 if (!ClipToFront(nearPlane, a, b, out Point3D ca, out Point3D cb))
                     continue;

@@ -25,7 +25,7 @@ public class WireframeProjectorTests
 
         List<WireframeProjector.Segment> segments = WireframeProjector.Project(camera, new[] { box });
 
-        segments.Should().HaveCount(box.Mesh.Edges().Count()); // every visible edge
+        segments.Should().HaveCount(box.Mesh.FeatureEdges().Count()); // only the feature edges
         segments.Should().OnlyContain(s => double.IsFinite(s.A.X) && double.IsFinite(s.A.Y)
                                         && double.IsFinite(s.B.X) && double.IsFinite(s.B.Y));
         segments.Should().OnlyContain(s => s.ObjectIndex == 0);

@@ -18,7 +18,18 @@ public class Model3DTests
         box.Vertices.Should().HaveCount(8);
         box.Indices.Should().HaveCount(36); // 12 triangles
         box.Edges().Should().HaveCount(18); // 12 box edges + 6 face diagonals from triangulation
+        box.FeatureEdges().Should().HaveCount(12); // only the 12 real cube edges (diagonals dropped)
         box.Bounds.Size.Should().Be(new Vector3D(10, 20, 30));
+    }
+
+    [Fact]
+    public void FeatureEdges_DropCoplanarSplitsButKeepCreases()
+    {
+        // A cylinder's faceted side edges (shallow dihedral) drop out; the cap rims (90°) remain,
+        // so the feature-edge count is far below the raw triangle-edge count.
+        Mesh3D cyl = Mesh3D.Cylinder(50, 100, 24);
+        cyl.FeatureEdges().Count().Should().BeLessThan(cyl.Edges().Count() / 2);
+        cyl.FeatureEdges().Should().NotBeEmpty();
     }
 
     [Fact]
