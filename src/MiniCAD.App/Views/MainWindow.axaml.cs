@@ -31,11 +31,14 @@ public partial class MainWindow : Window
     private static readonly DataFormat<string> ToolbarDragFormat =
         DataFormat.CreateInProcessFormat<string>("minicad.toolbar.drag");
 
+    private Point2D _lastCursorWorld;
+
     public MainWindow()
     {
         InitializeComponent();
         Canvas.CursorWorldMoved += OnCursorWorldMoved;
         Canvas.DoubleClicked += OnCanvasDoubleClicked;
+        Canvas.DistanceInputStarted += OnDistanceInputStarted;
         DataContextChanged += OnDataContextChanged;
 
         DragDrop.AddDragOverHandler(this, OnToolbarDragOver);
@@ -135,9 +138,59 @@ public partial class MainWindow : Window
             current.TextEditRequested += OnTextEditRequested;
     }
 
-    private void OnCursorWorldMoved(object? sender, Point2D world) => ViewModel?.UpdateCursor(world);
+    private void OnCursorWorldMoved(object? sender, Point2D world)
+    {
+        _lastCursorWorld = world;
+        ViewModel?.UpdateCursor(world);
+    }
 
     private void OnCanvasDoubleClicked(object? sender, Point2D world) => ViewModel?.EditTextAt(world);
+
+    // ----- Direct length entry at the crosshair -----
+
+    private void OnDistanceInputStarted(object? sender, string firstChar)
+    {
+        if (ViewModel is not { } vm)
+            return;
+
+        Point2D device = vm.Viewport.WorldToScreenPoint(_lastCursorWorld);
+        double scaling = TopLevel.GetTopLevel(Canvas)?.RenderScaling ?? 1.0;
+
+        // Offset a little down-right of the crosshair so the field doesn't sit on top of it.
+        DistanceInputBox.Margin = new Thickness(device.X / scaling + 16, device.Y / scaling + 16, 0, 0);
+        DistanceInput.Text = firstChar;
+        DistanceInputBox.IsVisible = true;
+        DistanceInput.Focus();
+        DistanceInput.CaretIndex = firstChar.Length;
+    }
+
+    private void OnDistanceInputKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            HideDistanceInput();
+            Canvas.Focus();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Enter)
+        {
+            CommitDistanceInput();
+            e.Handled = true;
+        }
+    }
+
+    private void OnDistanceInputLostFocus(object? sender, RoutedEventArgs e) => HideDistanceInput();
+
+    private void CommitDistanceInput()
+    {
+        if (ViewModel is { } vm && CoordinateFormat.TryParse(DistanceInput.Text ?? string.Empty, out double length))
+            vm.Tools.CommitDistance(length, _lastCursorWorld);
+
+        HideDistanceInput();
+        Canvas.Focus();
+    }
+
+    private void HideDistanceInput() => DistanceInputBox.IsVisible = false;
 
     // ----- Inline text editor (text tool) -----
 

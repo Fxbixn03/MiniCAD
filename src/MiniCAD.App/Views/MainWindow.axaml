@@ -472,6 +472,18 @@
                                  Background="{DynamicResource Brush.SurfaceChromeAlt}" Foreground="{DynamicResource Brush.TextBody}"
                                  BorderBrush="{DynamicResource Brush.Brand}" BorderThickness="1"
                                  KeyDown="OnInlineTextEditorKeyDown" LostFocus="OnInlineTextEditorLostFocus" />
+
+                        <!-- Direct length entry at the crosshair (Allplan-style): type a length while drawing. -->
+                        <StackPanel x:Name="DistanceInputBox" IsVisible="False" Orientation="Horizontal" Spacing="4"
+                                    HorizontalAlignment="Left" VerticalAlignment="Top"
+                                    Background="{DynamicResource Brush.SurfaceChromeAlt}">
+                            <TextBlock Text="Länge" VerticalAlignment="Center" Margin="6,0,0,0"
+                                       Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" />
+                            <TextBox x:Name="DistanceInput" MinWidth="80" FontFamily="{StaticResource Font.Mono}" Padding="4,2"
+                                     Background="{DynamicResource Brush.SurfaceChromeAlt}" Foreground="{DynamicResource Brush.TextBody}"
+                                     BorderBrush="{DynamicResource Brush.Brand}" BorderThickness="1"
+                                     KeyDown="OnDistanceInputKeyDown" LostFocus="OnDistanceInputLostFocus" />
+                        </StackPanel>
                     </Panel>
                 </TabItem>
                 <TabItem Header="3D">

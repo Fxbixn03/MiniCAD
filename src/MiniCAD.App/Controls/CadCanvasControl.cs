@@ -99,6 +99,12 @@ public sealed class CadCanvasControl : Control
     /// <summary>Raised on a left-button double-click, with the world-space position under it.</summary>
     public event EventHandler<Point2D>? DoubleClicked;
 
+    /// <summary>
+    /// Raised when the user starts typing a number while a drawing tool is mid-operation — the
+    /// host opens the direct length-entry field at the crosshair, seeded with this first character.
+    /// </summary>
+    public event EventHandler<string>? DistanceInputStarted;
+
     private double Scaling => TopLevel.GetTopLevel(this)?.RenderScaling ?? 1.0;
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -392,6 +398,17 @@ public sealed class CadCanvasControl : Control
         if (Tools is not { } tools)
             return;
 
+        // Direct length entry (Allplan-style): typing a number while a tool is mid-operation opens
+        // the length field at the crosshair.
+        if (tools.ActiveTool is { IsInProgress: true }
+            && e.KeyModifiers is KeyModifiers.None or KeyModifiers.Shift
+            && TryMapNumericKey(e.Key) is { } ch)
+        {
+            DistanceInputStarted?.Invoke(this, ch);
+            e.Handled = true;
+            return;
+        }
+
         ToolKey key = e.Key switch
         {
             Key.Escape => ToolKey.Escape,
@@ -406,6 +423,16 @@ public sealed class CadCanvasControl : Control
         tools.KeyDown(key);
         e.Handled = true;
     }
+
+    /// <summary>Maps a digit / decimal-separator / minus key to its character, else null.</summary>
+    private static string? TryMapNumericKey(Key key) => key switch
+    {
+        >= Key.D0 and <= Key.D9 => ((char)('0' + (key - Key.D0))).ToString(),
+        >= Key.NumPad0 and <= Key.NumPad9 => ((char)('0' + (key - Key.NumPad0))).ToString(),
+        Key.OemComma or Key.OemPeriod or Key.Decimal => ",",
+        Key.OemMinus or Key.Subtract => "-",
+        _ => null,
+    };
 
     private ToolPointerInput BuildInput(Point position, ToolButton button, KeyModifiers modifiers, int clickCount)
         => new()

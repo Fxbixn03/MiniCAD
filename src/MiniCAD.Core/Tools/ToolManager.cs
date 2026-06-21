@@ -144,6 +144,28 @@ public sealed class ToolManager : IToolContext
         RequestRedraw();
     }
 
+    /// <summary>
+    /// Places the next point at an exact distance from the last point, along the direction toward
+    /// <paramref name="cursorWorld"/> (honouring Ortho/Polar). This is the Allplan-style direct
+    /// length entry: pick the start, type a length, the segment gets exactly that length.
+    /// </summary>
+    public void CommitDistance(double length, Point2D cursorWorld)
+    {
+        if (LastPoint is not { } anchor || length <= 0 || ActiveTool is not { IsInProgress: true })
+            return;
+
+        Point2D aimed = InputSettings.AngleStepDegrees(false) is { } stepDegrees
+            ? GeometryMath.SnapToAngleStep(anchor, cursorWorld, GeometryMath.DegreesToRadians(stepDegrees))
+            : cursorWorld;
+
+        Vector2D dir = aimed - anchor;
+        if (dir.Length <= GeometryMath.Epsilon)
+            return; // direction undefined (cursor on the anchor)
+
+        Point2D end = anchor + dir.Normalized() * length;
+        CommitCoordinate(end);
+    }
+
     public void PointerMove(in ToolPointerInput input) => ActiveTool?.PointerMove(input);
 
     public void PointerUp(in ToolPointerInput input) => ActiveTool?.PointerUp(input);

@@ -19,6 +19,9 @@ public abstract class ToolBase : ITool
 
     public abstract string Name { get; }
 
+    /// <summary>Exposes the in-progress state so the host can offer direct length entry.</summary>
+    public bool IsInProgress => HasActiveOperation;
+
     public virtual void Activate(IToolContext context) => Context = context;
 
     public virtual void Deactivate() => Cancel();

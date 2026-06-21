@@ -11,6 +11,10 @@ public interface ITool
 {
     string Name { get; }
 
+    /// <summary>True while the tool is mid-operation (e.g. a wall/line has its start point placed),
+    /// so the host can offer direct length entry at the crosshair.</summary>
+    bool IsInProgress => false;
+
     /// <summary>Called when the tool becomes active; receives the context it operates against.</summary>
     void Activate(IToolContext context);
 
