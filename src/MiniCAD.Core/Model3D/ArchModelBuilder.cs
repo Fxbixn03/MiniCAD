@@ -1,50 +1,88 @@
 using System.Linq;
 using MiniCAD.Core.Entities;
 using MiniCAD.Core.Geometry;
+using MiniCAD.Core.Styling;
 
 namespace MiniCAD.Core.Model3D;
 
 /// <summary>
-/// Builds the live 3D solids of the architectural model (#72): each wall is extruded and any
-/// recess/opening (Aussparung, #143) that overlaps it in plan and elevation is subtracted via CSG
-/// (#126). The results are derived <see cref="Model3DObject"/>s, rebuilt whenever the 2D model
-/// changes. Keeping the rule in Core makes it unit-testable independently of the App.
+/// Builds the live 3D solids of the architectural model (#72) from the 2D building elements: walls
+/// (with recesses/openings subtracted via CSG, #126), columns (#75), slabs and beams (#144). The
+/// results are derived <see cref="Model3DObject"/>s, rebuilt whenever the 2D model changes. Keeping
+/// the rule in Core makes it unit-testable independently of the App.
 /// </summary>
 public static class ArchModelBuilder
 {
-    public static List<Model3DObject> Build(IEnumerable<WallEntity> walls, IEnumerable<OpeningEntity> openings)
+    private static readonly Color ColumnColor = new(190, 190, 200);
+    private static readonly Color SlabColor = new(200, 195, 185);
+    private static readonly Color BeamColor = new(180, 175, 165);
+
+    public static List<Model3DObject> Build(IEnumerable<IEntity> entities)
     {
-        var openingList = openings.ToList();
+        var list = entities.ToList();
+        var openings = list.OfType<OpeningEntity>().ToList();
         var models = new List<Model3DObject>();
 
-        foreach (WallEntity wall in walls)
+        foreach (WallEntity wall in list.OfType<WallEntity>())
         {
             Mesh3D mesh = WallModelBuilder.BuildMesh(wall);
-
-            foreach (OpeningEntity opening in openingList)
+            foreach (OpeningEntity opening in openings)
             {
-                if (!Overlaps(wall, opening))
+                if (!Overlaps(wall.Bounds, wall.BaseElevation, wall.TopElevation, opening))
                     continue;
-                // Extend the cutter slightly in Z so its faces never sit coplanar with the wall's
-                // top/bottom (coincident faces are unreliable for BSP-CSG); the overhang is outside
-                // the wall and removes nothing extra.
-                const double overhang = 1.0;
-                Mesh3D cutter = Extruder.Extrude(opening.Footprint(),
-                    opening.BaseElevation - overhang, opening.Height + 2 * overhang);
-                mesh = Csg.Subtract(mesh, cutter);
+                mesh = Csg.Subtract(mesh, OpeningCutter(opening));
             }
-
-            models.Add(new Model3DObject(mesh, "Wand") { Color = WallModelBuilder.WallColor, IsDerived = true });
+            models.Add(Derived(mesh, WallModelBuilder.WallColor));
         }
+
+        foreach (ColumnEntity column in list.OfType<ColumnEntity>())
+            models.Add(Derived(ColumnMesh(column), ColumnColor));
+
+        foreach (SlabEntity slab in list.OfType<SlabEntity>())
+            if (SlabMesh(slab) is { } mesh)
+                models.Add(Derived(mesh, SlabColor));
+
+        foreach (BeamEntity beam in list.OfType<BeamEntity>())
+            models.Add(Derived(BeamMesh(beam), BeamColor));
 
         return models;
     }
 
-    /// <summary>True if the opening intersects the wall in both plan footprint and Z range.</summary>
-    private static bool Overlaps(WallEntity wall, OpeningEntity opening)
+    private static Model3DObject Derived(Mesh3D mesh, Color color)
+        => new(mesh, "Bauteil") { Color = color, IsDerived = true };
+
+    // ----- Per-element meshes -----
+
+    private static Mesh3D ColumnMesh(ColumnEntity c)
     {
-        if (!wall.Bounds.Intersects(opening.Bounds))
+        var center = new Point3D(c.Position.X, c.Position.Y, c.BaseElevation + c.Height / 2);
+        return c.Round
+            ? Mesh3D.Cylinder(c.Width / 2, c.Height, 24, center)
+            : Mesh3D.Box(c.Width, c.Depth, c.Height, center);
+    }
+
+    private static Mesh3D? SlabMesh(SlabEntity slab)
+    {
+        if (slab.Outline.Count < 3)
+            return null;
+        return Extruder.Extrude(slab.Outline, slab.BaseElevation, slab.Thickness);
+    }
+
+    private static Mesh3D BeamMesh(BeamEntity beam)
+        => Extruder.Extrude(beam.Footprint(), beam.BaseElevation, beam.Height);
+
+    private static Mesh3D OpeningCutter(OpeningEntity opening)
+    {
+        // Extend slightly in Z so the cutter faces never sit coplanar with the wall's top/bottom
+        // (coincident faces are unreliable for BSP-CSG); the overhang is outside the wall.
+        const double overhang = 1.0;
+        return Extruder.Extrude(opening.Footprint(), opening.BaseElevation - overhang, opening.Height + 2 * overhang);
+    }
+
+    private static bool Overlaps(Rect2D bounds, double baseZ, double topZ, OpeningEntity opening)
+    {
+        if (!bounds.Intersects(opening.Bounds))
             return false;
-        return opening.BaseElevation < wall.TopElevation && opening.TopElevation > wall.BaseElevation;
+        return opening.BaseElevation < topZ && opening.TopElevation > baseZ;
     }
 }

@@ -30,7 +30,7 @@ public class OpeningTests
         // (spans the 240 thickness), Z 0..2100.
         var door = new OpeningEntity(new Point2D(2500, 0), new Point2D(3500, 0), width: 400, height: 2100);
 
-        var models = ArchModelBuilder.Build(new[] { wall }, new[] { door });
+        var models = ArchModelBuilder.Build(new IEntity[] { wall, door });
         models.Should().ContainSingle();
         Mesh3D mesh = models[0].WorldMesh();
 
@@ -47,7 +47,7 @@ public class OpeningTests
         var wall = new WallEntity(new Point2D(0, 0), new Point2D(6000, 0), thickness: 240, height: 2500);
         var far = new OpeningEntity(new Point2D(0, 9000), new Point2D(0, 9001), width: 1000, height: 2100);
 
-        var models = ArchModelBuilder.Build(new[] { wall }, new[] { far });
+        var models = ArchModelBuilder.Build(new IEntity[] { wall, far });
         Mesh3D mesh = models[0].WorldMesh();
 
         PointInside(mesh, new Point3D(3000, 0, 1000)).Should().BeTrue(); // untouched

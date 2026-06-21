@@ -489,6 +489,29 @@ public static class DocumentMapper
                 Height = opening.Height,
                 BaseElevation = opening.BaseElevation,
             },
+            ColumnEntity column => new ColumnDto
+            {
+                Position = ToDto(column.Position),
+                Round = column.Round,
+                Width = column.Width,
+                Depth = column.Depth,
+                Height = column.Height,
+                BaseElevation = column.BaseElevation,
+            },
+            SlabEntity slab => new SlabDto
+            {
+                Outline = slab.Outline.Select(ToDto).ToList(),
+                Thickness = slab.Thickness,
+                BaseElevation = slab.BaseElevation,
+            },
+            BeamEntity beam => new BeamDto
+            {
+                Start = ToDto(beam.Start),
+                End = ToDto(beam.End),
+                Width = beam.Width,
+                Height = beam.Height,
+                BaseElevation = beam.BaseElevation,
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -565,6 +588,12 @@ public static class DocumentMapper
                 FromDto(wall.Start), FromDto(wall.End), wall.Thickness, wall.Height, wall.BaseElevation),
             OpeningDto opening => new OpeningEntity(
                 FromDto(opening.Start), FromDto(opening.End), opening.Width, opening.Height, opening.BaseElevation),
+            ColumnDto column => new ColumnEntity(
+                FromDto(column.Position), column.Round, column.Width, column.Depth, column.Height, column.BaseElevation),
+            SlabDto slab => new SlabEntity(
+                slab.Outline.Select(FromDto), slab.Thickness, slab.BaseElevation),
+            BeamDto beam => new BeamEntity(
+                FromDto(beam.Start), FromDto(beam.End), beam.Width, beam.Height, beam.BaseElevation),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

@@ -248,6 +248,9 @@ public sealed class Model3DDto
 [JsonDerivedType(typeof(DetailMarkDto), "detailmark")]
 [JsonDerivedType(typeof(WallDto), "wall")]
 [JsonDerivedType(typeof(OpeningDto), "opening")]
+[JsonDerivedType(typeof(ColumnDto), "column")]
+[JsonDerivedType(typeof(SlabDto), "slab")]
+[JsonDerivedType(typeof(BeamDto), "beam")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -494,4 +497,30 @@ public sealed class OpeningDto : EntityDto
     public double Width { get; set; } = 500.0;
     public double Height { get; set; } = 2100.0;
     public double BaseElevation { get; set; }
+}
+
+public sealed class ColumnDto : EntityDto
+{
+    public PointDto Position { get; set; } = new();
+    public bool Round { get; set; }
+    public double Width { get; set; } = 300.0;
+    public double Depth { get; set; } = 300.0;
+    public double Height { get; set; } = 2500.0;
+    public double BaseElevation { get; set; }
+}
+
+public sealed class SlabDto : EntityDto
+{
+    public List<PointDto> Outline { get; set; } = new();
+    public double Thickness { get; set; } = 200.0;
+    public double BaseElevation { get; set; }
+}
+
+public sealed class BeamDto : EntityDto
+{
+    public PointDto Start { get; set; } = new();
+    public PointDto End { get; set; } = new();
+    public double Width { get; set; } = 240.0;
+    public double Height { get; set; } = 400.0;
+    public double BaseElevation { get; set; } = 2500.0;
 }

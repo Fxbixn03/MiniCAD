@@ -142,6 +142,51 @@ public partial class AttributesViewModel : ViewModelBase
     [ObservableProperty]
     private double _openingBaseElevation;
 
+    // ----- Column (Stütze) geometry -----
+
+    [ObservableProperty]
+    private bool _isColumn;
+
+    [ObservableProperty]
+    private bool _columnRound;
+
+    [ObservableProperty]
+    private double _columnWidth;
+
+    [ObservableProperty]
+    private double _columnDepth;
+
+    [ObservableProperty]
+    private double _columnHeight;
+
+    [ObservableProperty]
+    private double _columnBaseElevation;
+
+    // ----- Slab (Decke) geometry -----
+
+    [ObservableProperty]
+    private bool _isSlab;
+
+    [ObservableProperty]
+    private double _slabThickness;
+
+    [ObservableProperty]
+    private double _slabBaseElevation;
+
+    // ----- Beam (Unterzug) geometry -----
+
+    [ObservableProperty]
+    private bool _isBeam;
+
+    [ObservableProperty]
+    private double _beamWidth;
+
+    [ObservableProperty]
+    private double _beamHeight;
+
+    [ObservableProperty]
+    private double _beamBaseElevation;
+
     // ----- Area fill (solid/gradient) for a closed polyline -----
 
     [ObservableProperty]
@@ -219,6 +264,9 @@ public partial class AttributesViewModel : ViewModelBase
             SymbolParameters.Clear();
             IsWall = false;
             IsOpening = false;
+            IsColumn = false;
+            IsSlab = false;
+            IsBeam = false;
             _suppress = false;
             return;
         }
@@ -285,6 +333,34 @@ public partial class AttributesViewModel : ViewModelBase
             OpeningWidth = opening.Width;
             OpeningHeight = opening.Height;
             OpeningBaseElevation = opening.BaseElevation;
+        }
+
+        // Column (Stütze) geometry.
+        IsColumn = items.Count == 1 && items[0] is ColumnEntity;
+        if (items[0] is ColumnEntity column)
+        {
+            ColumnRound = column.Round;
+            ColumnWidth = column.Width;
+            ColumnDepth = column.Depth;
+            ColumnHeight = column.Height;
+            ColumnBaseElevation = column.BaseElevation;
+        }
+
+        // Slab (Decke) geometry.
+        IsSlab = items.Count == 1 && items[0] is SlabEntity;
+        if (items[0] is SlabEntity slab)
+        {
+            SlabThickness = slab.Thickness;
+            SlabBaseElevation = slab.BaseElevation;
+        }
+
+        // Beam (Unterzug) geometry.
+        IsBeam = items.Count == 1 && items[0] is BeamEntity;
+        if (items[0] is BeamEntity beam)
+        {
+            BeamWidth = beam.Width;
+            BeamHeight = beam.Height;
+            BeamBaseElevation = beam.BaseElevation;
         }
 
         // Area fill: a single closed polyline (same condition as the hatch fill).
@@ -492,6 +568,58 @@ public partial class AttributesViewModel : ViewModelBase
         ApplyToSelection("Aussparung ändern", _ => (
             () => { opening.Width = newWidth; opening.Height = newHeight; opening.BaseElevation = newBase; },
             () => { opening.Width = oldWidth; opening.Height = oldHeight; opening.BaseElevation = oldBase; }));
+    }
+
+    partial void OnColumnRoundChanged(bool value) => ApplyColumn();
+    partial void OnColumnWidthChanged(double value) => ApplyColumn();
+    partial void OnColumnDepthChanged(double value) => ApplyColumn();
+    partial void OnColumnHeightChanged(double value) => ApplyColumn();
+    partial void OnColumnBaseElevationChanged(double value) => ApplyColumn();
+
+    private void ApplyColumn()
+    {
+        if (_suppress || _selection.Items.Count != 1 || _selection.Items[0] is not ColumnEntity column)
+            return;
+
+        bool nRound = ColumnRound; double nW = ColumnWidth, nD = ColumnDepth, nH = ColumnHeight, nB = ColumnBaseElevation;
+        bool oRound = column.Round; double oW = column.Width, oD = column.Depth, oH = column.Height, oB = column.BaseElevation;
+
+        ApplyToSelection("Stütze ändern", _ => (
+            () => { column.Round = nRound; column.Width = nW; column.Depth = nD; column.Height = nH; column.BaseElevation = nB; },
+            () => { column.Round = oRound; column.Width = oW; column.Depth = oD; column.Height = oH; column.BaseElevation = oB; }));
+    }
+
+    partial void OnSlabThicknessChanged(double value) => ApplySlab();
+    partial void OnSlabBaseElevationChanged(double value) => ApplySlab();
+
+    private void ApplySlab()
+    {
+        if (_suppress || _selection.Items.Count != 1 || _selection.Items[0] is not SlabEntity slab)
+            return;
+
+        double nT = SlabThickness, nB = SlabBaseElevation;
+        double oT = slab.Thickness, oB = slab.BaseElevation;
+
+        ApplyToSelection("Decke ändern", _ => (
+            () => { slab.Thickness = nT; slab.BaseElevation = nB; },
+            () => { slab.Thickness = oT; slab.BaseElevation = oB; }));
+    }
+
+    partial void OnBeamWidthChanged(double value) => ApplyBeam();
+    partial void OnBeamHeightChanged(double value) => ApplyBeam();
+    partial void OnBeamBaseElevationChanged(double value) => ApplyBeam();
+
+    private void ApplyBeam()
+    {
+        if (_suppress || _selection.Items.Count != 1 || _selection.Items[0] is not BeamEntity beam)
+            return;
+
+        double nW = BeamWidth, nH = BeamHeight, nB = BeamBaseElevation;
+        double oW = beam.Width, oH = beam.Height, oB = beam.BaseElevation;
+
+        ApplyToSelection("Unterzug ändern", _ => (
+            () => { beam.Width = nW; beam.Height = nH; beam.BaseElevation = nB; },
+            () => { beam.Width = oW; beam.Height = oH; beam.BaseElevation = oB; }));
     }
 
     partial void OnUseAreaFillChanged(bool value) => ApplyAreaFill();

@@ -30,6 +30,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly LineTool _lineTool = new();
     private readonly WallTool _wallTool = new();
     private readonly OpeningTool _openingTool = new();
+    private readonly ColumnTool _columnTool = new();
+    private readonly SlabTool _slabTool = new();
+    private readonly BeamTool _beamTool = new();
     private readonly RectangleTool _rectangleTool = new();
     private readonly CircleTool _circleTool = new();
     private readonly ArcTool _arcTool = new();
@@ -140,6 +143,9 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<LineEntity>(_lineTool);
         Tools.RegisterQuickSelectTool<WallEntity>(_wallTool);
         Tools.RegisterQuickSelectTool<OpeningEntity>(_openingTool);
+        Tools.RegisterQuickSelectTool<ColumnEntity>(_columnTool);
+        Tools.RegisterQuickSelectTool<SlabEntity>(_slabTool);
+        Tools.RegisterQuickSelectTool<BeamEntity>(_beamTool);
         Tools.RegisterQuickSelectTool<CircleEntity>(_circleTool);
         Tools.RegisterQuickSelectTool<ArcEntity>(_arcTool);
         Tools.RegisterQuickSelectTool<EllipseEntity>(_ellipseTool);
@@ -258,7 +264,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>True for tools that place points, where typed coordinate entry is meaningful.</summary>
     private bool IsCoordinateTool(ITool? tool)
-        => tool == _lineTool || tool == _wallTool || tool == _openingTool || tool == _rectangleTool || tool == _circleTool
+        => tool == _lineTool || tool == _wallTool || tool == _openingTool
+        || tool == _columnTool || tool == _slabTool || tool == _beamTool || tool == _rectangleTool || tool == _circleTool
         || tool == _arcTool || tool == _ellipseTool || tool == _polylineTool || tool == _splineTool
         || tool == _pointTool || tool == _textTool || tool == _leaderTool
         || tool == _linearDimensionTool || tool == _angularDimensionTool
@@ -358,6 +365,9 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsLineActive => Tools.ActiveTool == _lineTool;
     public bool IsWallActive => Tools.ActiveTool == _wallTool;
     public bool IsOpeningActive => Tools.ActiveTool == _openingTool;
+    public bool IsColumnActive => Tools.ActiveTool == _columnTool;
+    public bool IsSlabActive => Tools.ActiveTool == _slabTool;
+    public bool IsBeamActive => Tools.ActiveTool == _beamTool;
     public bool IsRectangleActive => Tools.ActiveTool == _rectangleTool;
     public bool IsCircleActive => Tools.ActiveTool == _circleTool;
     public bool IsArcActive => Tools.ActiveTool == _arcTool;
@@ -391,6 +401,9 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsLineActive));
         OnPropertyChanged(nameof(IsWallActive));
         OnPropertyChanged(nameof(IsOpeningActive));
+        OnPropertyChanged(nameof(IsColumnActive));
+        OnPropertyChanged(nameof(IsSlabActive));
+        OnPropertyChanged(nameof(IsBeamActive));
         OnPropertyChanged(nameof(IsRectangleActive));
         OnPropertyChanged(nameof(IsCircleActive));
         OnPropertyChanged(nameof(IsArcActive));
@@ -679,6 +692,18 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Draws a recess/opening (#143) that carves material from overlapping walls in 3D.</summary>
     [RelayCommand]
     private void ActivateOpening() => ActivateDrawingTool(_openingTool);
+
+    /// <summary>Places an architectural column (#75).</summary>
+    [RelayCommand]
+    private void ActivateColumn() => ActivateDrawingTool(_columnTool);
+
+    /// <summary>Draws a slab (Decke) outline that becomes a live 3D slab.</summary>
+    [RelayCommand]
+    private void ActivateSlab() => ActivateDrawingTool(_slabTool);
+
+    /// <summary>Draws a beam/downstand (Unterzug, #144) along its axis.</summary>
+    [RelayCommand]
+    private void ActivateBeam() => ActivateDrawingTool(_beamTool);
 
     [RelayCommand]
     private void ActivateRectangle() => ActivateDrawingTool(_rectangleTool);

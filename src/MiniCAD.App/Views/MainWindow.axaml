@@ -382,6 +382,18 @@
                         Command="{Binding ActivateOpeningCommand}" ToolTip.Tip="Aussparung / Öffnung (zieht Material aus Wänden ab)">
                     <Path Classes="ico" Data="M3,4 H21 V20 H3 Z M3,4 L21,20 M21,4 L3,20" />
                 </Button>
+                <Button Classes="rail" Classes.active="{Binding IsColumnActive}"
+                        Command="{Binding ActivateColumnCommand}" ToolTip.Tip="Stütze (rund/rechteckig)">
+                    <Path Classes="ico" Data="M7,4 H17 V20 H7 Z" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsSlabActive}"
+                        Command="{Binding ActivateSlabCommand}" ToolTip.Tip="Decke / Platte (Umriss zeichnen)">
+                    <Path Classes="ico" Data="M3,7 H21 V17 H3 Z M3,7 L7,3 H21 M21,7 V17" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsBeamActive}"
+                        Command="{Binding ActivateBeamCommand}" ToolTip.Tip="Unterzug / Träger">
+                    <Path Classes="ico" Data="M3,9 H21 V15 H3 Z M3,9 L21,15 M21,9 L3,15" />
+                </Button>
                 <Button Classes="rail" Classes.active="{Binding IsRectangleActive}"
                         Command="{Binding ActivateRectangleCommand}" ToolTip.Tip="Rechteck  ·  R">
                     <Path Classes="ico" Data="{StaticResource Icon.Rectangle}" />
@@ -758,6 +770,71 @@
                                                        Foreground="{DynamicResource Brush.TextMuted}" />
                                             <TextBox Text="{Binding OpeningBaseElevation}" FontFamily="{StaticResource Font.Mono}"
                                                      ToolTip.Tip="Unterkante (z. B. 0 = Tür, 900 = Fensterbrüstung)" />
+                                        </DockPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="6" IsVisible="{Binding IsColumn}">
+                                        <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
+                                        <TextBlock Classes="eyebrow" Text="STÜTZE" />
+                                        <CheckBox Content="Rund" IsChecked="{Binding ColumnRound}" />
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="Breite/⌀" Width="96" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding ColumnWidth}" FontFamily="{StaticResource Font.Mono}"
+                                                     ToolTip.Tip="Breite (X) bzw. Durchmesser bei runder Stütze" />
+                                        </DockPanel>
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="Tiefe" Width="96" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding ColumnDepth}" FontFamily="{StaticResource Font.Mono}"
+                                                     ToolTip.Tip="Tiefe (Y), nur bei rechteckiger Stütze" />
+                                        </DockPanel>
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="Höhe" Width="96" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding ColumnHeight}" FontFamily="{StaticResource Font.Mono}" />
+                                        </DockPanel>
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="Basis-Z" Width="96" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding ColumnBaseElevation}" FontFamily="{StaticResource Font.Mono}" />
+                                        </DockPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="6" IsVisible="{Binding IsSlab}">
+                                        <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
+                                        <TextBlock Classes="eyebrow" Text="DECKE / PLATTE" />
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="Dicke" Width="96" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding SlabThickness}" FontFamily="{StaticResource Font.Mono}" />
+                                        </DockPanel>
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="Basis-Z" Width="96" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding SlabBaseElevation}" FontFamily="{StaticResource Font.Mono}"
+                                                     ToolTip.Tip="Unterkante der Decke" />
+                                        </DockPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="6" IsVisible="{Binding IsBeam}">
+                                        <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
+                                        <TextBlock Classes="eyebrow" Text="UNTERZUG / TRÄGER" />
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="Breite" Width="96" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding BeamWidth}" FontFamily="{StaticResource Font.Mono}" />
+                                        </DockPanel>
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="Höhe" Width="96" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding BeamHeight}" FontFamily="{StaticResource Font.Mono}" />
+                                        </DockPanel>
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="Basis-Z" Width="96" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding BeamBaseElevation}" FontFamily="{StaticResource Font.Mono}"
+                                                     ToolTip.Tip="Unterkante (oft Deckenhöhe)" />
                                         </DockPanel>
                                     </StackPanel>
 
