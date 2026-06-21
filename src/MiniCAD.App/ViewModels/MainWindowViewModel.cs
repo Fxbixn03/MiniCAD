@@ -103,6 +103,7 @@ public partial class MainWindowViewModel : ViewModelBase
             ConvertConstructionCommand.NotifyCanExecuteChanged();
             GroupSelectionCommand.NotifyCanExecuteChanged();
             UngroupSelectionCommand.NotifyCanExecuteChanged();
+            ExtrudeSelectionCommand.NotifyCanExecuteChanged();
         };
         Tools.ActiveToolChanged += (_, _) =>
         {
@@ -703,6 +704,27 @@ public partial class MainWindowViewModel : ViewModelBase
         if (Document.GetModelBounds() is { } bounds)
             Camera3D.ZoomToFit(bounds);
         StatusMessage = $"3D-Körper „{name}“ eingefügt – zur 3D-Ansicht wechseln.";
+    }
+
+    /// <summary>Extrudes the selected closed 2D profile into a 3D solid using the Teilbild height.</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ExtrudeSelection()
+    {
+        if (Tools.Selection.Count != 1)
+            return;
+        if (ProfileExtractor.FromEntity(Tools.Selection.Items[0]) is not { } profile)
+        {
+            StatusMessage = "Zum Extrudieren ein geschlossenes Objekt (Polylinie/Kreis/Ellipse) wählen.";
+            return;
+        }
+
+        PartialDrawing pd = Document.ActivePartialDrawing;
+        double height = pd.Height > 0 ? pd.Height : 1000.0;
+        Mesh3D mesh = Extruder.Extrude(profile, pd.BaseHeight, height);
+        Document.AddModelObject(new Model3DObject(mesh, "Extrusion") { Color = new Core.Styling.Color(150, 210, 150) });
+        if (Document.GetModelBounds() is { } bounds)
+            Camera3D.ZoomToFit(bounds);
+        StatusMessage = $"Profil extrudiert (H {height:0.##}) – zur 3D-Ansicht wechseln.";
     }
 
     /// <summary>Sets the 3D camera to a standard view (0=Iso, 1=Top, 2=Front, 3=Right).</summary>
