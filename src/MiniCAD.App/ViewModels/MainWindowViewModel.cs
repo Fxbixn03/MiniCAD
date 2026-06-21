@@ -282,6 +282,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _sideBySide3D;
 
+    /// <summary>Whether the 3D views show the ground grid and axis triad.</summary>
+    [ObservableProperty]
+    private bool _showGround3D = true;
+
     /// <summary>Two-way bound to the Ortho toggle: locks segments to horizontal/vertical.</summary>
     [ObservableProperty]
     private bool _orthoEnabled;

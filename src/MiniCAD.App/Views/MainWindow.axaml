@@ -596,11 +596,14 @@
                             <Button Content="Draht" Command="{Binding SetRenderModeCommand}" CommandParameter="Wireframe" />
                             <Button Content="Verdeckt" Command="{Binding SetRenderModeCommand}" CommandParameter="HiddenLine" />
                             <Button Content="Schattiert" Command="{Binding SetRenderModeCommand}" CommandParameter="Shaded" />
+                            <ToggleButton Content="Boden" IsChecked="{Binding ShowGround3D}" Margin="2"
+                                          ToolTip.Tip="Bodenraster &amp; Achsenkreuz ein/aus" />
                             <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
                             <Button Content="Abdocken ⧉" Click="OnDetach3D" />
                         </WrapPanel>
                         <controls:Cad3DView Document="{Binding Document}" Camera="{Binding Camera3D}"
-                                            Mode="{Binding View3DMode}" SelectedModel="{Binding Selected3DModel}" />
+                                            Mode="{Binding View3DMode}" SelectedModel="{Binding Selected3DModel}"
+                                            ShowGround="{Binding ShowGround3D}" />
                     </DockPanel>
                 </TabItem>
             </TabControl>
@@ -621,7 +624,8 @@
                     <Button Content="Schattiert" Command="{Binding SetRenderModeCommand}" CommandParameter="Shaded" />
                 </StackPanel>
                 <controls:Cad3DView Document="{Binding Document}" Camera="{Binding SideCamera3D}"
-                                    Mode="{Binding View3DMode}" SelectedModel="{Binding Selected3DModel}" />
+                                    Mode="{Binding View3DMode}" SelectedModel="{Binding Selected3DModel}"
+                                    ShowGround="{Binding ShowGround3D}" />
             </DockPanel>
             </Grid>
 

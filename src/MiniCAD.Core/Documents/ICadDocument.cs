@@ -62,6 +62,9 @@ public interface ICadDocument
     /// <summary>Signals that a 3D model object changed in place (e.g. after a transform).</summary>
     void NotifyModelModified();
 
+    /// <summary>The union of all 3D model bounds, or <c>null</c> if the model space is empty.</summary>
+    Geometry.BoundingBox3D? GetModelBounds();
+
     /// <summary>The named dimension styles defined for this document.</summary>
     IReadOnlyList<DimStyle> DimStyles { get; }
 

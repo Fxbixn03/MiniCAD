@@ -21,7 +21,8 @@ public sealed class Skia3DSceneRenderer
     private static readonly Vector3D Light = new Vector3D(0.4, 0.5, 1.0).Normalized();
 
     public void Render(ICadDocument document, Camera3D camera, nint pixelBuffer, int width, int height, int rowBytes,
-        Color background, Model3DObject? selected = null, Render3DMode mode = Render3DMode.Wireframe)
+        Color background, Model3DObject? selected = null, Render3DMode mode = Render3DMode.Wireframe,
+        bool showGround = true)
     {
         if (width <= 0 || height <= 0 || pixelBuffer == nint.Zero)
             return;
@@ -36,6 +37,9 @@ public sealed class Skia3DSceneRenderer
         var drawSurface = new SkiaRenderSurface(surface.Canvas, Matrix2D.Identity);
         try
         {
+            if (showGround)
+                DrawGroundAndAxes(drawSurface, camera, document);
+
             IReadOnlyList<Model3DObject> models = document.Models;
             if (mode == Render3DMode.Wireframe)
                 RenderWireframe(drawSurface, camera, models, selected);
@@ -48,6 +52,68 @@ public sealed class Skia3DSceneRenderer
         }
 
         surface.Canvas.Flush();
+    }
+
+    // ----- Ground grid + axis triad (orientation aids, Allplan-style) -----
+
+    private static readonly Color GridColor = new(42, 50, 70);
+    private static readonly Color AxisX = new(205, 95, 95);
+    private static readonly Color AxisY = new(95, 180, 95);
+    private static readonly Color AxisZ = new(105, 135, 235);
+
+    private static void DrawGroundAndAxes(SkiaRenderSurface surface, Camera3D camera, ICadDocument document)
+    {
+        double extent;
+        double centerX = 0, centerY = 0;
+        if (document.GetModelBounds() is { } b)
+        {
+            extent = Math.Max(Math.Max(b.Size.X, b.Size.Y), 1.0);
+            centerX = b.Center.X;
+            centerY = b.Center.Y;
+        }
+        else
+        {
+            extent = Math.Max(camera.Distance, 1.0);
+        }
+
+        double step = NiceStep(extent / 8.0);
+        const int n = 12;
+        double half = n * step;
+        double cx = Math.Round(centerX / step) * step;
+        double cy = Math.Round(centerY / step) * step;
+
+        var grid = new StrokeStyle(GridColor, 1.0);
+        for (int i = -n; i <= n; i++)
+        {
+            double x = cx + i * step;
+            DrawWorldLine(surface, camera, new Point3D(x, cy - half, 0), new Point3D(x, cy + half, 0), grid);
+            double y = cy + i * step;
+            DrawWorldLine(surface, camera, new Point3D(cx - half, y, 0), new Point3D(cx + half, y, 0), grid);
+        }
+
+        // Axis triad at the world origin (X red, Y green, Z blue).
+        DrawWorldLine(surface, camera, Point3D.Origin, new Point3D(half, 0, 0), new StrokeStyle(AxisX, 1.8));
+        DrawWorldLine(surface, camera, Point3D.Origin, new Point3D(0, half, 0), new StrokeStyle(AxisY, 1.8));
+        DrawWorldLine(surface, camera, Point3D.Origin, new Point3D(0, 0, half * 0.5), new StrokeStyle(AxisZ, 1.8));
+    }
+
+    private static void DrawWorldLine(SkiaRenderSurface surface, Camera3D camera, Point3D a, Point3D b, in StrokeStyle stroke)
+    {
+        Point2D pa = camera.Project(a, out bool fa);
+        Point2D pb = camera.Project(b, out bool fb);
+        if (!fa || !fb)
+            return; // skip lines crossing behind the camera
+        surface.DrawLine(pa, pb, stroke);
+    }
+
+    private static double NiceStep(double raw)
+    {
+        if (raw <= 0)
+            return 1.0;
+        double mag = Math.Pow(10, Math.Floor(Math.Log10(raw)));
+        double norm = raw / mag;
+        double nice = norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10;
+        return nice * mag;
     }
 
     private static void RenderWireframe(SkiaRenderSurface surface, Camera3D camera, IReadOnlyList<Model3DObject> models, Model3DObject? selected)

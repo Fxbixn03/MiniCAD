@@ -34,6 +34,9 @@ public sealed class Cad3DView : Control
         AvaloniaProperty.Register<Cad3DView, Model3DObject?>(
             nameof(SelectedModel), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
 
+    public static readonly StyledProperty<bool> ShowGroundProperty =
+        AvaloniaProperty.Register<Cad3DView, bool>(nameof(ShowGround), defaultValue: true);
+
     private static readonly CoreColor Background = new(12, 16, 30);
 
     private readonly Skia3DSceneRenderer _renderer = new();
@@ -79,6 +82,13 @@ public sealed class Cad3DView : Control
         set => SetValue(ModeProperty, value);
     }
 
+    /// <summary>Whether to draw the ground grid and axis triad.</summary>
+    public bool ShowGround
+    {
+        get => GetValue(ShowGroundProperty);
+        set => SetValue(ShowGroundProperty, value);
+    }
+
     private double Scaling => TopLevel.GetTopLevel(this)?.RenderScaling ?? 1.0;
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -106,7 +116,8 @@ public sealed class Cad3DView : Control
         {
             UpdateCameraSize();
         }
-        else if (change.Property == ModeProperty || change.Property == SelectedModelProperty)
+        else if (change.Property == ModeProperty || change.Property == SelectedModelProperty
+            || change.Property == ShowGroundProperty)
         {
             Invalidate();
         }
@@ -171,7 +182,7 @@ public sealed class Cad3DView : Control
             try
             {
                 using ILockedFramebuffer fb = _bitmap!.Lock();
-                _renderer.Render(document, camera, fb.Address, fb.Size.Width, fb.Size.Height, fb.RowBytes, Background, SelectedModel, Mode);
+                _renderer.Render(document, camera, fb.Address, fb.Size.Width, fb.Size.Height, fb.RowBytes, Background, SelectedModel, Mode, ShowGround);
             }
             catch (Exception ex)
             {
