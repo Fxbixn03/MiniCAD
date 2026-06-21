@@ -556,35 +556,51 @@
                 </TabItem>
                 <TabItem Header="3D">
                     <DockPanel>
-                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="6"
-                                    Background="{DynamicResource Brush.SurfaceChrome}">
+                        <WrapPanel DockPanel.Dock="Top" Margin="6" Background="{DynamicResource Brush.SurfaceChrome}">
+                            <WrapPanel.Styles>
+                                <Style Selector="Button"><Setter Property="Margin" Value="2" /></Style>
+                            </WrapPanel.Styles>
                             <Button Content="Iso" Command="{Binding SetView3DCommand}" CommandParameter="Iso" />
                             <Button Content="Oben" Command="{Binding SetView3DCommand}" CommandParameter="Top" />
+                            <Button Content="Unten" Command="{Binding SetView3DCommand}" CommandParameter="Bottom" />
                             <Button Content="Vorn" Command="{Binding SetView3DCommand}" CommandParameter="Front" />
+                            <Button Content="Hinten" Command="{Binding SetView3DCommand}" CommandParameter="Back" />
                             <Button Content="Rechts" Command="{Binding SetView3DCommand}" CommandParameter="Right" />
+                            <Button Content="Links" Command="{Binding SetView3DCommand}" CommandParameter="Left" />
+                            <Button Content="{Binding ProjectionLabel}" Command="{Binding ToggleProjectionCommand}"
+                                    ToolTip.Tip="Perspektive / Parallelprojektion umschalten" />
                             <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
-                            <TextBlock Text="+" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
                             <Button Content="Quader" Command="{Binding InsertPrimitive3DCommand}" CommandParameter="Box" />
                             <Button Content="Zylinder" Command="{Binding InsertPrimitive3DCommand}" CommandParameter="Cylinder" />
                             <Button Content="Kugel" Command="{Binding InsertPrimitive3DCommand}" CommandParameter="Sphere" />
                             <Button Content="Kegel" Command="{Binding InsertPrimitive3DCommand}" CommandParameter="Cone" />
                             <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
-                            <Button Content="Vereinen ∪" Command="{Binding BooleanOpCommand}" CommandParameter="Union"
-                                    ToolTip.Tip="Beide 3D-Körper vereinigen (CSG)" />
-                            <Button Content="Abziehen ∖" Command="{Binding BooleanOpCommand}" CommandParameter="Subtract"
-                                    ToolTip.Tip="Zweiten Körper vom ersten abziehen (CSG)" />
-                            <Button Content="Schnitt ∩" Command="{Binding BooleanOpCommand}" CommandParameter="Intersect"
-                                    ToolTip.Tip="Schnittmenge beider Körper (CSG)" />
+                            <Button Content="∪" Command="{Binding BooleanOpCommand}" CommandParameter="Union" ToolTip.Tip="Vereinen (CSG)" />
+                            <Button Content="∖" Command="{Binding BooleanOpCommand}" CommandParameter="Subtract" ToolTip.Tip="Abziehen (CSG)" />
+                            <Button Content="∩" Command="{Binding BooleanOpCommand}" CommandParameter="Intersect" ToolTip.Tip="Schnittmenge (CSG)" />
+                            <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
+                            <TextBlock Text="Auswahl:" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" Margin="4,0,0,0" />
+                            <Button Content="X−" Command="{Binding MoveModel3DCommand}" CommandParameter="X-" ToolTip.Tip="Verschieben −X" />
+                            <Button Content="X+" Command="{Binding MoveModel3DCommand}" CommandParameter="X+" />
+                            <Button Content="Y−" Command="{Binding MoveModel3DCommand}" CommandParameter="Y-" />
+                            <Button Content="Y+" Command="{Binding MoveModel3DCommand}" CommandParameter="Y+" />
+                            <Button Content="Z−" Command="{Binding MoveModel3DCommand}" CommandParameter="Z-" />
+                            <Button Content="Z+" Command="{Binding MoveModel3DCommand}" CommandParameter="Z+" />
+                            <Button Content="⟲" Command="{Binding RotateModel3DCommand}" CommandParameter="Z+" ToolTip.Tip="Drehen +90° (Z)" />
+                            <Button Content="⟳" Command="{Binding RotateModel3DCommand}" CommandParameter="Z-" ToolTip.Tip="Drehen −90° (Z)" />
+                            <Button Content="＋" Command="{Binding ScaleModel3DCommand}" CommandParameter="Up" ToolTip.Tip="Vergrößern" />
+                            <Button Content="－" Command="{Binding ScaleModel3DCommand}" CommandParameter="Down" ToolTip.Tip="Verkleinern" />
+                            <Button Content="Kopie" Command="{Binding DuplicateModel3DCommand}" ToolTip.Tip="Duplizieren" />
+                            <Button Content="Löschen" Command="{Binding DeleteModel3DCommand}" />
                             <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
                             <Button Content="Draht" Command="{Binding SetRenderModeCommand}" CommandParameter="Wireframe" />
                             <Button Content="Verdeckt" Command="{Binding SetRenderModeCommand}" CommandParameter="HiddenLine" />
                             <Button Content="Schattiert" Command="{Binding SetRenderModeCommand}" CommandParameter="Shaded" />
                             <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
                             <Button Content="Abdocken ⧉" Click="OnDetach3D" />
-                            <TextBlock Text="Linksklick: wählen · Linksziehen: orbit · Mittel: pan · Rad: zoom"
-                                       Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="8,0,0,0" />
-                        </StackPanel>
-                        <controls:Cad3DView Document="{Binding Document}" Camera="{Binding Camera3D}" Mode="{Binding View3DMode}" />
+                        </WrapPanel>
+                        <controls:Cad3DView Document="{Binding Document}" Camera="{Binding Camera3D}"
+                                            Mode="{Binding View3DMode}" SelectedModel="{Binding Selected3DModel}" />
                     </DockPanel>
                 </TabItem>
             </TabControl>
@@ -604,7 +620,8 @@
                     <Button Content="Verdeckt" Command="{Binding SetRenderModeCommand}" CommandParameter="HiddenLine" />
                     <Button Content="Schattiert" Command="{Binding SetRenderModeCommand}" CommandParameter="Shaded" />
                 </StackPanel>
-                <controls:Cad3DView Document="{Binding Document}" Camera="{Binding SideCamera3D}" Mode="{Binding View3DMode}" />
+                <controls:Cad3DView Document="{Binding Document}" Camera="{Binding SideCamera3D}"
+                                    Mode="{Binding View3DMode}" SelectedModel="{Binding Selected3DModel}" />
             </DockPanel>
             </Grid>
 

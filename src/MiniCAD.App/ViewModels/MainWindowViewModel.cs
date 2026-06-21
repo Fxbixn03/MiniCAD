@@ -1114,6 +1114,21 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void SetSideView3D(string view) => ApplyStandardView(SideCamera3D, view);
 
+    /// <summary>Label for the projection toggle button.</summary>
+    public string ProjectionLabel => Camera3D.Mode == ProjectionMode.Perspective ? "Perspektive" : "Parallel";
+
+    /// <summary>Toggles both 3D cameras between perspective and parallel (orthographic) projection.</summary>
+    [RelayCommand]
+    private void ToggleProjection()
+    {
+        ProjectionMode mode = Camera3D.Mode == ProjectionMode.Perspective
+            ? ProjectionMode.Orthographic
+            : ProjectionMode.Perspective;
+        Camera3D.Mode = mode;
+        SideCamera3D.Mode = mode;
+        OnPropertyChanged(nameof(ProjectionLabel));
+    }
+
     private void ApplyStandardView(Camera3D camera, string view)
     {
         camera.SetStandardView(view switch
@@ -1121,10 +1136,113 @@ public partial class MainWindowViewModel : ViewModelBase
             "Top" => StandardView.Top,
             "Front" => StandardView.Front,
             "Right" => StandardView.Right,
+            "Bottom" => StandardView.Bottom,
+            "Back" => StandardView.Back,
+            "Left" => StandardView.Left,
             _ => StandardView.Iso,
         });
         if (Document.GetModelBounds() is { } bounds)
             camera.ZoomToFit(bounds);
+    }
+
+    // ----- 3D editing of the selected model object (#75/#125 manual solids) -----
+
+    /// <summary>The 3D model object currently picked in a 3D view (two-way bound).</summary>
+    [ObservableProperty]
+    private Model3DObject? _selected3DModel;
+
+    private const double Move3DStep = 250.0;
+
+    /// <summary>True if a manually-created (non-derived) 3D solid is selected and can be edited.</summary>
+    private bool CanEdit3D(out Model3DObject model)
+    {
+        model = Selected3DModel!;
+        if (Selected3DModel is null)
+        {
+            StatusMessage = "Kein 3D-Körper ausgewählt (im 3D-Bereich anklicken).";
+            return false;
+        }
+        if (Selected3DModel.IsDerived)
+        {
+            StatusMessage = "Abgeleitete Bauteile über ihre 2D-Eigenschaften ändern.";
+            return false;
+        }
+        return true;
+    }
+
+    private void ApplyModelTransform(Model3DObject model, Matrix4 delta)
+    {
+        Matrix4 before = model.Transform;
+        _commands.Execute(new TransformModelCommand(Document, model, before, before * delta));
+    }
+
+    [RelayCommand]
+    private void MoveModel3D(string dir)
+    {
+        if (!CanEdit3D(out Model3DObject model))
+            return;
+        Vector3D v = dir switch
+        {
+            "X-" => new Vector3D(-Move3DStep, 0, 0),
+            "X+" => new Vector3D(Move3DStep, 0, 0),
+            "Y-" => new Vector3D(0, -Move3DStep, 0),
+            "Y+" => new Vector3D(0, Move3DStep, 0),
+            "Z-" => new Vector3D(0, 0, -Move3DStep),
+            _ => new Vector3D(0, 0, Move3DStep),
+        };
+        ApplyModelTransform(model, Matrix4.Translation(v));
+        StatusMessage = $"3D-Körper verschoben ({dir}, {Move3DStep:0.#}).";
+    }
+
+    [RelayCommand]
+    private void RotateModel3D(string dir)
+    {
+        if (!CanEdit3D(out Model3DObject model))
+            return;
+        double angle = (dir == "Z-" ? -1 : 1) * Math.PI / 2; // ±90° about Z, through the model centre
+        Point3D c = model.Bounds.Center;
+        var center = new Vector3D(c.X, c.Y, c.Z);
+        Matrix4 delta = Matrix4.Translation(-center) * Matrix4.RotationZ(angle) * Matrix4.Translation(center);
+        ApplyModelTransform(model, delta);
+        StatusMessage = "3D-Körper gedreht (90°).";
+    }
+
+    [RelayCommand]
+    private void ScaleModel3D(string mode)
+    {
+        if (!CanEdit3D(out Model3DObject model))
+            return;
+        double factor = mode == "Down" ? 0.8 : 1.25;
+        Point3D c = model.Bounds.Center;
+        var center = new Vector3D(c.X, c.Y, c.Z);
+        Matrix4 delta = Matrix4.Translation(-center) * Matrix4.Scaling(factor) * Matrix4.Translation(center);
+        ApplyModelTransform(model, delta);
+        StatusMessage = $"3D-Körper skaliert (×{factor:0.##}).";
+    }
+
+    [RelayCommand]
+    private void DuplicateModel3D()
+    {
+        if (!CanEdit3D(out Model3DObject model))
+            return;
+        var copy = new Model3DObject(model.Mesh, model.Name)
+        {
+            Color = model.Color,
+            Transform = model.Transform * Matrix4.Translation(new Vector3D(Move3DStep, Move3DStep, 0)),
+        };
+        _commands.Execute(new AddModelCommand(Document, copy));
+        Selected3DModel = copy;
+        StatusMessage = "3D-Körper dupliziert.";
+    }
+
+    [RelayCommand]
+    private void DeleteModel3D()
+    {
+        if (!CanEdit3D(out Model3DObject model))
+            return;
+        _commands.Execute(new RemoveModelCommand(Document, model));
+        Selected3DModel = null;
+        StatusMessage = "3D-Körper gelöscht.";
     }
 
     /// <summary>Sets the active work plane (UCS) used for planar operations.</summary>

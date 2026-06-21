@@ -35,7 +35,19 @@ public sealed class Camera3D
     /// <summary>Elevation angle above the ground plane (radians, clamped to ±89°).</summary>
     public double Pitch { get; private set; }
 
-    public ProjectionMode Mode { get; set; } = ProjectionMode.Perspective;
+    private ProjectionMode _mode = ProjectionMode.Perspective;
+
+    public ProjectionMode Mode
+    {
+        get => _mode;
+        set
+        {
+            if (_mode == value)
+                return;
+            _mode = value;
+            OnChanged();
+        }
+    }
 
     public double FieldOfView { get; set; } = 50.0 * Math.PI / 180.0;
 
@@ -165,9 +177,12 @@ public sealed class Camera3D
     {
         (Yaw, Pitch) = view switch
         {
-            StandardView.Top => (-Math.PI / 2, Math.PI / 2), // straight down (Up swaps to Y)
+            StandardView.Top => (-Math.PI / 2, Math.PI / 2),    // straight down (Up swaps to Y)
+            StandardView.Bottom => (-Math.PI / 2, -Math.PI / 2), // straight up
             StandardView.Front => (-Math.PI / 2, 0.0),
+            StandardView.Back => (Math.PI / 2, 0.0),
             StandardView.Right => (0.0, 0.0),
+            StandardView.Left => (Math.PI, 0.0),
             _ => (-Math.PI / 4, 30.0 * Math.PI / 180.0), // Iso
         };
         OnChanged();
@@ -180,7 +195,10 @@ public sealed class Camera3D
 public enum StandardView
 {
     Top,
+    Bottom,
     Front,
+    Back,
     Right,
+    Left,
     Iso,
 }

@@ -53,6 +53,15 @@ public interface ICadDocument
     /// <summary>The 3D model-space objects (parallel to the 2D Teilbilder).</summary>
     IReadOnlyList<Model3D.Model3DObject> Models { get; }
 
+    /// <summary>Adds a 3D model-space object.</summary>
+    Model3D.Model3DObject AddModelObject(Model3D.Model3DObject model);
+
+    /// <summary>Removes a 3D model-space object; returns true if it was present.</summary>
+    bool RemoveModelObject(Model3D.Model3DObject model);
+
+    /// <summary>Signals that a 3D model object changed in place (e.g. after a transform).</summary>
+    void NotifyModelModified();
+
     /// <summary>The named dimension styles defined for this document.</summary>
     IReadOnlyList<DimStyle> DimStyles { get; }
 

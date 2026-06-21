@@ -30,6 +30,10 @@ public sealed class Cad3DView : Control
     public static readonly StyledProperty<Render3DMode> ModeProperty =
         AvaloniaProperty.Register<Cad3DView, Render3DMode>(nameof(Mode), Render3DMode.Wireframe);
 
+    public static readonly StyledProperty<Model3DObject?> SelectedModelProperty =
+        AvaloniaProperty.Register<Cad3DView, Model3DObject?>(
+            nameof(SelectedModel), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
+
     private static readonly CoreColor Background = new(12, 16, 30);
 
     private readonly Skia3DSceneRenderer _renderer = new();
@@ -43,8 +47,13 @@ public sealed class Cad3DView : Control
     private bool _panning;
     private bool _syncingCamera; // true while we adjust the camera ourselves (avoids a render feedback loop)
 
-    /// <summary>The currently picked 3D object (highlighted), or null.</summary>
-    public Model3DObject? SelectedModel { get; private set; }
+    /// <summary>The currently picked 3D object (highlighted), or null. Bindable (two-way) so the
+    /// view model can drive 3D editing of the selection.</summary>
+    public Model3DObject? SelectedModel
+    {
+        get => GetValue(SelectedModelProperty);
+        set => SetValue(SelectedModelProperty, value);
+    }
 
     public Cad3DView()
     {
@@ -97,7 +106,7 @@ public sealed class Cad3DView : Control
         {
             UpdateCameraSize();
         }
-        else if (change.Property == ModeProperty)
+        else if (change.Property == ModeProperty || change.Property == SelectedModelProperty)
         {
             Invalidate();
         }
