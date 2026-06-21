@@ -29,6 +29,20 @@ public readonly struct Point3D : IEquatable<Point3D>
     /// <summary>Lifts a planar point into 3D at the given height (default ground plane).</summary>
     public static Point3D FromPoint2D(Point2D point, double z = 0.0) => new(point.X, point.Y, z);
 
+    /// <summary>The position as a vector from the origin.</summary>
+    public Vector3D ToVector3D() => new(X, Y, Z);
+
+    public double DistanceTo(Point3D other) => (this - other).Length;
+
+    public Point3D Lerp(Point3D other, double t)
+        => new(X + (other.X - X) * t, Y + (other.Y - Y) * t, Z + (other.Z - Z) * t);
+
+    public static Point3D operator +(Point3D p, Vector3D v) => new(p.X + v.X, p.Y + v.Y, p.Z + v.Z);
+
+    public static Point3D operator -(Point3D p, Vector3D v) => new(p.X - v.X, p.Y - v.Y, p.Z - v.Z);
+
+    public static Vector3D operator -(Point3D a, Point3D b) => new(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+
     public bool Equals(Point3D other) => X.Equals(other.X) && Y.Equals(other.Y) && Z.Equals(other.Z);
 
     public override bool Equals(object? obj) => obj is Point3D other && Equals(other);
