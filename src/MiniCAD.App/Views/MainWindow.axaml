@@ -108,6 +108,10 @@
                                 <MenuItem Header="_Seite (YZ)" Command="{Binding SetWorkPlaneCommand}" CommandParameter="Right" />
                             </MenuItem>
                             <Separator />
+                            <MenuItem Header="_Schnittzeichen platzieren" Command="{Binding PlaceSectionMarkCommand}" />
+                            <MenuItem Header="_Detailzeichen platzieren" Command="{Binding PlaceDetailMarkCommand}" />
+                            <MenuItem Header="Schnitt aus _Modell erzeugen (#93)" Command="{Binding GenerateSectionCommand}" />
+                            <Separator />
                             <MenuItem Header="_Teilbild-Auswahl…" Click="OnPartialDrawingSelection" />
                             <Separator />
                             <MenuItem Header="_Einstellungen…" Click="OnOpenSettings" />

@@ -61,6 +61,32 @@ public class PersistenceTests
     }
 
     [Fact]
+    public void RoundTrip_PreservesSectionAndDetailMarks()
+    {
+        var source = new CadDocument();
+        source.AddEntity(new SectionMarkEntity(
+            new Point2D(0, 0), new Point2D(100, 0), "A", "Blatt 2", size: 30, flipDirection: true));
+        source.AddEntity(new DetailMarkEntity(new Point2D(50, 50), 20, "1", "Detail D-04", textHeight: 8));
+
+        CadDocument restored = RoundTrip(source);
+
+        var section = restored.Entities.OfType<SectionMarkEntity>().Single();
+        section.Start.Should().Be(new Point2D(0, 0));
+        section.End.Should().Be(new Point2D(100, 0));
+        section.Label.Should().Be("A");
+        section.Reference.Should().Be("Blatt 2");
+        section.Size.Should().BeApproximately(30, 1e-9);
+        section.FlipDirection.Should().BeTrue();
+
+        var detail = restored.Entities.OfType<DetailMarkEntity>().Single();
+        detail.Center.Should().Be(new Point2D(50, 50));
+        detail.Radius.Should().BeApproximately(20, 1e-9);
+        detail.Label.Should().Be("1");
+        detail.Reference.Should().Be("Detail D-04");
+        detail.TextHeight.Should().BeApproximately(8, 1e-9);
+    }
+
+    [Fact]
     public void RoundTrip_PreservesGeometryAndStrokeOverride()
     {
         CadDocument restored = RoundTrip(BuildSampleDocument());

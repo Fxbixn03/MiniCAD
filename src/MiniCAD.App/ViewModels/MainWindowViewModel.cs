@@ -14,6 +14,7 @@ using MiniCAD.Core.Entities;
 using MiniCAD.Core.Geometry;
 using MiniCAD.Core.Model3D;
 using MiniCAD.Core.Persistence;
+using MiniCAD.Core.Sections;
 using MiniCAD.Core.Tools;
 using MiniCAD.Core.Viewing;
 
@@ -791,6 +792,137 @@ public partial class MainWindowViewModel : ViewModelBase
         if (Document.GetModelBounds() is { } bounds)
             Camera3D.ZoomToFit(bounds);
         StatusMessage = $"Boolesche Operation: {name} erzeugt.";
+    }
+
+    /// <summary>Places a section mark (#215) along the selected line, or through the drawing centre.</summary>
+    [RelayCommand]
+    private void PlaceSectionMark()
+    {
+        Point2D start, end;
+        if (Tools.Selection.Count == 1 && Tools.Selection.Items[0] is LineEntity line)
+        {
+            start = line.Start;
+            end = line.End;
+        }
+        else if (Document.GetContentBounds() is { } b)
+        {
+            double midY = (b.MinY + b.MaxY) / 2;
+            start = new Point2D(b.MinX, midY);
+            end = new Point2D(b.MaxX, midY);
+        }
+        else
+        {
+            start = new Point2D(0, 0);
+            end = new Point2D(1000, 0);
+        }
+
+        double size = Math.Max(50.0, (end - start).Length * 0.06);
+        var mark = new SectionMarkEntity(start, end, NextSectionLabel(), size: size)
+        {
+            LayerId = Document.ActiveLayer.Id,
+            PartialDrawingId = Document.ActivePartialDrawing.Id,
+        };
+        _commands.Execute(new AddEntityCommand(Document, mark));
+        StatusMessage = $"Schnittzeichen „{mark.Label}“ platziert – „Schnitt erzeugen“ leitet die 2D-Ansicht ab.";
+    }
+
+    /// <summary>Places a detail mark (#215) around the selected geometry, or the drawing centre.</summary>
+    [RelayCommand]
+    private void PlaceDetailMark()
+    {
+        Point2D center;
+        double radius;
+        if (Tools.Selection.Count >= 1)
+        {
+            Rect2D b = Tools.Selection.Items[0].Bounds;
+            center = new Point2D((b.MinX + b.MaxX) / 2, (b.MinY + b.MaxY) / 2);
+            radius = Math.Max(50.0, Math.Max(b.MaxX - b.MinX, b.MaxY - b.MinY) / 2);
+        }
+        else if (Document.GetContentBounds() is { } cb)
+        {
+            center = new Point2D((cb.MinX + cb.MaxX) / 2, (cb.MinY + cb.MaxY) / 2);
+            radius = Math.Max(50.0, Math.Min(cb.MaxX - cb.MinX, cb.MaxY - cb.MinY) / 6);
+        }
+        else
+        {
+            center = new Point2D(0, 0);
+            radius = 250;
+        }
+
+        var mark = new DetailMarkEntity(center, radius, NextDetailLabel(), textHeight: radius * 0.4)
+        {
+            LayerId = Document.ActiveLayer.Id,
+            PartialDrawingId = Document.ActivePartialDrawing.Id,
+        };
+        _commands.Execute(new AddEntityCommand(Document, mark));
+        StatusMessage = $"Detailzeichen „{mark.Label}“ platziert.";
+    }
+
+    /// <summary>
+    /// Derives the associative 2D section (#93) for the selected section mark by cutting the 3D
+    /// model space and (re)building the cut geometry into a dedicated Teilbild — re-run after model
+    /// changes to keep it in sync.
+    /// </summary>
+    [RelayCommand]
+    private void GenerateSection()
+    {
+        if (Tools.Selection.Count != 1 || Tools.Selection.Items[0] is not SectionMarkEntity mark)
+        {
+            StatusMessage = "Zum Erzeugen ein Schnittzeichen auswählen.";
+            return;
+        }
+        if (Document.Models.Count == 0)
+        {
+            StatusMessage = "Kein 3D-Modell vorhanden, aus dem ein Schnitt abgeleitet werden kann.";
+            return;
+        }
+
+        List<(Point2D A, Point2D B)> cut = SectionGenerator.Generate(Document.Models, mark.Start, mark.End);
+        if (cut.Count == 0)
+        {
+            StatusMessage = "Die Schnittlinie schneidet kein Modell.";
+            return;
+        }
+
+        // Dedicated Teilbild for this section; clear its previous content so re-runs stay associative.
+        string name = $"Schnitt {mark.Label}–{mark.Label}";
+        PartialDrawing target = Document.PartialDrawings.FirstOrDefault(p => p.Name == name)
+                                ?? Document.AddPartialDrawing(name);
+
+        var commands = new List<IUndoableCommand>();
+        foreach (IEntity old in Document.Entities.Where(e => e.PartialDrawingId == target.Id).ToList())
+            commands.Add(new RemoveEntityCommand(Document, old));
+
+        // Place the section beside the plan (section-local X along the line, Y = elevation).
+        Rect2D bounds = Document.GetContentBounds() ?? new Rect2D(0, 0, 0, 0);
+        var offset = new Vector2D(bounds.MaxX + 1000, (bounds.MinY + bounds.MaxY) / 2);
+        foreach ((Point2D a, Point2D b) in cut)
+        {
+            var seg = new LineEntity(a + offset, b + offset)
+            {
+                LayerId = Document.ActiveLayer.Id,
+                PartialDrawingId = target.Id,
+            };
+            commands.Add(new AddEntityCommand(Document, seg));
+        }
+
+        _commands.Execute(new CompositeCommand($"Schnitt {mark.Label} erzeugen", commands));
+        StatusMessage = $"Schnitt „{mark.Label}–{mark.Label}“ aus Modell abgeleitet ({cut.Count} Kanten).";
+    }
+
+    private string NextSectionLabel()
+    {
+        var used = Document.Entities.OfType<SectionMarkEntity>().Select(s => s.Label).ToHashSet();
+        for (char c = 'A'; c <= 'Z'; c++)
+            if (!used.Contains(c.ToString()))
+                return c.ToString();
+        return "A";
+    }
+
+    private string NextDetailLabel()
+    {
+        int n = Document.Entities.OfType<DetailMarkEntity>().Count() + 1;
+        return n.ToString();
     }
 
     /// <summary>Sets the 3D camera to a standard view (0=Iso, 1=Top, 2=Front, 3=Right).</summary>

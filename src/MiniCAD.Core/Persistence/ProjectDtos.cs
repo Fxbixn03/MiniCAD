@@ -244,6 +244,8 @@ public sealed class Model3DDto
 [JsonDerivedType(typeof(OrdinateDimensionDto), "ordinatedim")]
 [JsonDerivedType(typeof(BlockReferenceDto), "blockref")]
 [JsonDerivedType(typeof(ParametricSymbolDto), "paramsymbol")]
+[JsonDerivedType(typeof(SectionMarkDto), "sectionmark")]
+[JsonDerivedType(typeof(DetailMarkDto), "detailmark")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -450,4 +452,23 @@ public sealed class ParameterValueDto
 {
     public string Name { get; set; } = string.Empty;
     public double Value { get; set; }
+}
+
+public sealed class SectionMarkDto : EntityDto
+{
+    public PointDto Start { get; set; } = new();
+    public PointDto End { get; set; } = new();
+    public string Label { get; set; } = string.Empty;
+    public string Reference { get; set; } = string.Empty;
+    public double Size { get; set; } = 50.0;
+    public bool FlipDirection { get; set; }
+}
+
+public sealed class DetailMarkDto : EntityDto
+{
+    public PointDto Center { get; set; } = new();
+    public double Radius { get; set; }
+    public string Label { get; set; } = string.Empty;
+    public string Reference { get; set; } = string.Empty;
+    public double TextHeight { get; set; } = 50.0;
 }

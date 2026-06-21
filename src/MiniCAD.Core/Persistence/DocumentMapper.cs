@@ -454,6 +454,23 @@ public static class DocumentMapper
                 Rotation = symbol.Rotation,
                 Parameters = symbol.Parameters.Select(kv => new ParameterValueDto { Name = kv.Key, Value = kv.Value }).ToList(),
             },
+            SectionMarkEntity section => new SectionMarkDto
+            {
+                Start = ToDto(section.Start),
+                End = ToDto(section.End),
+                Label = section.Label,
+                Reference = section.Reference,
+                Size = section.Size,
+                FlipDirection = section.FlipDirection,
+            },
+            DetailMarkEntity detail => new DetailMarkDto
+            {
+                Center = ToDto(detail.Center),
+                Radius = detail.Radius,
+                Label = detail.Label,
+                Reference = detail.Reference,
+                TextHeight = detail.TextHeight,
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -521,6 +538,11 @@ public static class DocumentMapper
             ParametricSymbolDto symbol => new ParametricSymbolEntity(
                 symbol.SymbolKey, FromDto(symbol.Position),
                 symbol.Parameters.ToDictionary(p => p.Name, p => p.Value), symbol.Scale, symbol.Rotation),
+            SectionMarkDto section => new SectionMarkEntity(
+                FromDto(section.Start), FromDto(section.End), section.Label, section.Reference,
+                section.Size, section.FlipDirection),
+            DetailMarkDto detail => new DetailMarkEntity(
+                FromDto(detail.Center), detail.Radius, detail.Label, detail.Reference, detail.TextHeight),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 
