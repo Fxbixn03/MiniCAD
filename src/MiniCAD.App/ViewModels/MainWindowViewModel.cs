@@ -81,6 +81,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Assistant = new AssistantViewModel();
         CoordinateInput = new CoordinateInputViewModel(Tools, Document);
         FilletOptions = new FilletOptionsViewModel(_filletTool);
+        WallOptions = new WallOptionsViewModel(_wallTool, _beamTool);
         ArrayOptions = new ArrayOptionsViewModel(_arrayTool);
         ArcOptions = new ArcOptionsViewModel(_arcTool);
         PointOptions = new PointOptionsViewModel(_pointTool);
@@ -302,6 +303,11 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Inline radius/chamfer parameters, shown while the fillet tool is active.</summary>
     public FilletOptionsViewModel FilletOptions { get; }
 
+    public WallOptionsViewModel WallOptions { get; }
+
+    /// <summary>The wall/beam options bar is shown while either of those tools is active.</summary>
+    public bool IsWallOptionsVisible => IsWallActive || IsBeamActive;
+
     /// <summary>Inline rectangular/polar array parameters, shown while the array tool is active.</summary>
     public ArrayOptionsViewModel ArrayOptions { get; }
 
@@ -489,6 +495,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsColumnActive));
         OnPropertyChanged(nameof(IsSlabActive));
         OnPropertyChanged(nameof(IsBeamActive));
+        OnPropertyChanged(nameof(IsWallOptionsVisible));
         OnPropertyChanged(nameof(IsRectangleActive));
         OnPropertyChanged(nameof(IsCircleActive));
         OnPropertyChanged(nameof(IsArcActive));

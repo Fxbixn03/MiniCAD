@@ -20,6 +20,9 @@ public sealed class WallTool : ToolBase
     public double Height { get; set; } = 2500.0;
     public double BaseElevation { get; set; }
 
+    /// <summary>Which line is drawn (Anschlag): centerline, or a left/right face.</summary>
+    public DrawReference Reference { get; set; } = DrawReference.Center;
+
     public override string Name => "Wand";
 
     protected override bool HasActiveOperation => _hasStart;
@@ -45,8 +48,11 @@ public sealed class WallTool : ToolBase
         {
             Point2D end = ResolveSegmentPoint(_start, input);
             if (end.DistanceTo(_start) > GeometryMath.Epsilon)
+            {
+                Vector2D off = DrawReferenceMath.CenterlineOffset(_start, end, Thickness, Reference);
                 Context.Execute(new AddEntityCommand(Context.Document,
-                    ApplyDefaultStyle(new WallEntity(_start, end, Thickness, Height, BaseElevation))));
+                    ApplyDefaultStyle(new WallEntity(_start + off, end + off, Thickness, Height, BaseElevation))));
+            }
             _hasStart = false;
         }
 
@@ -70,7 +76,10 @@ public sealed class WallTool : ToolBase
     {
         var items = new List<OverlayItem>(2);
         if (_hasStart)
-            items.Add(new OverlayItem(new WallEntity(_start, _current, Thickness, Height, BaseElevation), ToolStyle.Preview));
+        {
+            Vector2D off = DrawReferenceMath.CenterlineOffset(_start, _current, Thickness, Reference);
+            items.Add(new OverlayItem(new WallEntity(_start + off, _current + off, Thickness, Height, BaseElevation), ToolStyle.Preview));
+        }
         AddSnapMarker(items);
         return items;
     }

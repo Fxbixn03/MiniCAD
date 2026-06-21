@@ -343,6 +343,32 @@
             </StackPanel>
         </Border>
 
+        <!-- Inline wall/beam options (Anschlag + Dicke + Höhe), shown while drawing walls/beams. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsWallOptionsVisible}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding WallOptions}" x:DataType="vm:WallOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="ANSCHLAG" VerticalAlignment="Center" />
+                <ToggleButton Content="Mitte" IsChecked="{Binding IsCenter}" MinWidth="56"
+                              Command="{Binding SetReferenceCommand}" CommandParameter="Center"
+                              ToolTip.Tip="Achse (Mittellinie) als Bezug" />
+                <ToggleButton Content="Links" IsChecked="{Binding IsLeft}" MinWidth="56"
+                              Command="{Binding SetReferenceCommand}" CommandParameter="Left"
+                              ToolTip.Tip="Linke Laibung als Bezug" />
+                <ToggleButton Content="Rechts" IsChecked="{Binding IsRight}" MinWidth="56"
+                              Command="{Binding SetReferenceCommand}" CommandParameter="Right"
+                              ToolTip.Tip="Rechte Laibung als Bezug" />
+                <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
+                <TextBlock Text="DICKE" Foreground="{DynamicResource Brush.StatusInfo}"
+                           FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                <TextBox Width="70" Text="{Binding ThicknessText}" FontFamily="{StaticResource Font.Mono}" />
+                <TextBlock Text="HÖHE" Foreground="{DynamicResource Brush.StatusInfo}"
+                           FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                <TextBox Width="70" Text="{Binding HeightText}" FontFamily="{StaticResource Font.Mono}" />
+            </StackPanel>
+        </Border>
+
         <!-- Allplan-style coordinate entry: type X/Y and press Enter to place the point. -->
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
                 BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
