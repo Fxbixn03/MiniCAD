@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -9,19 +10,22 @@ using CoreColor = MiniCAD.Core.Styling.Color;
 
 namespace MiniCAD.App;
 
-/// <summary>Renders a small thumbnail of a block definition for the library palette preview.</summary>
+/// <summary>Renders a small thumbnail of a block/symbol's geometry for palette previews.</summary>
 public static class SymbolPreviewRenderer
 {
     private static readonly SkiaSceneRenderer Renderer = new() { ShowGrid = false };
     private static readonly CoreColor Background = new(20, 28, 48);
 
     public static WriteableBitmap? Render(BlockDefinition definition, int width, int height)
+        => Render(definition.Entities, width, height);
+
+    public static WriteableBitmap? Render(IReadOnlyList<IEntity> entities, int width, int height)
     {
-        if (definition.Entities.Count == 0 || width <= 0 || height <= 0)
+        if (entities.Count == 0 || width <= 0 || height <= 0)
             return null;
 
         var document = new CadDocument();
-        foreach (IEntity entity in definition.Entities)
+        foreach (IEntity entity in entities)
             document.AddEntity(entity.Clone());
 
         var viewport = new Viewport();

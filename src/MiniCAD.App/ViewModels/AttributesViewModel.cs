@@ -107,6 +107,13 @@ public partial class AttributesViewModel : ViewModelBase
     [ObservableProperty]
     private string _newAttributeKey = string.Empty;
 
+    // ----- Parametric symbol parameters -----
+
+    public ObservableCollection<ParametricParamRowViewModel> SymbolParameters { get; } = new();
+
+    [ObservableProperty]
+    private bool _isParametricSymbol;
+
     // ----- Area fill (solid/gradient) for a closed polyline -----
 
     [ObservableProperty]
@@ -180,6 +187,8 @@ public partial class AttributesViewModel : ViewModelBase
             SelectedTextStyle = null;
             IsBlockReference = false;
             BlockAttributes.Clear();
+            IsParametricSymbol = false;
+            SymbolParameters.Clear();
             _suppress = false;
             return;
         }
@@ -226,6 +235,9 @@ public partial class AttributesViewModel : ViewModelBase
 
         IsBlockReference = items.Count == 1 && items[0] is BlockReferenceEntity;
         BuildBlockAttributes();
+
+        IsParametricSymbol = items.Count == 1 && items[0] is ParametricSymbolEntity;
+        BuildSymbolParameters();
 
         // Area fill: a single closed polyline (same condition as the hatch fill).
         if (CanFill && items[0] is PolylineEntity { SolidFill: { } areaFill })
@@ -340,6 +352,16 @@ public partial class AttributesViewModel : ViewModelBase
 
         foreach (string key in keys)
             BlockAttributes.Add(new BlockAttributeRowViewModel(reference, _document, key));
+    }
+
+    private void BuildSymbolParameters()
+    {
+        SymbolParameters.Clear();
+        if (!IsParametricSymbol || _selection.Items[0] is not ParametricSymbolEntity symbol)
+            return;
+
+        foreach (string name in symbol.Parameters.Keys)
+            SymbolParameters.Add(new ParametricParamRowViewModel(symbol, _document, name));
     }
 
     /// <summary>Adds a new attribute field to the selected block (and its definition).</summary>

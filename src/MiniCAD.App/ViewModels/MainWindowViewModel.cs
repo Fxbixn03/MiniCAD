@@ -40,6 +40,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly ElevationDimensionTool _elevationDimensionTool = new();
     private readonly OrdinateDimensionTool _ordinateDimensionTool = new();
     private readonly BlockInsertTool _blockInsertTool = new();
+    private readonly ParametricInsertTool _parametricInsertTool = new();
     private readonly SetNullPointTool _setNullPointTool = new();
 
     // Editing tools operating on the current selection (Epic: Bearbeitungswerkzeuge).
@@ -78,6 +79,7 @@ public partial class MainWindowViewModel : ViewModelBase
         TextStyles = new TextStylesViewModel(Document);
         Blocks = new BlocksViewModel(Document, Tools.Selection, _commands, Tools, _blockInsertTool);
         Library = new LibraryViewModel(Document, Tools, _blockInsertTool);
+        SmartSymbols = new SmartSymbolViewModel(Tools, _parametricInsertTool);
 
         // Text and leader tools can't open a UI field themselves; re-raise their requests so the
         // view can show the shared inline editor.
@@ -138,6 +140,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<ElevationDimensionEntity>(_elevationDimensionTool);
         Tools.RegisterQuickSelectTool<OrdinateDimensionEntity>(_ordinateDimensionTool);
         Tools.RegisterQuickSelectTool<BlockReferenceEntity>(_blockInsertTool);
+        Tools.RegisterQuickSelectTool<ParametricSymbolEntity>(_parametricInsertTool);
 
         Tools.SetActiveTool(_selectTool);
     }
@@ -211,6 +214,9 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>The cross-project symbol library panel (Bibliothek tab).</summary>
     public LibraryViewModel Library { get; }
 
+    /// <summary>The parametric symbol (Smartsymbole) palette.</summary>
+    public SmartSymbolViewModel SmartSymbols { get; }
+
     public bool IsBlockInsertActive => Tools.ActiveTool == _blockInsertTool;
 
     /// <summary>Raised when the text tool wants the view to open its inline editor.</summary>
@@ -223,7 +229,7 @@ public partial class MainWindowViewModel : ViewModelBase
         || tool == _pointTool || tool == _textTool || tool == _leaderTool
         || tool == _linearDimensionTool || tool == _angularDimensionTool
         || tool == _elevationDimensionTool || tool == _ordinateDimensionTool
-        || tool == _blockInsertTool || tool == _setNullPointTool
+        || tool == _blockInsertTool || tool == _parametricInsertTool || tool == _setNullPointTool
         || tool == _moveTool || tool == _copyTool || tool == _rotateTool
         || tool == _mirrorTool || tool == _scaleTool || tool == _offsetTool;
 

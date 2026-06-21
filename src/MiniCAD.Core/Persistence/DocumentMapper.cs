@@ -412,6 +412,14 @@ public static class DocumentMapper
                 Rotation = block.Rotation,
                 Attributes = block.Attributes.Select(kv => new BlockAttributeDto { Key = kv.Key, Value = kv.Value }).ToList(),
             },
+            ParametricSymbolEntity symbol => new ParametricSymbolDto
+            {
+                SymbolKey = symbol.SymbolKey,
+                Position = ToDto(symbol.Position),
+                Scale = symbol.Scale,
+                Rotation = symbol.Rotation,
+                Parameters = symbol.Parameters.Select(kv => new ParameterValueDto { Name = kv.Key, Value = kv.Value }).ToList(),
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -476,6 +484,9 @@ public static class DocumentMapper
             OrdinateDimensionDto dim => FillDim(new OrdinateDimensionEntity(
                 FromDto(dim.Position), FromDto(dim.LeaderEnd), FromDto(dim.Origin)), dim),
             BlockReferenceDto block => FromBlockReference(block),
+            ParametricSymbolDto symbol => new ParametricSymbolEntity(
+                symbol.SymbolKey, FromDto(symbol.Position),
+                symbol.Parameters.ToDictionary(p => p.Name, p => p.Value), symbol.Scale, symbol.Rotation),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

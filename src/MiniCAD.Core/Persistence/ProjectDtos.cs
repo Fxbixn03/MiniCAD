@@ -210,6 +210,7 @@ public sealed class PointDto
 [JsonDerivedType(typeof(ElevationDimensionDto), "elevationdim")]
 [JsonDerivedType(typeof(OrdinateDimensionDto), "ordinatedim")]
 [JsonDerivedType(typeof(BlockReferenceDto), "blockref")]
+[JsonDerivedType(typeof(ParametricSymbolDto), "paramsymbol")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -401,4 +402,19 @@ public sealed class BlockReferenceDto : EntityDto
     public double Scale { get; set; } = 1.0;
     public double Rotation { get; set; }
     public List<BlockAttributeDto> Attributes { get; set; } = new();
+}
+
+public sealed class ParametricSymbolDto : EntityDto
+{
+    public string SymbolKey { get; set; } = string.Empty;
+    public PointDto Position { get; set; } = new();
+    public double Scale { get; set; } = 1.0;
+    public double Rotation { get; set; }
+    public List<ParameterValueDto> Parameters { get; set; } = new();
+}
+
+public sealed class ParameterValueDto
+{
+    public string Name { get; set; } = string.Empty;
+    public double Value { get; set; }
 }

@@ -611,6 +611,22 @@
                                                   SelectedItem="{Binding SelectedTextStyle}" />
                                     </StackPanel>
 
+                                    <StackPanel Spacing="6" IsVisible="{Binding IsParametricSymbol}">
+                                        <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
+                                        <TextBlock Classes="eyebrow" Text="SMARTSYMBOL-PARAMETER" />
+                                        <ItemsControl ItemsSource="{Binding SymbolParameters}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:ParametricParamRowViewModel">
+                                                    <DockPanel Margin="0,2">
+                                                        <TextBlock Text="{Binding Name}" Width="96" VerticalAlignment="Center"
+                                                                   Foreground="{DynamicResource Brush.TextMuted}" />
+                                                        <TextBox Text="{Binding ValueText}" FontFamily="{StaticResource Font.Mono}" />
+                                                    </DockPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+
                                     <StackPanel Spacing="6" IsVisible="{Binding IsBlockReference}">
                                         <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
                                         <TextBlock Classes="eyebrow" Text="BLOCK-ATTRIBUTE" />
@@ -943,6 +959,42 @@
                             </StackPanel>
 
                             <ListBox ItemsSource="{Binding Symbols}" SelectedItem="{Binding SelectedSymbol}" />
+                        </DockPanel>
+                    </TabItem>
+
+                    <!-- ===== Smartsymbole (parametrisch) ===== -->
+                    <TabItem ToolTip.Tip="Smartsymbole">
+                        <TabItem.Header>
+                            <Border Classes="tabicon">
+                                <Path Classes="icotab" Width="22" Height="22" Data="{StaticResource Icon.Smart}" />
+                            </Border>
+                        </TabItem.Header>
+                        <DockPanel Margin="10" DataContext="{Binding SmartSymbols}" x:DataType="vm:SmartSymbolViewModel">
+                            <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,8">
+                                <TextBlock Classes="eyebrow" Text="PARAMETRISCHES SYMBOL" />
+                                <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Definitions}"
+                                          SelectedItem="{Binding SelectedDefinition}" />
+                            </StackPanel>
+
+                            <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="0,8,0,0">
+                                <Border Height="150" CornerRadius="4" Background="{DynamicResource Brush.SurfaceSunken}"
+                                        BorderBrush="{DynamicResource Brush.BorderDefault}" BorderThickness="1">
+                                    <Image Source="{Binding Preview}" Stretch="Uniform" Margin="4" />
+                                </Border>
+                                <Button Content="Einfügen" HorizontalAlignment="Left" Command="{Binding InsertCommand}" />
+                            </StackPanel>
+
+                            <ItemsControl ItemsSource="{Binding Parameters}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:SmartSymbolParamRowViewModel">
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="{Binding Name}" Width="90" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding ValueText}" FontFamily="{StaticResource Font.Mono}" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </DockPanel>
                     </TabItem>
 
