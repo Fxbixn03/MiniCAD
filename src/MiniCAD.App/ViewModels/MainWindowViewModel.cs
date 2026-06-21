@@ -760,6 +760,39 @@ public partial class MainWindowViewModel : ViewModelBase
         StatusMessage = "Profil rotiert (Revolve) – zur 3D-Ansicht wechseln.";
     }
 
+    /// <summary>
+    /// Combines the two model-space bodies with a boolean operation (#126: Union/Subtract/Intersect),
+    /// replacing them with the single result solid.
+    /// </summary>
+    [RelayCommand]
+    private void BooleanOp(string op)
+    {
+        if (Document.Models.Count != 2)
+        {
+            StatusMessage = "Boolesche Operation: es müssen genau zwei 3D-Körper vorhanden sein.";
+            return;
+        }
+
+        Model3DObject a = Document.Models[0];
+        Model3DObject b = Document.Models[1];
+        Mesh3D wa = a.WorldMesh();
+        Mesh3D wb = b.WorldMesh();
+
+        (Mesh3D result, string name) = op switch
+        {
+            "Subtract" => (Csg.Subtract(wa, wb), "Differenz"),
+            "Intersect" => (Csg.Intersect(wa, wb), "Schnittmenge"),
+            _ => (Csg.Union(wa, wb), "Vereinigung"),
+        };
+
+        Document.RemoveModelObject(a);
+        Document.RemoveModelObject(b);
+        Document.AddModelObject(new Model3DObject(result, name) { Color = a.Color });
+        if (Document.GetModelBounds() is { } bounds)
+            Camera3D.ZoomToFit(bounds);
+        StatusMessage = $"Boolesche Operation: {name} erzeugt.";
+    }
+
     /// <summary>Sets the 3D camera to a standard view (0=Iso, 1=Top, 2=Front, 3=Right).</summary>
     [RelayCommand]
     private void SetView3D(string view)
