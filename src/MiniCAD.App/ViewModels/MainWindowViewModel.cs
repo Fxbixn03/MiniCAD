@@ -104,6 +104,7 @@ public partial class MainWindowViewModel : ViewModelBase
             GroupSelectionCommand.NotifyCanExecuteChanged();
             UngroupSelectionCommand.NotifyCanExecuteChanged();
             ExtrudeSelectionCommand.NotifyCanExecuteChanged();
+            RevolveSelectionCommand.NotifyCanExecuteChanged();
         };
         Tools.ActiveToolChanged += (_, _) =>
         {
@@ -725,6 +726,25 @@ public partial class MainWindowViewModel : ViewModelBase
         if (Document.GetModelBounds() is { } bounds)
             Camera3D.ZoomToFit(bounds);
         StatusMessage = $"Profil extrudiert (H {height:0.##}) – zur 3D-Ansicht wechseln.";
+    }
+
+    /// <summary>Revolves the selected closed 2D profile a full turn around the Y axis into a solid.</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void RevolveSelection()
+    {
+        if (Tools.Selection.Count != 1)
+            return;
+        if (ProfileExtractor.FromEntity(Tools.Selection.Items[0]) is not { } profile)
+        {
+            StatusMessage = "Zum Rotieren ein geschlossenes Profil wählen.";
+            return;
+        }
+
+        Mesh3D mesh = Revolver.Revolve(profile);
+        Document.AddModelObject(new Model3DObject(mesh, "Rotationskörper") { Color = new Core.Styling.Color(210, 180, 140) });
+        if (Document.GetModelBounds() is { } bounds)
+            Camera3D.ZoomToFit(bounds);
+        StatusMessage = "Profil rotiert (Revolve) – zur 3D-Ansicht wechseln.";
     }
 
     /// <summary>Sets the 3D camera to a standard view (0=Iso, 1=Top, 2=Front, 3=Right).</summary>
