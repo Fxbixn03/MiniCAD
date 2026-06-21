@@ -91,6 +91,7 @@
                             <Separator />
                             <MenuItem Header="_Zerlegen (Explodieren)" Command="{Binding ExplodeSelectionCommand}" InputGesture="Ctrl+Shift+X" />
                             <MenuItem Header="_Verbinden (Join)" Command="{Binding JoinSelectionCommand}" InputGesture="Ctrl+J" />
+                            <MenuItem Header="_Bereinigen (Overkill)" Command="{Binding CleanupOverkillCommand}" />
                             <Separator />
                             <MenuItem Header="_Löschen" Command="{Binding DeleteSelectionCommand}" InputGesture="Delete" />
                         </MenuItem>

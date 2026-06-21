@@ -512,6 +512,32 @@ public partial class MainWindowViewModel : ViewModelBase
             : $"Zu {joined.Count} Polylinien verbunden.";
     }
 
+    /// <summary>Removes duplicate and overlapping geometry (#189). Works on the selection or the whole drawing.</summary>
+    [RelayCommand]
+    private void CleanupOverkill()
+    {
+        IReadOnlyList<IEntity> scope = Tools.Selection.Count > 0
+            ? Tools.Selection.Items.ToList()
+            : Document.Entities.ToList();
+
+        OverkillResult result = OverkillCleaner.Clean(scope);
+        if (result.Removed.Count == 0)
+        {
+            StatusMessage = "Bereinigen: keine Duplikate oder Überlappungen gefunden.";
+            return;
+        }
+
+        var commands = new List<IUndoableCommand>();
+        foreach (IEntity entity in result.Removed)
+            commands.Add(new RemoveEntityCommand(Document, entity));
+        foreach (IEntity entity in result.Added)
+            commands.Add(new AddEntityCommand(Document, entity));
+
+        _commands.Execute(new CompositeCommand("Bereinigen", commands));
+        Tools.Selection.Clear();
+        StatusMessage = $"Bereinigt: {result.NetRemoved} Objekt(e) entfernt.";
+    }
+
     /// <summary>Removes the selected entities from their group.</summary>
     [RelayCommand(CanExecute = nameof(HasSelection))]
     private void UngroupSelection()
