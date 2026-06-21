@@ -114,6 +114,20 @@ public partial class AttributesViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isParametricSymbol;
 
+    // ----- Wall (architectural) geometry -----
+
+    [ObservableProperty]
+    private bool _isWall;
+
+    [ObservableProperty]
+    private double _wallThickness;
+
+    [ObservableProperty]
+    private double _wallHeight;
+
+    [ObservableProperty]
+    private double _wallBaseElevation;
+
     // ----- Area fill (solid/gradient) for a closed polyline -----
 
     [ObservableProperty]
@@ -189,6 +203,7 @@ public partial class AttributesViewModel : ViewModelBase
             BlockAttributes.Clear();
             IsParametricSymbol = false;
             SymbolParameters.Clear();
+            IsWall = false;
             _suppress = false;
             return;
         }
@@ -238,6 +253,15 @@ public partial class AttributesViewModel : ViewModelBase
 
         IsParametricSymbol = items.Count == 1 && items[0] is ParametricSymbolEntity;
         BuildSymbolParameters();
+
+        // Wall geometry: a single wall exposes thickness/height/base elevation.
+        IsWall = items.Count == 1 && items[0] is WallEntity;
+        if (items[0] is WallEntity wall)
+        {
+            WallThickness = wall.Thickness;
+            WallHeight = wall.Height;
+            WallBaseElevation = wall.BaseElevation;
+        }
 
         // Area fill: a single closed polyline (same condition as the hatch fill).
         if (CanFill && items[0] is PolylineEntity { SolidFill: { } areaFill })
@@ -406,6 +430,25 @@ public partial class AttributesViewModel : ViewModelBase
                     text.WidthFactor = oldWidth;
                 });
         });
+    }
+
+    partial void OnWallThicknessChanged(double value) => ApplyWall();
+
+    partial void OnWallHeightChanged(double value) => ApplyWall();
+
+    partial void OnWallBaseElevationChanged(double value) => ApplyWall();
+
+    private void ApplyWall()
+    {
+        if (_suppress || _selection.Items.Count != 1 || _selection.Items[0] is not WallEntity wall)
+            return;
+
+        double newThickness = WallThickness, newHeight = WallHeight, newBase = WallBaseElevation;
+        double oldThickness = wall.Thickness, oldHeight = wall.Height, oldBase = wall.BaseElevation;
+
+        ApplyToSelection("Wand ändern", _ => (
+            () => { wall.Thickness = newThickness; wall.Height = newHeight; wall.BaseElevation = newBase; },
+            () => { wall.Thickness = oldThickness; wall.Height = oldHeight; wall.BaseElevation = oldBase; }));
     }
 
     partial void OnUseAreaFillChanged(bool value) => ApplyAreaFill();

@@ -28,6 +28,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private readonly SelectTool _selectTool = new();
     private readonly LineTool _lineTool = new();
+    private readonly WallTool _wallTool = new();
     private readonly RectangleTool _rectangleTool = new();
     private readonly CircleTool _circleTool = new();
     private readonly ArcTool _arcTool = new();
@@ -134,6 +135,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         // Double right-click on an object adopts its layer/Teilbild and re-activates its tool.
         Tools.RegisterQuickSelectTool<LineEntity>(_lineTool);
+        Tools.RegisterQuickSelectTool<WallEntity>(_wallTool);
         Tools.RegisterQuickSelectTool<CircleEntity>(_circleTool);
         Tools.RegisterQuickSelectTool<ArcEntity>(_arcTool);
         Tools.RegisterQuickSelectTool<EllipseEntity>(_ellipseTool);
@@ -248,7 +250,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>True for tools that place points, where typed coordinate entry is meaningful.</summary>
     private bool IsCoordinateTool(ITool? tool)
-        => tool == _lineTool || tool == _rectangleTool || tool == _circleTool
+        => tool == _lineTool || tool == _wallTool || tool == _rectangleTool || tool == _circleTool
         || tool == _arcTool || tool == _ellipseTool || tool == _polylineTool || tool == _splineTool
         || tool == _pointTool || tool == _textTool || tool == _leaderTool
         || tool == _linearDimensionTool || tool == _angularDimensionTool
@@ -342,6 +344,7 @@ public partial class MainWindowViewModel : ViewModelBase
     // Per-tool active flags drive the toolbar's brand-blue "selected tool" highlight.
     public bool IsSelectActive => Tools.ActiveTool == _selectTool;
     public bool IsLineActive => Tools.ActiveTool == _lineTool;
+    public bool IsWallActive => Tools.ActiveTool == _wallTool;
     public bool IsRectangleActive => Tools.ActiveTool == _rectangleTool;
     public bool IsCircleActive => Tools.ActiveTool == _circleTool;
     public bool IsArcActive => Tools.ActiveTool == _arcTool;
@@ -373,6 +376,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(ActiveToolName));
         OnPropertyChanged(nameof(IsSelectActive));
         OnPropertyChanged(nameof(IsLineActive));
+        OnPropertyChanged(nameof(IsWallActive));
         OnPropertyChanged(nameof(IsRectangleActive));
         OnPropertyChanged(nameof(IsCircleActive));
         OnPropertyChanged(nameof(IsArcActive));
@@ -653,6 +657,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void ActivateLine() => ActivateDrawingTool(_lineTool);
+
+    /// <summary>Draws architectural walls (#73); thickness/height are taken from the wall defaults.</summary>
+    [RelayCommand]
+    private void ActivateWall() => ActivateDrawingTool(_wallTool);
 
     [RelayCommand]
     private void ActivateRectangle() => ActivateDrawingTool(_rectangleTool);

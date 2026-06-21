@@ -368,6 +368,10 @@
                         Command="{Binding ActivateLineCommand}" ToolTip.Tip="Linie  ·  L">
                     <Path Classes="ico" Data="{StaticResource Icon.Line}" />
                 </Button>
+                <Button Classes="rail" Classes.active="{Binding IsWallActive}"
+                        Command="{Binding ActivateWallCommand}" ToolTip.Tip="Wand (Architektur)">
+                    <Path Classes="ico" Data="M3,5 H21 V9 H3 Z M3,15 H21 V19 H3 Z" />
+                </Button>
                 <Button Classes="rail" Classes.active="{Binding IsRectangleActive}"
                         Command="{Binding ActivateRectangleCommand}" ToolTip.Tip="Rechteck  ·  R">
                     <Path Classes="ico" Data="{StaticResource Icon.Rectangle}" />
@@ -672,6 +676,29 @@
                                         <TextBlock Classes="eyebrow" Text="TEXTSTIL" />
                                         <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding TextStyleOptions}"
                                                   SelectedItem="{Binding SelectedTextStyle}" />
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="6" IsVisible="{Binding IsWall}">
+                                        <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
+                                        <TextBlock Classes="eyebrow" Text="WAND" />
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="Dicke" Width="96" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding WallThickness}" FontFamily="{StaticResource Font.Mono}"
+                                                     ToolTip.Tip="Wanddicke in Zeichnungseinheiten" />
+                                        </DockPanel>
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="Höhe" Width="96" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding WallHeight}" FontFamily="{StaticResource Font.Mono}"
+                                                     ToolTip.Tip="Wandhöhe (Z-Ausdehnung)" />
+                                        </DockPanel>
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="Basis-Z" Width="96" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource Brush.TextMuted}" />
+                                            <TextBox Text="{Binding WallBaseElevation}" FontFamily="{StaticResource Font.Mono}"
+                                                     ToolTip.Tip="Unterkante der Wand (z. B. 0 = Boden, 10 = beginnt bei Z=10)" />
+                                        </DockPanel>
                                     </StackPanel>
 
                                     <StackPanel Spacing="6" IsVisible="{Binding IsParametricSymbol}">

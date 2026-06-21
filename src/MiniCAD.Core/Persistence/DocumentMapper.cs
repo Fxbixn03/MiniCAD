@@ -472,6 +472,14 @@ public static class DocumentMapper
                 Reference = detail.Reference,
                 TextHeight = detail.TextHeight,
             },
+            WallEntity wall => new WallDto
+            {
+                Start = ToDto(wall.Start),
+                End = ToDto(wall.End),
+                Thickness = wall.Thickness,
+                Height = wall.Height,
+                BaseElevation = wall.BaseElevation,
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -544,6 +552,8 @@ public static class DocumentMapper
                 section.Size, section.FlipDirection),
             DetailMarkDto detail => new DetailMarkEntity(
                 FromDto(detail.Center), detail.Radius, detail.Label, detail.Reference, detail.TextHeight),
+            WallDto wall => new WallEntity(
+                FromDto(wall.Start), FromDto(wall.End), wall.Thickness, wall.Height, wall.BaseElevation),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

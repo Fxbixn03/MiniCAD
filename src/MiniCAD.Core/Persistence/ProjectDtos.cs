@@ -246,6 +246,7 @@ public sealed class Model3DDto
 [JsonDerivedType(typeof(ParametricSymbolDto), "paramsymbol")]
 [JsonDerivedType(typeof(SectionMarkDto), "sectionmark")]
 [JsonDerivedType(typeof(DetailMarkDto), "detailmark")]
+[JsonDerivedType(typeof(WallDto), "wall")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -474,4 +475,13 @@ public sealed class DetailMarkDto : EntityDto
     public string Label { get; set; } = string.Empty;
     public string Reference { get; set; } = string.Empty;
     public double TextHeight { get; set; } = 50.0;
+}
+
+public sealed class WallDto : EntityDto
+{
+    public PointDto Start { get; set; } = new();
+    public PointDto End { get; set; } = new();
+    public double Thickness { get; set; } = 240.0;
+    public double Height { get; set; } = 2500.0;
+    public double BaseElevation { get; set; }
 }
