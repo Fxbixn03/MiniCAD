@@ -5,6 +5,8 @@ using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using MiniCAD.Core.Documents;
+using MiniCAD.Core.Geometry;
+using MiniCAD.Core.Model3D;
 using MiniCAD.Core.Viewing;
 using MiniCAD.Renderer.Rendering;
 using CoreColor = MiniCAD.Core.Styling.Color;
@@ -32,8 +34,13 @@ public sealed class Cad3DView : Control
     private bool _sceneInvalid = true;
     private bool _autoFitPending = true;
     private Point _lastPointer;
+    private Point _pressPoint;
+    private bool _leftPressed;
     private bool _orbiting;
     private bool _panning;
+
+    /// <summary>The currently picked 3D object (highlighted), or null.</summary>
+    public Model3DObject? SelectedModel { get; private set; }
 
     public Cad3DView()
     {
@@ -126,7 +133,7 @@ public sealed class Cad3DView : Control
         if (_sceneInvalid)
         {
             using (ILockedFramebuffer fb = _bitmap!.Lock())
-                _renderer.Render(document, camera, fb.Address, fb.Size.Width, fb.Size.Height, fb.RowBytes, Background);
+                _renderer.Render(document, camera, fb.Address, fb.Size.Width, fb.Size.Height, fb.RowBytes, Background, SelectedModel);
             _sceneInvalid = false;
         }
 
@@ -157,6 +164,8 @@ public sealed class Cad3DView : Control
         Focus();
         PointerPointProperties props = e.GetCurrentPoint(this).Properties;
         _lastPointer = e.GetPosition(this);
+        _pressPoint = _lastPointer;
+        _leftPressed = props.IsLeftButtonPressed;
         _orbiting = props.IsLeftButtonPressed;
         _panning = props.IsMiddleButtonPressed;
         if (_orbiting || _panning)
@@ -186,6 +195,19 @@ public sealed class Cad3DView : Control
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
         base.OnPointerReleased(e);
+
+        Point pos = e.GetPosition(this);
+        bool wasClick = _leftPressed
+            && Math.Abs(pos.X - _pressPoint.X) < 3 && Math.Abs(pos.Y - _pressPoint.Y) < 3;
+        if (wasClick && Document is { } document && Camera is { } camera)
+        {
+            double scaling = Scaling;
+            var device = new Point2D(pos.X * scaling, pos.Y * scaling);
+            SelectedModel = Picker3D.Pick(camera, device, document.Models)?.Object;
+            Invalidate();
+        }
+
+        _leftPressed = false;
         _orbiting = false;
         _panning = false;
         e.Pointer.Capture(null);

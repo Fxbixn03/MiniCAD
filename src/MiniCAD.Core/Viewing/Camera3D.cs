@@ -105,6 +105,28 @@ public sealed class Camera3D
         return new Point2D((ndcX * 0.5 + 0.5) * Width, (1.0 - (ndcY * 0.5 + 0.5)) * Height);
     }
 
+    /// <summary>Builds the world-space ray through a device-pixel screen point (for picking).</summary>
+    public Ray3D RayFromScreen(Point2D screen)
+    {
+        double nx = 2.0 * screen.X / Math.Max(Width, 1.0) - 1.0;
+        double ny = 1.0 - 2.0 * screen.Y / Math.Max(Height, 1.0);
+
+        if (!ViewProjection.TryInvert(out Matrix4 inv))
+            return new Ray3D(Eye, (Target - Eye).Normalized());
+
+        Point3D near = Unproject(nx, ny, 0.0, inv);
+        Point3D far = Unproject(nx, ny, 1.0, inv);
+        return new Ray3D(near, far - near);
+    }
+
+    private static Point3D Unproject(double nx, double ny, double nz, in Matrix4 inverseViewProjection)
+    {
+        Point3D h = inverseViewProjection.TransformWithW(new Point3D(nx, ny, nz), out double w);
+        if (Math.Abs(w) <= GeometryMath.Epsilon)
+            return h;
+        return new Point3D(h.X / w, h.Y / w, h.Z / w);
+    }
+
     public void Orbit(double deltaYaw, double deltaPitch)
     {
         Yaw += deltaYaw;

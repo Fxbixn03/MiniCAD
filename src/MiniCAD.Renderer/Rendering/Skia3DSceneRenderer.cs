@@ -15,7 +15,10 @@ namespace MiniCAD.Renderer.Rendering;
 /// </summary>
 public sealed class Skia3DSceneRenderer
 {
-    public void Render(ICadDocument document, Camera3D camera, nint pixelBuffer, int width, int height, int rowBytes, Color background)
+    private static readonly Color HighlightColor = new(255, 170, 40);
+
+    public void Render(ICadDocument document, Camera3D camera, nint pixelBuffer, int width, int height, int rowBytes,
+        Color background, Model3DObject? selected = null)
     {
         if (width <= 0 || height <= 0 || pixelBuffer == nint.Zero)
             return;
@@ -33,8 +36,10 @@ public sealed class Skia3DSceneRenderer
             IReadOnlyList<Model3DObject> models = document.Models;
             foreach (WireframeProjector.Segment segment in WireframeProjector.Project(camera, models))
             {
-                Color color = models[segment.ObjectIndex].Color;
-                drawSurface.DrawLine(segment.A, segment.B, new StrokeStyle(color, 1.2));
+                Model3DObject model = models[segment.ObjectIndex];
+                bool isSelected = ReferenceEquals(model, selected);
+                Color color = isSelected ? HighlightColor : model.Color;
+                drawSurface.DrawLine(segment.A, segment.B, new StrokeStyle(color, isSelected ? 2.2 : 1.2));
             }
         }
         finally
