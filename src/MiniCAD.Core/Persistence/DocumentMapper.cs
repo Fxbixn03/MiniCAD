@@ -41,6 +41,9 @@ public static class DocumentMapper
         foreach (DimStyle style in document.DimStyles)
             dto.DimStyles.Add(ToDto(style));
 
+        foreach (LayerFavorite favorite in document.LayerFavorites)
+            dto.LayerFavorites.Add(ToDto(favorite));
+
         foreach (PartialDrawing partialDrawing in document.PartialDrawings)
             dto.PartialDrawings.Add(ToDto(partialDrawing));
 
@@ -75,6 +78,8 @@ public static class DocumentMapper
 
         List<DimStyle> dimStyles = dto.DimStyles.Select(FromDto).ToList();
 
+        List<LayerFavorite> layerFavorites = dto.LayerFavorites.Select(FromDto).ToList();
+
         List<IEntity> entities = dto.Entities.Select(FromDto).ToList();
         foreach (IEntity entity in entities)
         {
@@ -100,6 +105,7 @@ public static class DocumentMapper
             DimStyles = dimStyles,
             DefaultDimStyleId = dto.DefaultDimStyleId,
             ActiveDimStyleId = dto.ActiveDimStyleId,
+            LayerFavorites = layerFavorites,
             Origin = new Point3D(dto.OriginX, dto.OriginY, dto.OriginZ),
         });
     }
@@ -161,6 +167,16 @@ public static class DocumentMapper
 
     private static DimStyle FromDto(DimStyleDto dto) => new(
         dto.Id, dto.Name, dto.TextHeight, dto.ArrowSize, dto.ExtensionOffset, dto.ExtensionOvershoot, dto.DecimalPlaces);
+
+    private static LayerFavoriteDto ToDto(LayerFavorite favorite) => new()
+    {
+        Id = favorite.Id,
+        Name = favorite.Name,
+        States = favorite.States.Select(kv => new LayerStateEntryDto { LayerId = kv.Key, State = kv.Value }).ToList(),
+    };
+
+    private static LayerFavorite FromDto(LayerFavoriteDto dto) => new(
+        dto.Id, dto.Name, dto.States.ToDictionary(e => e.LayerId, e => e.State));
 
     /// <summary>Copies the shared dimension fields onto the persisted DTO and returns it.</summary>
     private static T FillDimDto<T>(T dto, DimensionEntity dim) where T : DimensionDto

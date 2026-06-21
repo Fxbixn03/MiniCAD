@@ -24,6 +24,9 @@ public enum DocumentChangeKind
     /// <summary>The document's dimension styles changed (added/removed/edited).</summary>
     DimStylesChanged,
 
+    /// <summary>The document's layer favorites changed (saved/removed).</summary>
+    LayerFavoritesChanged,
+
     /// <summary>The whole document was replaced (e.g. a project was loaded).</summary>
     Reloaded,
 }

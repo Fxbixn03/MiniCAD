@@ -46,6 +46,9 @@ public sealed class DocumentDto
 
     public Guid ActiveDimStyleId { get; set; }
 
+    /// <summary>Saved layer-state favorites.</summary>
+    public List<LayerFavoriteDto> LayerFavorites { get; set; } = new();
+
     public List<EntityDto> Entities { get; set; } = new();
 
     /// <summary>The user-defined origin (Nullpunkt) in absolute world coordinates.</summary>
@@ -81,6 +84,19 @@ public sealed class TextStyleDto
     public string FontFamily { get; set; } = string.Empty;
     public double Height { get; set; } = 12.0;
     public double WidthFactor { get; set; } = 1.0;
+}
+
+public sealed class LayerFavoriteDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = "Favorit";
+    public List<LayerStateEntryDto> States { get; set; } = new();
+}
+
+public sealed class LayerStateEntryDto
+{
+    public Guid LayerId { get; set; }
+    public ElementState State { get; set; }
 }
 
 public sealed class DimStyleDto

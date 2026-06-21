@@ -23,6 +23,7 @@ public sealed class CadDocument : ICadDocument
     private readonly Dictionary<Guid, TextStyle> _textStylesById = new();
     private readonly List<DimStyle> _dimStyles = new();
     private readonly Dictionary<Guid, DimStyle> _dimStylesById = new();
+    private readonly List<LayerFavorite> _layerFavorites = new();
 
     public CadDocument()
     {
@@ -366,6 +367,42 @@ public sealed class CadDocument : ICadDocument
         _textStylesById[style.Id] = style;
     }
 
+    // ----- Layer favorites (saved layer-state sets) -----
+
+    public IReadOnlyList<LayerFavorite> LayerFavorites => _layerFavorites;
+
+    /// <summary>Captures the current state of every layer as a new named favorite.</summary>
+    public LayerFavorite SaveLayerFavorite(string name)
+    {
+        var favorite = new LayerFavorite(name);
+        foreach (Layer layer in _layers)
+            favorite.States[layer.Id] = layer.State;
+
+        _layerFavorites.Add(favorite);
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.LayerFavoritesChanged));
+        return favorite;
+    }
+
+    /// <summary>Restores the states stored in <paramref name="favorite"/> for layers that still exist.</summary>
+    public void ApplyLayerFavorite(LayerFavorite favorite)
+    {
+        ArgumentNullException.ThrowIfNull(favorite);
+        foreach ((Guid layerId, ElementState state) in favorite.States)
+        {
+            if (FindLayer(layerId) is { } layer)
+                SetLayerState(layer, state);
+        }
+    }
+
+    public bool RemoveLayerFavorite(LayerFavorite favorite)
+    {
+        if (!_layerFavorites.Remove(favorite))
+            return false;
+
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.LayerFavoritesChanged));
+        return true;
+    }
+
     // ----- Dimension styles -----
 
     public DimStyle AddDimStyle(string name)
@@ -588,6 +625,9 @@ public sealed class CadDocument : ICadDocument
             RegisterDimStyle(new DimStyle("Standard"));
         DefaultDimStyle = FindDimStyle(contents.DefaultDimStyleId) ?? _dimStyles[0];
         ActiveDimStyle = FindDimStyle(contents.ActiveDimStyleId) ?? DefaultDimStyle;
+
+        _layerFavorites.Clear();
+        _layerFavorites.AddRange(contents.LayerFavorites);
 
         _entities.Clear();
         foreach (IEntity entity in contents.Entities)

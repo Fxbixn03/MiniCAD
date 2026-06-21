@@ -33,6 +33,9 @@ public sealed record DocumentContents(
 
     public Guid ActiveDimStyleId { get; init; }
 
+    /// <summary>Saved layer-state favorites.</summary>
+    public IReadOnlyList<LayerFavorite> LayerFavorites { get; init; } = Array.Empty<LayerFavorite>();
+
     /// <summary>The user-defined origin (Nullpunkt) in absolute world coordinates.</summary>
     public Point3D Origin { get; init; } = Point3D.Origin;
 }

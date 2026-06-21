@@ -27,6 +27,15 @@ public partial class StructurePanelViewModel : ViewModelBase
 
     public ObservableCollection<LayerItemViewModel> Layers { get; } = new();
 
+    /// <summary>Saved layer-state favorites for quick recall.</summary>
+    public ObservableCollection<LayerFavorite> LayerFavorites { get; } = new();
+
+    [ObservableProperty]
+    private LayerFavorite? _selectedFavorite;
+
+    [ObservableProperty]
+    private string _newFavoriteName = string.Empty;
+
     /// <summary>The selected Teilbild is the active one for new geometry.</summary>
     [ObservableProperty]
     private PartialDrawingItemViewModel? _selectedPartialDrawing;
@@ -79,6 +88,35 @@ public partial class StructurePanelViewModel : ViewModelBase
             RebuildLayers();
     }
 
+    /// <summary>Saves the current layer states as a new named favorite.</summary>
+    [RelayCommand]
+    private void SaveFavorite()
+    {
+        string name = string.IsNullOrWhiteSpace(NewFavoriteName) ? $"Favorit {_document.LayerFavorites.Count + 1}" : NewFavoriteName.Trim();
+        LayerFavorite favorite = _document.SaveLayerFavorite(name);
+        RebuildFavorites();
+        SelectedFavorite = LayerFavorites.FirstOrDefault(f => f.Id == favorite.Id);
+        NewFavoriteName = string.Empty;
+    }
+
+    /// <summary>Applies the selected favorite's layer states.</summary>
+    [RelayCommand]
+    private void ApplyFavorite()
+    {
+        if (SelectedFavorite is { } favorite)
+        {
+            _document.ApplyLayerFavorite(favorite);
+            RebuildLayers(); // reflect the restored states in the rows
+        }
+    }
+
+    [RelayCommand]
+    private void RemoveFavorite()
+    {
+        if (SelectedFavorite is { } favorite && _document.RemoveLayerFavorite(favorite))
+            RebuildFavorites();
+    }
+
     [RelayCommand]
     private void MovePartialDrawingUp() => MoveSelectedPartialDrawing(-1);
 
@@ -117,12 +155,22 @@ public partial class StructurePanelViewModel : ViewModelBase
             Rebuild();
         else if (e.Kind == DocumentChangeKind.PartialDrawingModified)
             RefreshPartialDrawingStatuses();
+        else if (e.Kind == DocumentChangeKind.LayerFavoritesChanged)
+            RebuildFavorites();
     }
 
     private void Rebuild()
     {
         RebuildPartialDrawings();
         RebuildLayers();
+        RebuildFavorites();
+    }
+
+    private void RebuildFavorites()
+    {
+        LayerFavorites.Clear();
+        foreach (LayerFavorite favorite in _document.LayerFavorites)
+            LayerFavorites.Add(favorite);
     }
 
     private void RebuildPartialDrawings()
