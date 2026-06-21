@@ -359,8 +359,8 @@ public partial class MainWindow : Window
         if (ViewModel is not { } viewModel)
             return;
 
-        // Same document (live model), independent camera.
-        var window = new View3DWindow(viewModel.Document, new MiniCAD.Core.Viewing.Camera3D());
+        // Same document (live model) and render mode, independent camera.
+        var window = new View3DWindow(viewModel, viewModel.Document, new MiniCAD.Core.Viewing.Camera3D());
         window.Show(this);
     }
 
