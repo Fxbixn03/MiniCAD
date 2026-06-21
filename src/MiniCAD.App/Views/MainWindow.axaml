@@ -65,6 +65,12 @@
                         </MenuItem>
                         <MenuItem Header="_Ansicht">
                             <MenuItem Header="_Zoom anpassen" Command="{Binding ZoomToFitCommand}" />
+                            <Separator />
+                            <MenuItem Header="3D _nebeneinander" ToggleType="CheckBox"
+                                      IsChecked="{Binding SideBySide3D}"
+                                      ToolTip.Tip="2D-Grundriss links, 3D-Modell rechts (live)" />
+                            <MenuItem Header="3D-Fenster _abdocken" Click="OnDetach3D"
+                                      ToolTip.Tip="3D-Ansicht als eigenes Fenster (auf einen zweiten Monitor verschiebbar)" />
                         </MenuItem>
                         <MenuItem Header="_Bearbeiten">
                             <MenuItem Header="_Verschieben" Command="{Binding ActivateMoveCommand}" InputGesture="M" />
@@ -508,6 +514,14 @@
                 <ColumnDefinition Width="300" MinWidth="230" MaxWidth="600" />
             </Grid.ColumnDefinitions>
 
+            <!-- 2D plan | optional side-by-side live 3D pane -->
+            <Grid Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" MinWidth="150" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
             <TabControl Grid.Column="0" Padding="0">
                 <TabItem Header="2D">
                     <Panel>
@@ -558,6 +572,25 @@
                     </DockPanel>
                 </TabItem>
             </TabControl>
+
+            <!-- Side-by-side live 3D pane (left 2D, right 3D); toggled via Ansicht ▸ 3D nebeneinander -->
+            <Border Grid.Column="1" Width="4" IsVisible="{Binding SideBySide3D}"
+                    Background="{DynamicResource Brush.BorderStrong}" />
+            <DockPanel Grid.Column="2" Width="460" IsVisible="{Binding SideBySide3D}"
+                       Background="{DynamicResource Brush.SurfaceChrome}">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="6">
+                    <Button Content="Iso" Command="{Binding SetView3DCommand}" CommandParameter="Iso" />
+                    <Button Content="Oben" Command="{Binding SetView3DCommand}" CommandParameter="Top" />
+                    <Button Content="Vorn" Command="{Binding SetView3DCommand}" CommandParameter="Front" />
+                    <Button Content="Rechts" Command="{Binding SetView3DCommand}" CommandParameter="Right" />
+                    <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
+                    <Button Content="Draht" Command="{Binding SetRenderModeCommand}" CommandParameter="Wireframe" />
+                    <Button Content="Verdeckt" Command="{Binding SetRenderModeCommand}" CommandParameter="HiddenLine" />
+                    <Button Content="Schattiert" Command="{Binding SetRenderModeCommand}" CommandParameter="Shaded" />
+                </StackPanel>
+                <controls:Cad3DView Document="{Binding Document}" Camera="{Binding Camera3D}" Mode="{Binding View3DMode}" />
+            </DockPanel>
+            </Grid>
 
             <GridSplitter Grid.Column="1" Width="5" Background="{DynamicResource Brush.BorderStrong}"
                           ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" />

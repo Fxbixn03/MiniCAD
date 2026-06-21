@@ -265,6 +265,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _snapEnabled = true;
 
+    /// <summary>When true the 3D view is shown side-by-side to the right of the 2D plan.</summary>
+    [ObservableProperty]
+    private bool _sideBySide3D;
+
     /// <summary>Two-way bound to the Ortho toggle: locks segments to horizontal/vertical.</summary>
     [ObservableProperty]
     private bool _orthoEnabled;
