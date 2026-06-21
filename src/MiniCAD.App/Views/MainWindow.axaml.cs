@@ -8,6 +8,7 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using MiniCAD.App.Input;
 using MiniCAD.App.ViewModels;
+using MiniCAD.App.ViewModels.Toolbar;
 using MiniCAD.Core.Geometry;
 using MiniCAD.Core.Tools;
 
@@ -30,6 +31,18 @@ public partial class MainWindow : Window
         Canvas.CursorWorldMoved += OnCursorWorldMoved;
         Canvas.DoubleClicked += OnCanvasDoubleClicked;
         DataContextChanged += OnDataContextChanged;
+    }
+
+    // ----- Toolbar block reordering (via each block's grip flyout) -----
+
+    private void OnToolGroupMoveForward(object? sender, RoutedEventArgs e) => MoveToolGroup(sender, -1);
+
+    private void OnToolGroupMoveBackward(object? sender, RoutedEventArgs e) => MoveToolGroup(sender, +1);
+
+    private void MoveToolGroup(object? sender, int delta)
+    {
+        if (ViewModel is { } vm && (sender as Control)?.DataContext is ToolGroupViewModel group)
+            vm.Toolbar.MoveGroupBy(group.Id, delta);
     }
 
     private MainWindowViewModel? ViewModel => DataContext as MainWindowViewModel;
