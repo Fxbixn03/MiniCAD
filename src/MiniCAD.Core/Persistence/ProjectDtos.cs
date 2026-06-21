@@ -49,6 +49,9 @@ public sealed class DocumentDto
     /// <summary>Saved layer-state favorites.</summary>
     public List<LayerFavoriteDto> LayerFavorites { get; set; } = new();
 
+    /// <summary>Block definitions (reusable symbols).</summary>
+    public List<BlockDefinitionDto> BlockDefinitions { get; set; } = new();
+
     public List<EntityDto> Entities { get; set; } = new();
 
     /// <summary>The user-defined origin (Nullpunkt) in absolute world coordinates.</summary>
@@ -97,6 +100,20 @@ public sealed class LayerStateEntryDto
 {
     public Guid LayerId { get; set; }
     public ElementState State { get; set; }
+}
+
+public sealed class BlockDefinitionDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = "Block";
+    public PointDto BasePoint { get; set; } = new();
+    public List<EntityDto> Entities { get; set; } = new();
+}
+
+public sealed class BlockAttributeDto
+{
+    public string Key { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
 }
 
 public sealed class DimStyleDto
@@ -191,6 +208,7 @@ public sealed class PointDto
 [JsonDerivedType(typeof(RadialDimensionDto), "radialdim")]
 [JsonDerivedType(typeof(ElevationDimensionDto), "elevationdim")]
 [JsonDerivedType(typeof(OrdinateDimensionDto), "ordinatedim")]
+[JsonDerivedType(typeof(BlockReferenceDto), "blockref")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -370,4 +388,13 @@ public sealed class OrdinateDimensionDto : DimensionDto
     public PointDto Position { get; set; } = new();
     public PointDto LeaderEnd { get; set; } = new();
     public PointDto Origin { get; set; } = new();
+}
+
+public sealed class BlockReferenceDto : EntityDto
+{
+    public Guid DefinitionId { get; set; }
+    public PointDto Position { get; set; } = new();
+    public double Scale { get; set; } = 1.0;
+    public double Rotation { get; set; }
+    public List<BlockAttributeDto> Attributes { get; set; } = new();
 }

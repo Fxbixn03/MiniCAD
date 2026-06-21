@@ -27,6 +27,9 @@ public enum DocumentChangeKind
     /// <summary>The document's layer favorites changed (saved/removed).</summary>
     LayerFavoritesChanged,
 
+    /// <summary>The document's block definitions changed (added/removed).</summary>
+    BlocksChanged,
+
     /// <summary>The whole document was replaced (e.g. a project was loaded).</summary>
     Reloaded,
 }

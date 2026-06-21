@@ -24,6 +24,8 @@ public sealed class CadDocument : ICadDocument
     private readonly List<DimStyle> _dimStyles = new();
     private readonly Dictionary<Guid, DimStyle> _dimStylesById = new();
     private readonly List<LayerFavorite> _layerFavorites = new();
+    private readonly List<BlockDefinition> _blockDefinitions = new();
+    private readonly Dictionary<Guid, BlockDefinition> _blockDefinitionsById = new();
 
     public CadDocument()
     {
@@ -403,6 +405,45 @@ public sealed class CadDocument : ICadDocument
         return true;
     }
 
+    // ----- Block definitions -----
+
+    public IReadOnlyList<BlockDefinition> BlockDefinitions => _blockDefinitions;
+
+    public BlockDefinition AddBlockDefinition(BlockDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        _blockDefinitions.Add(definition);
+        _blockDefinitionsById[definition.Id] = definition;
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.BlocksChanged));
+        return definition;
+    }
+
+    public BlockDefinition? FindBlockDefinition(Guid id) => _blockDefinitionsById.GetValueOrDefault(id);
+
+    public bool RemoveBlockDefinition(BlockDefinition definition)
+    {
+        if (!_blockDefinitions.Remove(definition))
+            return false;
+
+        _blockDefinitionsById.Remove(definition.Id);
+
+        // Drop instances of the removed definition so nothing references a missing block.
+        for (int i = _entities.Count - 1; i >= 0; i--)
+        {
+            if (_entities[i] is BlockReferenceEntity reference && reference.DefinitionId == definition.Id)
+                _entities.RemoveAt(i);
+        }
+
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.BlocksChanged));
+        return true;
+    }
+
+    private void RegisterBlockDefinition(BlockDefinition definition)
+    {
+        _blockDefinitions.Add(definition);
+        _blockDefinitionsById[definition.Id] = definition;
+    }
+
     // ----- Dimension styles -----
 
     public DimStyle AddDimStyle(string name)
@@ -628,6 +669,11 @@ public sealed class CadDocument : ICadDocument
 
         _layerFavorites.Clear();
         _layerFavorites.AddRange(contents.LayerFavorites);
+
+        _blockDefinitions.Clear();
+        _blockDefinitionsById.Clear();
+        foreach (BlockDefinition definition in contents.BlockDefinitions)
+            RegisterBlockDefinition(definition);
 
         _entities.Clear();
         foreach (IEntity entity in contents.Entities)

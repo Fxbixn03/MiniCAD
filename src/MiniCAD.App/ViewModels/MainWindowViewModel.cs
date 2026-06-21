@@ -39,6 +39,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly RadialDimensionTool _radialDimensionTool = new();
     private readonly ElevationDimensionTool _elevationDimensionTool = new();
     private readonly OrdinateDimensionTool _ordinateDimensionTool = new();
+    private readonly BlockInsertTool _blockInsertTool = new();
     private readonly SetNullPointTool _setNullPointTool = new();
 
     // Editing tools operating on the current selection (Epic: Bearbeitungswerkzeuge).
@@ -75,6 +76,7 @@ public partial class MainWindowViewModel : ViewModelBase
         RadialDimensionOptions = new RadialDimensionOptionsViewModel(_radialDimensionTool);
         ElevationDimensionOptions = new ElevationDimensionOptionsViewModel(_elevationDimensionTool);
         TextStyles = new TextStylesViewModel(Document);
+        Blocks = new BlocksViewModel(Document, Tools.Selection, _commands, Tools, _blockInsertTool);
 
         // Text and leader tools can't open a UI field themselves; re-raise their requests so the
         // view can show the shared inline editor.
@@ -132,6 +134,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<RadialDimensionEntity>(_radialDimensionTool);
         Tools.RegisterQuickSelectTool<ElevationDimensionEntity>(_elevationDimensionTool);
         Tools.RegisterQuickSelectTool<OrdinateDimensionEntity>(_ordinateDimensionTool);
+        Tools.RegisterQuickSelectTool<BlockReferenceEntity>(_blockInsertTool);
 
         Tools.SetActiveTool(_selectTool);
     }
@@ -199,6 +202,11 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>The text-style management panel (Textstile tab).</summary>
     public TextStylesViewModel TextStyles { get; }
 
+    /// <summary>The block library panel (Blöcke tab).</summary>
+    public BlocksViewModel Blocks { get; }
+
+    public bool IsBlockInsertActive => Tools.ActiveTool == _blockInsertTool;
+
     /// <summary>Raised when the text tool wants the view to open its inline editor.</summary>
     public event Action<TextEditRequest>? TextEditRequested;
 
@@ -208,7 +216,8 @@ public partial class MainWindowViewModel : ViewModelBase
         || tool == _arcTool || tool == _ellipseTool || tool == _polylineTool || tool == _splineTool
         || tool == _pointTool || tool == _textTool || tool == _leaderTool
         || tool == _linearDimensionTool || tool == _angularDimensionTool
-        || tool == _elevationDimensionTool || tool == _ordinateDimensionTool || tool == _setNullPointTool
+        || tool == _elevationDimensionTool || tool == _ordinateDimensionTool
+        || tool == _blockInsertTool || tool == _setNullPointTool
         || tool == _moveTool || tool == _copyTool || tool == _rotateTool
         || tool == _mirrorTool || tool == _scaleTool || tool == _offsetTool;
 
@@ -342,6 +351,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsRadialDimensionActive));
         OnPropertyChanged(nameof(IsElevationDimensionActive));
         OnPropertyChanged(nameof(IsOrdinateDimensionActive));
+        OnPropertyChanged(nameof(IsBlockInsertActive));
         OnPropertyChanged(nameof(IsSetNullPointActive));
         OnPropertyChanged(nameof(IsMoveActive));
         OnPropertyChanged(nameof(IsCopyActive));

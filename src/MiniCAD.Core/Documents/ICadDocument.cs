@@ -42,6 +42,11 @@ public interface ICadDocument
 
     TextStyle? FindTextStyle(Guid id);
 
+    /// <summary>The block definitions (reusable symbols) defined for this document.</summary>
+    IReadOnlyList<BlockDefinition> BlockDefinitions { get; }
+
+    BlockDefinition? FindBlockDefinition(Guid id);
+
     /// <summary>The named dimension styles defined for this document.</summary>
     IReadOnlyList<DimStyle> DimStyles { get; }
 

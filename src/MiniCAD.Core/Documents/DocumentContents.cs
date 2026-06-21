@@ -36,6 +36,9 @@ public sealed record DocumentContents(
     /// <summary>Saved layer-state favorites.</summary>
     public IReadOnlyList<LayerFavorite> LayerFavorites { get; init; } = Array.Empty<LayerFavorite>();
 
+    /// <summary>Block definitions (reusable symbols).</summary>
+    public IReadOnlyList<BlockDefinition> BlockDefinitions { get; init; } = Array.Empty<BlockDefinition>();
+
     /// <summary>The user-defined origin (Nullpunkt) in absolute world coordinates.</summary>
     public Point3D Origin { get; init; } = Point3D.Origin;
 }

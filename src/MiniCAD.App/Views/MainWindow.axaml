@@ -866,6 +866,29 @@
                         </DockPanel>
                     </TabItem>
 
+                    <!-- ===== Blöcke ===== -->
+                    <TabItem ToolTip.Tip="Blöcke">
+                        <TabItem.Header>
+                            <Border Classes="tabicon">
+                                <Path Classes="icotab" Width="22" Height="22" Data="{StaticResource Icon.Block}" />
+                            </Border>
+                        </TabItem.Header>
+                        <DockPanel Margin="10" DataContext="{Binding Blocks}" x:DataType="vm:BlocksViewModel">
+                            <TextBlock DockPanel.Dock="Top" Margin="0,0,0,6" Foreground="{DynamicResource Brush.TextMuted}" TextWrapping="Wrap"
+                                       Text="Auswahl zu einem Block zusammenfassen, dann beliebig oft einfügen." />
+                            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                                <Button DockPanel.Dock="Right" Content="Aus Auswahl" Command="{Binding CreateBlockCommand}"
+                                        ToolTip.Tip="Block aus der aktuellen Auswahl erstellen" />
+                                <TextBox Text="{Binding NewBlockName}" PlaceholderText="Blockname" />
+                            </DockPanel>
+                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="4" Margin="0,8,0,0">
+                                <Button Content="Einfügen" Command="{Binding InsertBlockCommand}" />
+                                <Button Content="Entfernen" Command="{Binding RemoveBlockCommand}" />
+                            </StackPanel>
+                            <ListBox ItemsSource="{Binding Blocks}" SelectedItem="{Binding SelectedBlock}" />
+                        </DockPanel>
+                    </TabItem>
+
                     <!-- ===== Assistent ===== -->
                     <TabItem ToolTip.Tip="Assistent">
                         <TabItem.Header>

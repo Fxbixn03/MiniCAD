@@ -44,6 +44,9 @@ public static class DocumentMapper
         foreach (LayerFavorite favorite in document.LayerFavorites)
             dto.LayerFavorites.Add(ToDto(favorite));
 
+        foreach (BlockDefinition definition in document.BlockDefinitions)
+            dto.BlockDefinitions.Add(ToDto(definition));
+
         foreach (PartialDrawing partialDrawing in document.PartialDrawings)
             dto.PartialDrawings.Add(ToDto(partialDrawing));
 
@@ -80,7 +83,16 @@ public static class DocumentMapper
 
         List<LayerFavorite> layerFavorites = dto.LayerFavorites.Select(FromDto).ToList();
 
+        List<BlockDefinition> blockDefinitions = dto.BlockDefinitions.Select(FromDto).ToList();
+
         List<IEntity> entities = dto.Entities.Select(FromDto).ToList();
+
+        // Link block references to their definitions (only the id is persisted).
+        foreach (IEntity entity in entities)
+        {
+            if (entity is BlockReferenceEntity reference)
+                reference.Definition = blockDefinitions.FirstOrDefault(d => d.Id == reference.DefinitionId);
+        }
         foreach (IEntity entity in entities)
         {
             if (entity.PartialDrawingId == Guid.Empty)
@@ -106,6 +118,7 @@ public static class DocumentMapper
             DefaultDimStyleId = dto.DefaultDimStyleId,
             ActiveDimStyleId = dto.ActiveDimStyleId,
             LayerFavorites = layerFavorites,
+            BlockDefinitions = blockDefinitions,
             Origin = new Point3D(dto.OriginX, dto.OriginY, dto.OriginZ),
         });
     }
@@ -177,6 +190,17 @@ public static class DocumentMapper
 
     private static LayerFavorite FromDto(LayerFavoriteDto dto) => new(
         dto.Id, dto.Name, dto.States.ToDictionary(e => e.LayerId, e => e.State));
+
+    private static BlockDefinitionDto ToDto(BlockDefinition definition) => new()
+    {
+        Id = definition.Id,
+        Name = definition.Name,
+        BasePoint = ToDto(definition.BasePoint),
+        Entities = definition.Entities.Select(ToDto).ToList(),
+    };
+
+    private static BlockDefinition FromDto(BlockDefinitionDto dto) => new(
+        dto.Id, dto.Name, FromDto(dto.BasePoint), dto.Entities.Select(FromDto));
 
     /// <summary>Copies the shared dimension fields onto the persisted DTO and returns it.</summary>
     private static T FillDimDto<T>(T dto, DimensionEntity dim) where T : DimensionDto
@@ -373,6 +397,14 @@ public static class DocumentMapper
                 LeaderEnd = ToDto(dim.LeaderEnd),
                 Origin = ToDto(dim.Origin),
             }, dim),
+            BlockReferenceEntity block => new BlockReferenceDto
+            {
+                DefinitionId = block.DefinitionId,
+                Position = ToDto(block.Position),
+                Scale = block.Scale,
+                Rotation = block.Rotation,
+                Attributes = block.Attributes.Select(kv => new BlockAttributeDto { Key = kv.Key, Value = kv.Value }).ToList(),
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -435,6 +467,7 @@ public static class DocumentMapper
                 FromDto(dim.Position), dim.ZValue), dim),
             OrdinateDimensionDto dim => FillDim(new OrdinateDimensionEntity(
                 FromDto(dim.Position), FromDto(dim.LeaderEnd), FromDto(dim.Origin)), dim),
+            BlockReferenceDto block => FromBlockReference(block),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 
@@ -443,6 +476,14 @@ public static class DocumentMapper
         entity.StrokeOverride = dto.Stroke is { } stroke ? FromDto(stroke) : null;
         entity.IsConstruction = dto.IsConstruction;
         return entity;
+    }
+
+    private static BlockReferenceEntity FromBlockReference(BlockReferenceDto dto)
+    {
+        var reference = new BlockReferenceEntity(dto.DefinitionId, FromDto(dto.Position), dto.Scale, dto.Rotation);
+        foreach (BlockAttributeDto attribute in dto.Attributes)
+            reference.Attributes[attribute.Key] = attribute.Value;
+        return reference;
     }
 
     private static TextHAlign ParseHAlign(string value)
