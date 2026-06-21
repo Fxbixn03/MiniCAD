@@ -37,6 +37,9 @@ public sealed class Cad3DView : Control
     public static readonly StyledProperty<bool> ShowGroundProperty =
         AvaloniaProperty.Register<Cad3DView, bool>(nameof(ShowGround), defaultValue: true);
 
+    public static readonly StyledProperty<bool> ShowLegendProperty =
+        AvaloniaProperty.Register<Cad3DView, bool>(nameof(ShowLegend), defaultValue: false);
+
     private static readonly CoreColor Background = new(12, 16, 30);
 
     private readonly Skia3DSceneRenderer _renderer = new();
@@ -89,6 +92,13 @@ public sealed class Cad3DView : Control
         set => SetValue(ShowGroundProperty, value);
     }
 
+    /// <summary>Whether to draw the material legend overlay.</summary>
+    public bool ShowLegend
+    {
+        get => GetValue(ShowLegendProperty);
+        set => SetValue(ShowLegendProperty, value);
+    }
+
     private double Scaling => TopLevel.GetTopLevel(this)?.RenderScaling ?? 1.0;
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -117,7 +127,7 @@ public sealed class Cad3DView : Control
             UpdateCameraSize();
         }
         else if (change.Property == ModeProperty || change.Property == SelectedModelProperty
-            || change.Property == ShowGroundProperty)
+            || change.Property == ShowGroundProperty || change.Property == ShowLegendProperty)
         {
             Invalidate();
         }
@@ -182,7 +192,7 @@ public sealed class Cad3DView : Control
             try
             {
                 using ILockedFramebuffer fb = _bitmap!.Lock();
-                _renderer.Render(document, camera, fb.Address, fb.Size.Width, fb.Size.Height, fb.RowBytes, Background, SelectedModel, Mode, ShowGround);
+                _renderer.Render(document, camera, fb.Address, fb.Size.Width, fb.Size.Height, fb.RowBytes, Background, SelectedModel, Mode, ShowGround, ShowLegend);
             }
             catch (Exception ex)
             {

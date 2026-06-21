@@ -1,0 +1,25 @@
+<Project>
+
+  <!--
+    Single source of truth for the product version. MSBuild auto-imports this file
+    into every project in the repo, so all assemblies share one version. The Release
+    workflow (.github/workflows/release.yml) is the only thing that edits <Version>;
+    bump it there via "Run workflow", not by hand.
+
+    From <Version> the SDK derives AssemblyVersion (X.Y.Z.0), FileVersion and
+    InformationalVersion automatically.
+  -->
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Product>MiniCAD</Product>
+    <Authors>Fxbixn03</Authors>
+    <Company>MiniCAD</Company>
+    <Copyright>Copyright © Fxbixn03</Copyright>
+    <RepositoryUrl>https://github.com/Fxbixn03/MiniCAD</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+</Project>

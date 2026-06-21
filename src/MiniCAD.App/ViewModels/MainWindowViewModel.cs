@@ -373,6 +373,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _showGround3D = true;
 
+    /// <summary>Whether the 3D views show the material legend overlay.</summary>
+    [ObservableProperty]
+    private bool _showMaterialLegend;
+
     /// <summary>Two-way bound to the Ortho toggle: locks segments to horizontal/vertical.</summary>
     [ObservableProperty]
     private bool _orthoEnabled;

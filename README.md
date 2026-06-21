@@ -10,9 +10,16 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/Fxbixn03/MiniCAD?color=green"></a>
-  <img alt="Platforms" src="https://img.shields.io/badge/runs%20on-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey">
-  <img alt="Status" src="https://img.shields.io/badge/status-early%20development-orange">
-  <img alt="Made with .NET" src="https://img.shields.io/badge/made%20with-.NET%2010-512BD4">
+  <img alt="Version 0.1.0" src="https://img.shields.io/badge/version-0.1.0-blue">
+  <img alt="Status: early development" src="https://img.shields.io/badge/status-early%20development-orange">
+  <img alt="Platforms: Windows, macOS, Linux" src="https://img.shields.io/badge/runs%20on-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey">
+</p>
+
+<p align="center">
+  <img alt=".NET 10" src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white">
+  <img alt="C# 14" src="https://img.shields.io/badge/C%23-14-239120">
+  <img alt="Avalonia 12" src="https://img.shields.io/badge/Avalonia-12-8B44AC?logo=avaloniaui&logoColor=white">
+  <img alt="SkiaSharp 3" src="https://img.shields.io/badge/SkiaSharp-3.119-FF7A00">
 </p>
 
 ---

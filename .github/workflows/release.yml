@@ -1,0 +1,195 @@
+name: Release
+
+# Manually triggered release pipeline. GitHub Actions cannot prompt interactively,
+# so "asking" which part of the version to bump is done through workflow_dispatch
+# inputs: open Actions ▸ Release ▸ "Run workflow" and pick major / minor / patch.
+#
+# Flow: test ▸ bump version metadata + README badge (commit & tag) ▸ build
+# self-contained single-file binaries for Linux, Windows and macOS ▸ publish a
+# GitHub Release with the archives attached.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Which part of the version to raise"
+        type: choice
+        required: true
+        default: patch
+        options:
+          - major
+          - minor
+          - patch
+      prerelease:
+        description: "Mark the GitHub release as a pre-release"
+        type: boolean
+        required: false
+        default: false
+
+# Needed so the version job can push the commit + tag and the release job can
+# create the GitHub Release.
+permissions:
+  contents: write
+
+# Never run two releases at once — they would race on the version commit/tag.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Gate: do not tag a release that does not even pass its tests.
+  # ---------------------------------------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet test --configuration Release --nologo
+
+  # ---------------------------------------------------------------------------
+  # Bump the version in Directory.Build.props + the README badge, commit & tag.
+  # ---------------------------------------------------------------------------
+  version:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: bump
+        name: Raise version
+        run: |
+          set -euo pipefail
+          PROPS="Directory.Build.props"
+
+          CURRENT=$(grep -oPm1 '(?<=<Version>)[^<]+' "$PROPS")
+          echo "Current version: $CURRENT"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          case "${{ inputs.bump }}" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+          NEW="$MAJOR.$MINOR.$PATCH"
+          echo "New version:     $NEW"
+
+          # Version metadata (single source of truth for all assemblies).
+          sed -i "s|<Version>$CURRENT</Version>|<Version>$NEW</Version>|" "$PROPS"
+
+          # README shields.io badge: both the alt text and the badge URL segment.
+          sed -i \
+            -e "s|alt=\"Version $CURRENT\"|alt=\"Version $NEW\"|" \
+            -e "s|version-$CURRENT-blue|version-$NEW-blue|" \
+            README.md
+
+          echo "version=$NEW" >> "$GITHUB_OUTPUT"
+
+      - name: Commit, tag and push
+        run: |
+          set -euo pipefail
+          NEW="${{ steps.bump.outputs.version }}"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Directory.Build.props README.md
+          git commit -m "Release v$NEW"
+          git tag -a "v$NEW" -m "MiniCAD v$NEW"
+          git push origin "HEAD:${{ github.ref_name }}"
+          git push origin "v$NEW"
+
+  # ---------------------------------------------------------------------------
+  # Build a self-contained, single-file binary per platform, on its native OS.
+  # ---------------------------------------------------------------------------
+  build:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  rid: linux-x64 }
+          - { os: windows-latest, rid: win-x64 }
+          - { os: macos-latest,   rid: osx-x64 }
+          - { os: macos-latest,   rid: osx-arm64 }
+    runs-on: ${{ matrix.os }}
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      RID: ${{ matrix.rid }}
+    steps:
+      # Check out the tag the version job just created so we build exactly that.
+      - uses: actions/checkout@v4
+        with:
+          ref: "v${{ needs.version.outputs.version }}"
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet publish src/MiniCAD.App/MiniCAD.App.csproj \
+            -c Release \
+            -r "$RID" \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:DebugType=none \
+            -p:Version="$VERSION" \
+            --nologo
+
+      - name: Package (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          PUBLISH_DIR="src/MiniCAD.App/bin/Release/net10.0/$RID/publish"
+          NAME="MiniCAD-$VERSION-$RID"
+          mkdir "$NAME"
+          cp -a "$PUBLISH_DIR/." "$NAME/"
+          chmod +x "$NAME/MiniCAD.App" || true
+          zip -r "$NAME.zip" "$NAME"
+          echo "ASSET=$NAME.zip" >> "$GITHUB_ENV"
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $publishDir = "src/MiniCAD.App/bin/Release/net10.0/$env:RID/publish"
+          $name = "MiniCAD-$env:VERSION-$env:RID"
+          New-Item -ItemType Directory -Path $name | Out-Null
+          Copy-Item -Path "$publishDir/*" -Destination $name -Recurse
+          Compress-Archive -Path $name -DestinationPath "$name.zip"
+          "ASSET=$name.zip" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "MiniCAD-${{ matrix.rid }}"
+          path: ${{ env.ASSET }}
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Collect every platform archive into one GitHub Release.
+  # ---------------------------------------------------------------------------
+  release:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ needs.version.outputs.version }}"
+          name: "MiniCAD v${{ needs.version.outputs.version }}"
+          generate_release_notes: true
+          prerelease: ${{ inputs.prerelease }}
+          files: artifacts/**/*

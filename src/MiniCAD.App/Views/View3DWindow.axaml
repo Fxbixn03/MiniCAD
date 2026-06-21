@@ -25,7 +25,8 @@
             <Button Content="Verdeckt" Command="{Binding SetRenderModeCommand}" CommandParameter="HiddenLine" />
             <Button Content="Schattiert" Command="{Binding SetRenderModeCommand}" CommandParameter="Shaded" />
             <ToggleButton Content="Boden" IsChecked="{Binding ShowGround3D}" Margin="2" />
+            <ToggleButton Content="Legende" IsChecked="{Binding ShowMaterialLegend}" Margin="2" />
         </WrapPanel>
-        <controls:Cad3DView x:Name="View3D" Mode="{Binding View3DMode}" ShowGround="{Binding ShowGround3D}" />
+        <controls:Cad3DView x:Name="View3D" Mode="{Binding View3DMode}" ShowGround="{Binding ShowGround3D}" ShowLegend="{Binding ShowMaterialLegend}" />
     </DockPanel>
 </Window>

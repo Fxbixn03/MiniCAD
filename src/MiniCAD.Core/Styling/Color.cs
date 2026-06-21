@@ -6,6 +6,9 @@ namespace MiniCAD.Core.Styling;
 /// </summary>
 public readonly struct Color : IEquatable<Color>
 {
+    // A struct has an implicit parameterless ctor and get-only properties, so System.Text.Json
+    // must be told to use this constructor (else it deserializes to all-zero).
+    [System.Text.Json.Serialization.JsonConstructor]
     public Color(byte r, byte g, byte b, byte a = 255)
     {
         R = r;

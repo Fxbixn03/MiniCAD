@@ -1,6 +1,8 @@
 using MiniCAD.Core.Documents;
 using MiniCAD.Core.Geometry;
+using MiniCAD.Core.Materials;
 using MiniCAD.Core.Model3D;
+using MiniCAD.Core.Rendering;
 using MiniCAD.Core.Styling;
 using MiniCAD.Core.Viewing;
 using SkiaSharp;
@@ -22,7 +24,7 @@ public sealed class Skia3DSceneRenderer
 
     public void Render(ICadDocument document, Camera3D camera, nint pixelBuffer, int width, int height, int rowBytes,
         Color background, Model3DObject? selected = null, Render3DMode mode = Render3DMode.Wireframe,
-        bool showGround = true)
+        bool showGround = true, bool showLegend = false)
     {
         if (width <= 0 || height <= 0 || pixelBuffer == nint.Zero)
             return;
@@ -45,6 +47,9 @@ public sealed class Skia3DSceneRenderer
                 RenderWireframe(drawSurface, camera, models, selected);
             else
                 RenderSolid(drawSurface, camera, models, selected, background, mode);
+
+            if (showLegend)
+                DrawLegend(drawSurface, models, height);
         }
         finally
         {
@@ -151,9 +156,10 @@ public sealed class Skia3DSceneRenderer
                     continue; // skip triangles crossing behind the camera
 
                 double depth = (view.Transform(wa).Z + view.Transform(wb).Z + view.Transform(wc).Z) / 3.0;
+                Color baseColor = isSelected ? HighlightColor : (model.Material?.DiffuseColor ?? model.Color);
                 Color color = mode == Render3DMode.HiddenLine
                     ? background
-                    : Shade(isSelected ? HighlightColor : model.Color, wa, wb, wc);
+                    : Shade(baseColor, wa, wb, wc, model.Material);
                 faces.Add(new Face(pa, pb, pc, depth, color, isSelected));
             }
         }
@@ -172,13 +178,52 @@ public sealed class Skia3DSceneRenderer
         }
     }
 
-    private static Color Shade(Color baseColor, Point3D a, Point3D b, Point3D c)
+    private static Color Shade(Color baseColor, Point3D a, Point3D b, Point3D c, MaterialDefinition? material)
     {
         Vector3D normal = (b - a).Cross(c - a).Normalized();
-        double factor = 0.35 + 0.65 * Math.Abs(normal.Dot(Light));
+        double diffuse = Math.Abs(normal.Dot(Light)); // two-sided (winding-agnostic)
+
+        double ambient = material?.AmbientFactor ?? 0.35;
+        double specularFactor = material?.SpecularFactor ?? 0.1;
+        double shininess = material?.Shininess ?? 16.0;
+
+        double intensity = ambient + (1.0 - ambient) * diffuse;
+        double specular = specularFactor * Math.Pow(diffuse, shininess); // simplified Phong highlight
+        double factor = intensity + specular;
+
         return new Color(
             (byte)Math.Clamp(baseColor.R * factor, 0, 255),
             (byte)Math.Clamp(baseColor.G * factor, 0, 255),
             (byte)Math.Clamp(baseColor.B * factor, 0, 255));
+    }
+
+    // ----- Material legend (#286) -----
+
+    private static void DrawLegend(SkiaRenderSurface surface, IReadOnlyList<Model3DObject> models, int height)
+    {
+        // Distinct materials actually used in the scene (by name).
+        var used = new List<MaterialDefinition>();
+        foreach (Model3DObject model in models)
+            if (model.Material is { } m && used.All(x => x.Name != m.Name))
+                used.Add(m);
+        if (used.Count == 0)
+            return;
+
+        const double swatch = 12, gap = 6, lineHeight = 18, left = 12, textSize = 12;
+        double y = height - 12 - (used.Count - 1) * lineHeight; // bottom-left, stacked upward
+        var labelStroke = new StrokeStyle(new Color(235, 238, 245), 1.0);
+
+        foreach (MaterialDefinition m in used)
+        {
+            var rect = new[]
+            {
+                new Point2D(left, y - swatch), new Point2D(left + swatch, y - swatch),
+                new Point2D(left + swatch, y), new Point2D(left, y),
+            };
+            surface.DrawFilledPolygon(rect, FillStyle.Solid(m.DiffuseColor));
+            surface.DrawText(m.Name, new Point2D(left + swatch + gap, y), textSize, 0,
+                TextHAlign.Left, TextVAlign.Bottom, null, 1.0, labelStroke);
+            y += lineHeight;
+        }
     }
 }

@@ -1,7 +1,7 @@
 using System.Linq;
 using MiniCAD.Core.Entities;
 using MiniCAD.Core.Geometry;
-using MiniCAD.Core.Styling;
+using MiniCAD.Core.Materials;
 
 namespace MiniCAD.Core.Model3D;
 
@@ -13,9 +13,10 @@ namespace MiniCAD.Core.Model3D;
 /// </summary>
 public static class ArchModelBuilder
 {
-    private static readonly Color ColumnColor = new(190, 190, 200);
-    private static readonly Color SlabColor = new(200, 195, 185);
-    private static readonly Color BeamColor = new(180, 175, 165);
+    private static readonly MaterialLibrary Library = MaterialLibrary.Default;
+    private static readonly MaterialDefinition WallMaterial =
+        Library.TryGet("Kalksandstein", out MaterialDefinition w) ? w : MaterialLibrary.Concrete;
+    private static readonly MaterialDefinition ConcreteMaterial = MaterialLibrary.Concrete;
 
     public static List<Model3DObject> Build(IEnumerable<IEntity> entities)
     {
@@ -32,24 +33,24 @@ public static class ArchModelBuilder
                     continue;
                 mesh = Csg.Subtract(mesh, OpeningCutter(opening));
             }
-            models.Add(Derived(mesh, WallModelBuilder.WallColor));
+            models.Add(Derived(mesh, WallMaterial));
         }
 
         foreach (ColumnEntity column in list.OfType<ColumnEntity>())
-            models.Add(Derived(ColumnMesh(column), ColumnColor));
+            models.Add(Derived(ColumnMesh(column), ConcreteMaterial));
 
         foreach (SlabEntity slab in list.OfType<SlabEntity>())
             if (SlabMesh(slab) is { } mesh)
-                models.Add(Derived(mesh, SlabColor));
+                models.Add(Derived(mesh, ConcreteMaterial));
 
         foreach (BeamEntity beam in list.OfType<BeamEntity>())
-            models.Add(Derived(BeamMesh(beam), BeamColor));
+            models.Add(Derived(BeamMesh(beam), ConcreteMaterial));
 
         return models;
     }
 
-    private static Model3DObject Derived(Mesh3D mesh, Color color)
-        => new(mesh, "Bauteil") { Color = color, IsDerived = true };
+    private static Model3DObject Derived(Mesh3D mesh, MaterialDefinition material)
+        => new(mesh, material.Name) { Color = material.DiffuseColor, Material = material, IsDerived = true };
 
     // ----- Per-element meshes -----
 

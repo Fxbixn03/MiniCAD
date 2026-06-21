@@ -530,12 +530,15 @@
                             <Button Content="Schattiert" Command="{Binding SetRenderModeCommand}" CommandParameter="Shaded" />
                             <ToggleButton Content="Boden" IsChecked="{Binding ShowGround3D}" Margin="2"
                                           ToolTip.Tip="Bodenraster &amp; Achsenkreuz ein/aus" />
+                            <ToggleButton Content="Legende" IsChecked="{Binding ShowMaterialLegend}" Margin="2"
+                                          ToolTip.Tip="Material-Legende ein/aus" />
                             <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
                             <Button Content="Abdocken ⧉" Click="OnDetach3D" />
                         </WrapPanel>
                         <controls:Cad3DView Document="{Binding Document}" Camera="{Binding Camera3D}"
                                             Mode="{Binding View3DMode}" SelectedModel="{Binding Selected3DModel}"
-                                            ShowGround="{Binding ShowGround3D}" />
+                                            ShowGround="{Binding ShowGround3D}"
+                                            ShowLegend="{Binding ShowMaterialLegend}" />
                     </DockPanel>
                 </TabItem>
             </TabControl>
@@ -557,7 +560,8 @@
                 </StackPanel>
                 <controls:Cad3DView Document="{Binding Document}" Camera="{Binding SideCamera3D}"
                                     Mode="{Binding View3DMode}" SelectedModel="{Binding Selected3DModel}"
-                                    ShowGround="{Binding ShowGround3D}" />
+                                    ShowGround="{Binding ShowGround3D}"
+                                            ShowLegend="{Binding ShowMaterialLegend}" />
             </DockPanel>
             </Grid>
 

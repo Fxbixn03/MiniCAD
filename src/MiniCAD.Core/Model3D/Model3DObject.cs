@@ -37,6 +37,12 @@ public sealed class Model3DObject
     public Color Color { get; set; }
 
     /// <summary>
+    /// The object's material (#284). When set, the shaded renderer uses its diffuse colour and
+    /// Phong factors; <c>null</c> falls back to <see cref="Color"/>. Also drives mass take-offs.
+    /// </summary>
+    public Materials.MaterialDefinition? Material { get; set; }
+
+    /// <summary>
     /// True for models generated live from 2D source entities (e.g. walls). Derived models are
     /// rebuilt on every document change and are not persisted — they regenerate on load.
     /// </summary>
