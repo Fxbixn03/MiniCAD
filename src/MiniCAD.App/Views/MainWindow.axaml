@@ -76,6 +76,8 @@
                             <MenuItem Header="S_tutzen / Dehnen" Command="{Binding ActivateTrimCommand}" InputGesture="T" />
                             <MenuItem Header="_Dehnen (Fenster)" Command="{Binding ActivateStretchCommand}" InputGesture="S" />
                             <MenuItem Header="_Abrundung / Fase" Command="{Binding ActivateFilletCommand}" InputGesture="Shift+F" />
+                            <MenuItem Header="Trennen am _Punkt" Command="{Binding ActivateBreakAtPointCommand}" />
+                            <MenuItem Header="_Bruch (zwei Punkte)" Command="{Binding ActivateBreakCommand}" />
                             <MenuItem Header="_Array (Raster / polar)" Command="{Binding ActivateArrayCommand}" InputGesture="Shift+A" />
                             <Separator />
                             <MenuItem Header="_Gruppieren" Command="{Binding GroupSelectionCommand}" InputGesture="Ctrl+G" />

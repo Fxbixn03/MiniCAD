@@ -53,6 +53,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly MirrorTool _mirrorTool = new();
     private readonly ScaleTool _scaleTool = new();
     private readonly OffsetTool _offsetTool = new();
+    private readonly BreakTool _breakTool = new();
     private readonly TrimExtendTool _trimTool = new();
     private readonly StretchTool _stretchTool = new();
     private readonly FilletTool _filletTool = new();
@@ -736,6 +737,22 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Fillet/Chamfer picks two lines; the radius comes from the inline options line.</summary>
     [RelayCommand]
     private void ActivateFillet() => Tools.SetActiveTool(_filletTool);
+
+    /// <summary>Break-at-point splits the picked object in two at a snapped point (#187).</summary>
+    [RelayCommand]
+    private void ActivateBreakAtPoint()
+    {
+        _breakTool.TwoPoint = false;
+        Tools.SetActiveTool(_breakTool);
+    }
+
+    /// <summary>Break removes the piece between two picked points on the object (#187).</summary>
+    [RelayCommand]
+    private void ActivateBreak()
+    {
+        _breakTool.TwoPoint = true;
+        Tools.SetActiveTool(_breakTool);
+    }
 
     /// <summary>Array repeats the current selection; needs something selected first.</summary>
     [RelayCommand(CanExecute = nameof(HasSelection))]
