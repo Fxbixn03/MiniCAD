@@ -78,6 +78,8 @@
                             <MenuItem Header="_Abrundung / Fase" Command="{Binding ActivateFilletCommand}" InputGesture="Shift+F" />
                             <MenuItem Header="_Array (Raster / polar)" Command="{Binding ActivateArrayCommand}" InputGesture="Shift+A" />
                             <Separator />
+                            <MenuItem Header="In _Hilfskonstruktion umwandeln" Command="{Binding ConvertConstructionCommand}" />
+                            <Separator />
                             <MenuItem Header="_Löschen" Command="{Binding DeleteSelectionCommand}" InputGesture="Delete" />
                         </MenuItem>
                         <MenuItem Header="_Werkzeuge">
@@ -452,6 +454,10 @@
                 <ToggleButton Classes="rail" IsChecked="{Binding PolarEnabled}"
                               ToolTip.Tip="Polar-Tracking (Winkelschritte)  ·  F10">
                     <Path Classes="ico" Data="{StaticResource Icon.Polar}" />
+                </ToggleButton>
+                <ToggleButton Classes="rail" IsChecked="{Binding ConstructionMode}"
+                              ToolTip.Tip="Hilfskonstruktion (nicht druckbar, snapbar)">
+                    <Path Classes="ico" Data="{StaticResource Icon.Construction}" />
                 </ToggleButton>
                 <Button Classes="rail" Classes.active="{Binding IsSetNullPointActive}"
                         Command="{Binding ActivateSetNullPointCommand}"

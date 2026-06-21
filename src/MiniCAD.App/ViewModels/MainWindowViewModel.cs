@@ -94,6 +94,7 @@ public partial class MainWindowViewModel : ViewModelBase
             ActivateMirrorCommand.NotifyCanExecuteChanged();
             ActivateScaleCommand.NotifyCanExecuteChanged();
             ActivateArrayCommand.NotifyCanExecuteChanged();
+            ConvertConstructionCommand.NotifyCanExecuteChanged();
         };
         Tools.ActiveToolChanged += (_, _) =>
         {
@@ -222,6 +223,10 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Two-way bound to the Polar toggle: snaps segments to fixed angle steps.</summary>
     [ObservableProperty]
     private bool _polarEnabled;
+
+    /// <summary>Two-way bound to the construction toggle: new geometry is drawn as Hilfskonstruktion.</summary>
+    [ObservableProperty]
+    private bool _constructionMode;
 
     /// <summary>The current project's display name (derived from the file name).</summary>
     [ObservableProperty]
@@ -369,6 +374,41 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnPolarEnabledChanged(bool value)
     {
         Tools.InputSettings.PolarEnabled = value;
+        Tools.RequestRedraw();
+    }
+
+    partial void OnConstructionModeChanged(bool value)
+    {
+        Tools.ConstructionMode = value;
+        StatusMessage = value ? "Hilfskonstruktion: neue Elemente werden als Konstruktion gezeichnet." : string.Empty;
+    }
+
+    /// <summary>Toggles the selected entities between normal geometry and Hilfskonstruktion.</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ConvertConstruction()
+    {
+        if (Tools.Selection.IsEmpty)
+            return;
+
+        // If every selected entity is already construction, convert back; otherwise convert to it.
+        bool target = !Tools.Selection.Items.All(e => e.IsConstruction);
+
+        var commands = Tools.Selection.Items
+            .Where(e => e.IsConstruction != target)
+            .Select(entity =>
+            {
+                IEntity captured = entity;
+                return (IUndoableCommand)new SetEntityPropertyCommand(
+                    "Hilfskonstruktion umschalten", Document, captured,
+                    () => captured.IsConstruction = target,
+                    () => captured.IsConstruction = !target);
+            })
+            .ToList();
+
+        if (commands.Count == 0)
+            return;
+
+        _commands.Execute(commands.Count == 1 ? commands[0] : new CompositeCommand("Hilfskonstruktion umschalten", commands));
         Tools.RequestRedraw();
     }
 

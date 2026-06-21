@@ -23,6 +23,13 @@ public sealed class SkiaSceneRenderer
     private static StrokeStyle Dim(StrokeStyle stroke)
         => stroke.WithColor(stroke.Color.Lerp(PassiveTint, 0.7).WithAlpha((byte)(stroke.Color.A * 0.6)));
 
+    // Construction geometry (Hilfskonstruktion): tinted toward cyan and dashed so it reads as
+    // non-printing helper lines, yet stays snappable.
+    private static readonly Color ConstructionTint = new(110, 200, 255);
+
+    private static StrokeStyle Construction(StrokeStyle stroke)
+        => stroke.WithColor(stroke.Color.Lerp(ConstructionTint, 0.45)).WithLineType(LineType.Dashed);
+
     // Blueprint grid: translucent light-blue (logo vertex node #93c5fd) over the navy canvas.
     private static readonly Color GridColor = new(147, 197, 253, 38);
     private static readonly Color XAxisColor = new(190, 92, 96);
@@ -95,6 +102,8 @@ public sealed class SkiaSceneRenderer
                         return;
 
                     StrokeStyle stroke = document.ResolveStroke(entity);
+                    if (entity.IsConstruction)
+                        stroke = Construction(stroke);
                     if (teilbildPassive || layer is { State: ElementState.Locked })
                         stroke = Dim(stroke);
 

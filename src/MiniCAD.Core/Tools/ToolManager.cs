@@ -48,6 +48,9 @@ public sealed class ToolManager : IToolContext
 
     public StrokeStyle? DefaultStrokeOverride { get; set; }
 
+    /// <summary>When true, geometry drawn by tools is created as construction (Hilfskonstruktion).</summary>
+    public bool ConstructionMode { get; set; }
+
     public ITool? ActiveTool { get; private set; }
 
     public string ActiveToolName => ActiveTool?.Name ?? "—";

@@ -199,6 +199,9 @@ public abstract class EntityDto
 
     /// <summary>Optional per-entity stroke override.</summary>
     public StrokeDto? Stroke { get; set; }
+
+    /// <summary>True for construction geometry (Hilfskonstruktion).</summary>
+    public bool IsConstruction { get; set; }
 }
 
 public sealed class LineDto : EntityDto

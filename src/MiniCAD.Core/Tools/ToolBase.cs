@@ -64,6 +64,8 @@ public abstract class ToolBase : ITool
     {
         if (Context.DefaultStrokeOverride is { } stroke)
             entity.StrokeOverride = stroke;
+        if (Context.ConstructionMode)
+            entity.IsConstruction = true;
         return entity;
     }
 

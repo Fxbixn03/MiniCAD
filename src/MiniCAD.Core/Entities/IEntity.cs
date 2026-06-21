@@ -23,6 +23,13 @@ public interface IEntity
     /// <summary>An optional per-entity stroke that overrides the layer default when set.</summary>
     StrokeStyle? StrokeOverride { get; set; }
 
+    /// <summary>
+    /// True for construction geometry (Hilfskonstruktion): drawn in a distinct style and
+    /// snappable, but excluded from printing/export. Can be toggled to convert to/from normal
+    /// geometry.
+    /// </summary>
+    bool IsConstruction { get; set; }
+
     /// <summary>The axis-aligned bounding box in world coordinates.</summary>
     Rect2D Bounds { get; }
 

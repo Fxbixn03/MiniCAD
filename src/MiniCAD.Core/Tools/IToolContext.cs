@@ -25,6 +25,12 @@ public interface IToolContext
     /// </summary>
     StrokeStyle? DefaultStrokeOverride { get; }
 
+    /// <summary>
+    /// When true, geometry created by drawing tools is flagged as construction
+    /// (Hilfskonstruktion). Hosts that don't support the mode inherit the default <c>false</c>.
+    /// </summary>
+    bool ConstructionMode => false;
+
     /// <summary>Switches back to the idle/select tool (e.g. after a draw is cancelled with Esc).</summary>
     void ReturnToDefaultTool();
 

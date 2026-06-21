@@ -19,6 +19,7 @@ public abstract class Entity : IEntity
         LayerId = source.LayerId;
         PartialDrawingId = source.PartialDrawingId;
         StrokeOverride = source.StrokeOverride;
+        IsConstruction = source.IsConstruction;
     }
 
     public EntityId Id { get; }
@@ -28,6 +29,8 @@ public abstract class Entity : IEntity
     public Guid PartialDrawingId { get; set; }
 
     public StrokeStyle? StrokeOverride { get; set; }
+
+    public bool IsConstruction { get; set; }
 
     public abstract Rect2D Bounds { get; }
 
