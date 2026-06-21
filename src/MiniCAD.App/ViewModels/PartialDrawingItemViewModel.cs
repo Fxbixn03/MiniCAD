@@ -25,6 +25,10 @@ public partial class PartialDrawingItemViewModel : ViewModelBase
     [ObservableProperty]
     private ElementState _state;
 
+    /// <summary>Multi-selection flag used by the Teilbild selection dialog (batch operations).</summary>
+    [ObservableProperty]
+    private bool _isSelected;
+
     /// <summary>Reference scale denominator (the "n" in 1:n) for this Teilbild.</summary>
     [ObservableProperty]
     private int _scaleDenominator;

@@ -212,6 +212,18 @@ public partial class MainWindow : Window
 
     private void OnExit(object? sender, RoutedEventArgs e) => Close();
 
+    private void OnPartialDrawingSelection(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel is not { } viewModel)
+            return;
+
+        var dialog = new PartialDrawingsWindow
+        {
+            DataContext = new PartialDrawingSelectionViewModel(viewModel.Document),
+        };
+        dialog.ShowDialog(this);
+    }
+
     private void OnOpenSettings(object? sender, RoutedEventArgs e)
     {
         if (ViewModel is not { } viewModel)

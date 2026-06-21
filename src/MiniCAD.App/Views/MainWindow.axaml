@@ -95,6 +95,8 @@
                             <Separator />
                             <MenuItem Header="_Standard-Layer einfügen" Command="{Binding AddStandardLayersCommand}" />
                             <Separator />
+                            <MenuItem Header="_Teilbild-Auswahl…" Click="OnPartialDrawingSelection" />
+                            <Separator />
                             <MenuItem Header="_Einstellungen…" Click="OnOpenSettings" />
                         </MenuItem>
                     </Menu>
