@@ -1,11 +1,37 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MiniCAD.App.Configuration;
 using MiniCAD.App.Input;
+using MiniCAD.App.ViewModels.Toolbar;
 
 namespace MiniCAD.App.ViewModels;
+
+/// <summary>One entry in the settings navigation list (left side), searchable by name + keywords.</summary>
+public sealed class SettingsSectionViewModel
+{
+    public SettingsSectionViewModel(string key, string name, string keywords)
+    {
+        Key = key;
+        Name = name;
+        Keywords = keywords;
+    }
+
+    public string Key { get; }
+
+    public string Name { get; }
+
+    /// <summary>Searchable text (representative content of the section).</summary>
+    public string Keywords { get; }
+
+    public bool Matches(string query)
+        => Name.Contains(query, System.StringComparison.OrdinalIgnoreCase)
+           || Keywords.Contains(query, System.StringComparison.OrdinalIgnoreCase);
+}
 
 /// <summary>
 /// Live view settings shared between the main window's canvas and the settings dialog.
@@ -59,10 +85,69 @@ public partial class SettingsViewModel : ViewModelBase
         _useDecimalPoint = config.DecimalSeparator == ".";
 
         Shortcuts = new ShortcutsViewModel(shortcuts);
+
+        _allSections = new List<SettingsSectionViewModel>
+        {
+            new("general", "Allgemein", "start projekt zuletzt laden eingabe dezimal komma punkt trennzeichen"),
+            new("display", "Darstellung", "design dark dunkel hell theme raster grid hintergrund farbe canvas zeichenfläche"),
+            new("toolbar", "Werkzeugleiste", "werkzeug tool leiste toolbar anzeigen ausblenden ein aus andocken position blöcke"),
+            new("shortcuts", "Tastenkürzel", "taste tasten kürzel gesten shortcut belegung"),
+        };
+        Sections = new ObservableCollection<SettingsSectionViewModel>(_allSections);
+        _selectedSection = _allSections[0];
     }
 
     /// <summary>The customizable keyboard-shortcut page ("Tastenkürzel").</summary>
     public ShortcutsViewModel Shortcuts { get; }
+
+    /// <summary>The configurable toolbar (assigned by the main view model after construction).</summary>
+    public ToolbarViewModel? Toolbar { get; set; }
+
+    // ----- Sectioned navigation + search -----
+
+    private readonly List<SettingsSectionViewModel> _allSections;
+
+    /// <summary>The (search-filtered) navigation entries shown on the left.</summary>
+    public ObservableCollection<SettingsSectionViewModel> Sections { get; }
+
+    [ObservableProperty]
+    private SettingsSectionViewModel? _selectedSection;
+
+    [ObservableProperty]
+    private string _searchText = string.Empty;
+
+    /// <summary>The large title shown top-right (the current section's name).</summary>
+    public string SelectedSectionTitle => SelectedSection?.Name ?? string.Empty;
+
+    public bool IsGeneral => SelectedSection?.Key == "general";
+    public bool IsDisplay => SelectedSection?.Key == "display";
+    public bool IsToolbar => SelectedSection?.Key == "toolbar";
+    public bool IsShortcuts => SelectedSection?.Key == "shortcuts";
+
+    partial void OnSelectedSectionChanged(SettingsSectionViewModel? value)
+    {
+        OnPropertyChanged(nameof(SelectedSectionTitle));
+        OnPropertyChanged(nameof(IsGeneral));
+        OnPropertyChanged(nameof(IsDisplay));
+        OnPropertyChanged(nameof(IsToolbar));
+        OnPropertyChanged(nameof(IsShortcuts));
+    }
+
+    partial void OnSearchTextChanged(string value)
+    {
+        string query = value.Trim();
+        IEnumerable<SettingsSectionViewModel> matches = string.IsNullOrEmpty(query)
+            ? _allSections
+            : _allSections.Where(s => s.Matches(query));
+
+        Sections.Clear();
+        foreach (SettingsSectionViewModel section in matches)
+            Sections.Add(section);
+
+        // Keep a valid selection: prefer the current one, else the first match.
+        if (SelectedSection is null || !Sections.Contains(SelectedSection))
+            SelectedSection = Sections.FirstOrDefault();
+    }
 
     /// <summary>The composed background color the canvas clears to.</summary>
     public Color BackgroundColor => Color.FromRgb((byte)BackgroundRed, (byte)BackgroundGreen, (byte)BackgroundBlue);

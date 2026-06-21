@@ -166,6 +166,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<ParametricSymbolEntity>(_parametricInsertTool);
 
         Toolbar = BuildToolbar();
+        Settings.Toolbar = Toolbar;
 
         Tools.SetActiveTool(_selectTool);
         Toolbar.RefreshAll();
