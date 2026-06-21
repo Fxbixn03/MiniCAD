@@ -39,6 +39,9 @@ public sealed record DocumentContents(
     /// <summary>Block definitions (reusable symbols).</summary>
     public IReadOnlyList<BlockDefinition> BlockDefinitions { get; init; } = Array.Empty<BlockDefinition>();
 
+    /// <summary>3D model-space objects.</summary>
+    public IReadOnlyList<Model3D.Model3DObject> Models { get; init; } = Array.Empty<Model3D.Model3DObject>();
+
     /// <summary>The user-defined origin (Nullpunkt) in absolute world coordinates.</summary>
     public Point3D Origin { get; init; } = Point3D.Origin;
 }

@@ -47,6 +47,9 @@ public interface ICadDocument
 
     BlockDefinition? FindBlockDefinition(Guid id);
 
+    /// <summary>The 3D model-space objects (parallel to the 2D Teilbilder).</summary>
+    IReadOnlyList<Model3D.Model3DObject> Models { get; }
+
     /// <summary>The named dimension styles defined for this document.</summary>
     IReadOnlyList<DimStyle> DimStyles { get; }
 

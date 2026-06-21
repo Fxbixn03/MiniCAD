@@ -2,6 +2,7 @@ using System.Linq;
 using MiniCAD.Core.Documents;
 using MiniCAD.Core.Entities;
 using MiniCAD.Core.Geometry;
+using MiniCAD.Core.Model3D;
 using MiniCAD.Core.Rendering;
 using MiniCAD.Core.Styling;
 
@@ -47,6 +48,9 @@ public static class DocumentMapper
         foreach (BlockDefinition definition in document.BlockDefinitions)
             dto.BlockDefinitions.Add(ToDto(definition));
 
+        foreach (Model3DObject model in document.Models)
+            dto.Models.Add(ToDto(model));
+
         foreach (PartialDrawing partialDrawing in document.PartialDrawings)
             dto.PartialDrawings.Add(ToDto(partialDrawing));
 
@@ -85,6 +89,8 @@ public static class DocumentMapper
 
         List<BlockDefinition> blockDefinitions = dto.BlockDefinitions.Select(FromDto).ToList();
 
+        List<Model3DObject> models = dto.Models.Select(FromDto).ToList();
+
         List<IEntity> entities = dto.Entities.Select(FromDto).ToList();
 
         // Link block references to their definitions (only the id is persisted).
@@ -119,6 +125,7 @@ public static class DocumentMapper
             ActiveDimStyleId = dto.ActiveDimStyleId,
             LayerFavorites = layerFavorites,
             BlockDefinitions = blockDefinitions,
+            Models = models,
             Origin = new Point3D(dto.OriginX, dto.OriginY, dto.OriginZ),
         });
     }
@@ -291,6 +298,29 @@ public static class DocumentMapper
     private static PointDto ToDto(Point2D point) => new() { X = point.X, Y = point.Y };
 
     private static Point2D FromDto(PointDto dto) => new(dto.X, dto.Y);
+
+    private static Point3DDto ToDto(Point3D point) => new() { X = point.X, Y = point.Y, Z = point.Z };
+
+    private static Point3D FromDto(Point3DDto dto) => new(dto.X, dto.Y, dto.Z);
+
+    private static Model3DDto ToDto(Model3DObject model) => new()
+    {
+        Id = model.Id,
+        Name = model.Name,
+        Mesh = new Mesh3DDto
+        {
+            Vertices = model.Mesh.Vertices.Select(ToDto).ToList(),
+            Indices = model.Mesh.Indices.ToList(),
+        },
+        Transform = model.Transform.ToArray().ToList(),
+        Color = ToDto(model.Color),
+    };
+
+    private static Model3DObject FromDto(Model3DDto dto) => new(
+        dto.Id, dto.Name,
+        new Mesh3D(dto.Mesh.Vertices.Select(FromDto), dto.Mesh.Indices),
+        Matrix4.FromArray(dto.Transform),
+        FromDto(dto.Color));
 
     private static EntityDto ToDto(IEntity entity)
     {

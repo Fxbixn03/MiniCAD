@@ -52,6 +52,9 @@ public sealed class DocumentDto
     /// <summary>Block definitions (reusable symbols).</summary>
     public List<BlockDefinitionDto> BlockDefinitions { get; set; } = new();
 
+    /// <summary>3D model-space objects.</summary>
+    public List<Model3DDto> Models { get; set; } = new();
+
     public List<EntityDto> Entities { get; set; } = new();
 
     /// <summary>The user-defined origin (Nullpunkt) in absolute world coordinates.</summary>
@@ -189,6 +192,30 @@ public sealed class PointDto
 {
     public double X { get; set; }
     public double Y { get; set; }
+}
+
+public sealed class Point3DDto
+{
+    public double X { get; set; }
+    public double Y { get; set; }
+    public double Z { get; set; }
+}
+
+public sealed class Mesh3DDto
+{
+    public List<Point3DDto> Vertices { get; set; } = new();
+    public List<int> Indices { get; set; } = new();
+}
+
+public sealed class Model3DDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = "Körper";
+    public Mesh3DDto Mesh { get; set; } = new();
+
+    /// <summary>The 16 row-major components of the world transform.</summary>
+    public List<double> Transform { get; set; } = new();
+    public ColorDto Color { get; set; } = new();
 }
 
 /// <summary>Polymorphic base for entities; the <c>kind</c> discriminator selects the shape.</summary>

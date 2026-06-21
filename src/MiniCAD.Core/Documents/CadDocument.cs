@@ -1,6 +1,7 @@
 using MiniCAD.Core.Coordinates;
 using MiniCAD.Core.Entities;
 using MiniCAD.Core.Geometry;
+using MiniCAD.Core.Model3D;
 using MiniCAD.Core.Styling;
 
 namespace MiniCAD.Core.Documents;
@@ -26,6 +27,7 @@ public sealed class CadDocument : ICadDocument
     private readonly List<LayerFavorite> _layerFavorites = new();
     private readonly List<BlockDefinition> _blockDefinitions = new();
     private readonly Dictionary<Guid, BlockDefinition> _blockDefinitionsById = new();
+    private readonly List<Model3DObject> _models = new();
 
     public CadDocument()
     {
@@ -444,6 +446,38 @@ public sealed class CadDocument : ICadDocument
         _blockDefinitionsById[definition.Id] = definition;
     }
 
+    // ----- 3D model space (parallel to the 2D Teilbilder) -----
+
+    public IReadOnlyList<Model3DObject> Models => _models;
+
+    public Model3DObject AddModelObject(Model3DObject model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        _models.Add(model);
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.ModelsChanged));
+        return model;
+    }
+
+    public bool RemoveModelObject(Model3DObject model)
+    {
+        if (!_models.Remove(model))
+            return false;
+
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.ModelsChanged));
+        return true;
+    }
+
+    public void NotifyModelModified() => Raise(new DocumentChangedEventArgs(DocumentChangeKind.ModelsChanged));
+
+    /// <summary>The combined world bounds of all 3D objects, or <c>null</c> if the model is empty.</summary>
+    public BoundingBox3D? GetModelBounds()
+    {
+        BoundingBox3D? bounds = null;
+        foreach (Model3DObject model in _models)
+            bounds = bounds is { } b ? b.Union(model.Bounds) : model.Bounds;
+        return bounds;
+    }
+
     // ----- Dimension styles -----
 
     public DimStyle AddDimStyle(string name)
@@ -674,6 +708,9 @@ public sealed class CadDocument : ICadDocument
         _blockDefinitionsById.Clear();
         foreach (BlockDefinition definition in contents.BlockDefinitions)
             RegisterBlockDefinition(definition);
+
+        _models.Clear();
+        _models.AddRange(contents.Models);
 
         _entities.Clear();
         foreach (IEntity entity in contents.Entities)

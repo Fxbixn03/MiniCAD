@@ -30,6 +30,9 @@ public enum DocumentChangeKind
     /// <summary>The document's block definitions changed (added/removed).</summary>
     BlocksChanged,
 
+    /// <summary>The 3D model space changed (object added/removed/modified).</summary>
+    ModelsChanged,
+
     /// <summary>The whole document was replaced (e.g. a project was loaded).</summary>
     Reloaded,
 }

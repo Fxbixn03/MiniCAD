@@ -156,6 +156,24 @@ public readonly struct Matrix4 : IEquatable<Matrix4>
 
     public static Matrix4 operator *(Matrix4 a, Matrix4 b) => a.Multiply(b);
 
+    /// <summary>The 16 components in row-major order (for persistence).</summary>
+    public double[] ToArray() => new[]
+    {
+        M11, M12, M13, M14,
+        M21, M22, M23, M24,
+        M31, M32, M33, M34,
+        M41, M42, M43, M44,
+    };
+
+    /// <summary>Rebuilds a matrix from 16 row-major components (falls back to identity otherwise).</summary>
+    public static Matrix4 FromArray(IReadOnlyList<double> m) => m.Count == 16
+        ? new Matrix4(
+            m[0], m[1], m[2], m[3],
+            m[4], m[5], m[6], m[7],
+            m[8], m[9], m[10], m[11],
+            m[12], m[13], m[14], m[15])
+        : Identity;
+
     /// <summary>Inverts the matrix via Gauss-Jordan elimination; returns <c>false</c> if singular.</summary>
     public bool TryInvert(out Matrix4 inverse)
     {
