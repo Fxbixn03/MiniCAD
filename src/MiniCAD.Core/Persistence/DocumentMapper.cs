@@ -197,10 +197,15 @@ public static class DocumentMapper
         Name = definition.Name,
         BasePoint = ToDto(definition.BasePoint),
         Entities = definition.Entities.Select(ToDto).ToList(),
+        AttributeKeys = definition.AttributeKeys.ToList(),
     };
 
-    private static BlockDefinition FromDto(BlockDefinitionDto dto) => new(
-        dto.Id, dto.Name, FromDto(dto.BasePoint), dto.Entities.Select(FromDto));
+    private static BlockDefinition FromDto(BlockDefinitionDto dto)
+    {
+        var definition = new BlockDefinition(dto.Id, dto.Name, FromDto(dto.BasePoint), dto.Entities.Select(FromDto));
+        definition.AttributeKeys.AddRange(dto.AttributeKeys);
+        return definition;
+    }
 
     /// <summary>Copies the shared dimension fields onto the persisted DTO and returns it.</summary>
     private static T FillDimDto<T>(T dto, DimensionEntity dim) where T : DimensionDto

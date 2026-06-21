@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MiniCAD.Core.Commands;
 using MiniCAD.Core.Documents;
 using MiniCAD.Core.Entities;
@@ -96,6 +97,16 @@ public partial class AttributesViewModel : ViewModelBase
     [ObservableProperty]
     private TextStyle? _selectedTextStyle;
 
+    // ----- Block instance attributes -----
+
+    public ObservableCollection<BlockAttributeRowViewModel> BlockAttributes { get; } = new();
+
+    [ObservableProperty]
+    private bool _isBlockReference;
+
+    [ObservableProperty]
+    private string _newAttributeKey = string.Empty;
+
     // ----- Area fill (solid/gradient) for a closed polyline -----
 
     [ObservableProperty]
@@ -167,6 +178,8 @@ public partial class AttributesViewModel : ViewModelBase
             SelectedFill = null;
             CanSetTextStyle = false;
             SelectedTextStyle = null;
+            IsBlockReference = false;
+            BlockAttributes.Clear();
             _suppress = false;
             return;
         }
@@ -210,6 +223,9 @@ public partial class AttributesViewModel : ViewModelBase
         SelectedTextStyle = items[0] is ITextEntity text
             ? TextStyleOptions.FirstOrDefault(s => s.Id == text.TextStyleId)
             : null;
+
+        IsBlockReference = items.Count == 1 && items[0] is BlockReferenceEntity;
+        BuildBlockAttributes();
 
         // Area fill: a single closed polyline (same condition as the hatch fill).
         if (CanFill && items[0] is PolylineEntity { SolidFill: { } areaFill })
@@ -307,6 +323,43 @@ public partial class AttributesViewModel : ViewModelBase
 
         _commands.Execute(new SetEntityPropertyCommand("Füllung ändern", _document, poly,
             () => poly.Fill = next, () => poly.Fill = old));
+    }
+
+    private void BuildBlockAttributes()
+    {
+        BlockAttributes.Clear();
+        if (!IsBlockReference || _selection.Items[0] is not BlockReferenceEntity reference)
+            return;
+
+        var keys = new List<string>();
+        if (reference.Definition is { } definition)
+            keys.AddRange(definition.AttributeKeys);
+        foreach (string key in reference.Attributes.Keys)
+            if (!keys.Contains(key))
+                keys.Add(key);
+
+        foreach (string key in keys)
+            BlockAttributes.Add(new BlockAttributeRowViewModel(reference, _document, key));
+    }
+
+    /// <summary>Adds a new attribute field to the selected block (and its definition).</summary>
+    [RelayCommand]
+    private void AddAttributeKey()
+    {
+        if (string.IsNullOrWhiteSpace(NewAttributeKey)
+            || _selection.Items.Count != 1 || _selection.Items[0] is not BlockReferenceEntity reference)
+        {
+            return;
+        }
+
+        string key = NewAttributeKey.Trim();
+        if (reference.Definition is { } definition && !definition.AttributeKeys.Contains(key))
+            definition.AttributeKeys.Add(key);
+        if (!reference.Attributes.ContainsKey(key))
+            reference.Attributes[key] = string.Empty;
+
+        NewAttributeKey = string.Empty;
+        BuildBlockAttributes();
     }
 
     partial void OnSelectedTextStyleChanged(TextStyle? value)

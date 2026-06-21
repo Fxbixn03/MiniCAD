@@ -32,6 +32,9 @@ public sealed class BlockDefinition
     /// <summary>The reference point that lands on a reference's insertion point.</summary>
     public Point2D BasePoint { get; set; }
 
+    /// <summary>Names of the labelled attribute fields instances of this block carry.</summary>
+    public List<string> AttributeKeys { get; } = new();
+
     /// <summary>The block's geometry (in the coordinates captured at definition time).</summary>
     public IReadOnlyList<IEntity> Entities => _entities;
 

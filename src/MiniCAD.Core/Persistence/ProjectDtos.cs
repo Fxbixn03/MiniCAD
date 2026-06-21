@@ -108,6 +108,7 @@ public sealed class BlockDefinitionDto
     public string Name { get; set; } = "Block";
     public PointDto BasePoint { get; set; } = new();
     public List<EntityDto> Entities { get; set; } = new();
+    public List<string> AttributeKeys { get; set; } = new();
 }
 
 public sealed class BlockAttributeDto

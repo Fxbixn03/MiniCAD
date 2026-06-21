@@ -124,6 +124,45 @@ public sealed class BlockReferenceEntity : Entity, IEditableEntity
     {
         foreach (IEntity child in Instantiate())
             child.Render(surface, child.StrokeOverride ?? stroke); // baked override, else ByBlock
+
+        RenderAttributes(surface, stroke);
+    }
+
+    /// <summary>The attribute keys to show, definition order first, then any extra instance keys.</summary>
+    private IEnumerable<string> OrderedAttributeKeys()
+    {
+        var seen = new HashSet<string>();
+        if (Definition is { } definition)
+            foreach (string key in definition.AttributeKeys)
+                if (seen.Add(key))
+                    yield return key;
+        foreach (string key in Attributes.Keys)
+            if (seen.Add(key))
+                yield return key;
+    }
+
+    private void RenderAttributes(IRenderSurface surface, StrokeStyle stroke)
+    {
+        if (Attributes.Count == 0)
+            return;
+
+        Rect2D bounds = Bounds;
+        double height = Math.Max(bounds.Width, bounds.Height) * 0.08;
+        if (height <= GeometryMath.Epsilon)
+            height = 1.0;
+        double lineHeight = height * 1.4;
+        double centerX = (bounds.MinX + bounds.MaxX) * 0.5;
+        double y = bounds.MinY - lineHeight;
+
+        foreach (string key in OrderedAttributeKeys())
+        {
+            if (!Attributes.TryGetValue(key, out string? value) || string.IsNullOrEmpty(value))
+                continue;
+
+            surface.DrawText($"{key}: {value}", new Point2D(centerX, y), height, 0.0,
+                TextHAlign.Center, TextVAlign.Top, null, 1.0, stroke);
+            y -= lineHeight;
+        }
     }
 
     public override IEntity Clone() => new BlockReferenceEntity(this);

@@ -610,6 +610,27 @@
                                         <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding TextStyleOptions}"
                                                   SelectedItem="{Binding SelectedTextStyle}" />
                                     </StackPanel>
+
+                                    <StackPanel Spacing="6" IsVisible="{Binding IsBlockReference}">
+                                        <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
+                                        <TextBlock Classes="eyebrow" Text="BLOCK-ATTRIBUTE" />
+                                        <ItemsControl ItemsSource="{Binding BlockAttributes}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:BlockAttributeRowViewModel">
+                                                    <DockPanel Margin="0,2">
+                                                        <TextBlock Text="{Binding Key}" Width="96" VerticalAlignment="Center"
+                                                                   Foreground="{DynamicResource Brush.TextMuted}" />
+                                                        <TextBox Text="{Binding Value}" />
+                                                    </DockPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <DockPanel>
+                                            <Button DockPanel.Dock="Right" Content="Feld +" Command="{Binding AddAttributeKeyCommand}"
+                                                    ToolTip.Tip="Neues Attributfeld hinzufügen" />
+                                            <TextBox Text="{Binding NewAttributeKey}" PlaceholderText="Neues Feld (z. B. Raumname)" />
+                                        </DockPanel>
+                                    </StackPanel>
                                 </StackPanel>
                             </StackPanel>
                         </ScrollViewer>

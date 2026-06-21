@@ -33,12 +33,13 @@ public class BlockTests
     private sealed class CountingSurface : IRenderSurface
     {
         public int Lines { get; private set; }
+        public List<string> Texts { get; } = new();
         public void DrawLine(Point2D a, Point2D b, in StrokeStyle stroke) => Lines++;
         public void DrawPolyline(IReadOnlyList<Point2D> points, bool closed, in StrokeStyle stroke) { }
         public void DrawCircle(Point2D center, double radius, in StrokeStyle stroke) { }
         public void DrawArc(Point2D center, double radius, double startAngle, double sweepAngle, in StrokeStyle stroke) { }
         public void DrawText(string text, Point2D position, double height, double rotation,
-            TextHAlign h, TextVAlign v, string? fontFamily, double widthFactor, in StrokeStyle stroke) { }
+            TextHAlign h, TextVAlign v, string? fontFamily, double widthFactor, in StrokeStyle stroke) => Texts.Add(text);
     }
 
     private static BlockDefinition MakeBlock()
@@ -113,6 +114,36 @@ public class BlockTests
         var reference = doc.Entities.OfType<BlockReferenceEntity>().Should().ContainSingle().Subject;
         reference.Position.Should().Be(new Point2D(7, 8));
         reference.DefinitionId.Should().Be(def.Id);
+    }
+
+    [Fact]
+    public void BlockReference_RendersNonEmptyAttributeValues()
+    {
+        var reference = new BlockReferenceEntity(MakeBlock(), Point2D.Origin);
+        reference.Attributes["Raumname"] = "Büro";
+        reference.Attributes["Leer"] = "";
+        var surface = new CountingSurface();
+
+        reference.Render(surface, StrokeStyle.Default);
+
+        surface.Texts.Should().ContainSingle().Which.Should().Contain("Raumname").And.Contain("Büro");
+    }
+
+    [Fact]
+    public void BlockDefinition_AttributeKeys_SurvivePersistence()
+    {
+        var doc = new CadDocument();
+        BlockDefinition def = MakeBlock();
+        def.AttributeKeys.Add("Raumname");
+        def.AttributeKeys.Add("Fläche");
+        doc.AddBlockDefinition(def);
+        doc.AddEntity(new BlockReferenceEntity(def, Point2D.Origin));
+
+        DocumentDto dto = DocumentMapper.ToDto(doc);
+        var restored = new CadDocument();
+        DocumentMapper.Apply(dto, restored);
+
+        restored.BlockDefinitions.Single().AttributeKeys.Should().Equal("Raumname", "Fläche");
     }
 
     [Fact]
