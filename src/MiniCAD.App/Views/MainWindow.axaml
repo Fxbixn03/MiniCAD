@@ -583,16 +583,16 @@
             <DockPanel Grid.Column="2" Width="460" IsVisible="{Binding SideBySide3D}"
                        Background="{DynamicResource Brush.SurfaceChrome}">
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="6">
-                    <Button Content="Iso" Command="{Binding SetView3DCommand}" CommandParameter="Iso" />
-                    <Button Content="Oben" Command="{Binding SetView3DCommand}" CommandParameter="Top" />
-                    <Button Content="Vorn" Command="{Binding SetView3DCommand}" CommandParameter="Front" />
-                    <Button Content="Rechts" Command="{Binding SetView3DCommand}" CommandParameter="Right" />
+                    <Button Content="Iso" Command="{Binding SetSideView3DCommand}" CommandParameter="Iso" />
+                    <Button Content="Oben" Command="{Binding SetSideView3DCommand}" CommandParameter="Top" />
+                    <Button Content="Vorn" Command="{Binding SetSideView3DCommand}" CommandParameter="Front" />
+                    <Button Content="Rechts" Command="{Binding SetSideView3DCommand}" CommandParameter="Right" />
                     <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
                     <Button Content="Draht" Command="{Binding SetRenderModeCommand}" CommandParameter="Wireframe" />
                     <Button Content="Verdeckt" Command="{Binding SetRenderModeCommand}" CommandParameter="HiddenLine" />
                     <Button Content="Schattiert" Command="{Binding SetRenderModeCommand}" CommandParameter="Shaded" />
                 </StackPanel>
-                <controls:Cad3DView Document="{Binding Document}" Camera="{Binding Camera3D}" Mode="{Binding View3DMode}" />
+                <controls:Cad3DView Document="{Binding Document}" Camera="{Binding SideCamera3D}" Mode="{Binding View3DMode}" />
             </DockPanel>
             </Grid>
 

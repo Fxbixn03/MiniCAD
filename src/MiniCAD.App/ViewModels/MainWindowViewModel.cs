@@ -170,8 +170,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public Viewport Viewport { get; } = new();
 
-    /// <summary>The shared 3D camera for the model-space view(s).</summary>
+    /// <summary>The 3D camera for the docked 3D tab / detached window.</summary>
     public Camera3D Camera3D { get; } = new();
+
+    /// <summary>A separate camera for the side-by-side 3D pane, so two views never share one
+    /// camera (a shared camera makes the views fight over its viewport size and feed back).</summary>
+    public Camera3D SideCamera3D { get; } = new();
 
     /// <summary>The 3D view's render mode (wireframe / hidden-line / shaded).</summary>
     [ObservableProperty]
@@ -1079,9 +1083,15 @@ public partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>Sets the 3D camera to a standard view (0=Iso, 1=Top, 2=Front, 3=Right).</summary>
     [RelayCommand]
-    private void SetView3D(string view)
+    private void SetView3D(string view) => ApplyStandardView(Camera3D, view);
+
+    /// <summary>Sets the side-by-side pane's camera to a standard view.</summary>
+    [RelayCommand]
+    private void SetSideView3D(string view) => ApplyStandardView(SideCamera3D, view);
+
+    private void ApplyStandardView(Camera3D camera, string view)
     {
-        Camera3D.SetStandardView(view switch
+        camera.SetStandardView(view switch
         {
             "Top" => StandardView.Top,
             "Front" => StandardView.Front,
@@ -1089,7 +1099,7 @@ public partial class MainWindowViewModel : ViewModelBase
             _ => StandardView.Iso,
         });
         if (Document.GetModelBounds() is { } bounds)
-            Camera3D.ZoomToFit(bounds);
+            camera.ZoomToFit(bounds);
     }
 
     /// <summary>Sets the active work plane (UCS) used for planar operations.</summary>

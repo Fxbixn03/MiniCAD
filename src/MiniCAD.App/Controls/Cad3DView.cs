@@ -41,6 +41,7 @@ public sealed class Cad3DView : Control
     private bool _leftPressed;
     private bool _orbiting;
     private bool _panning;
+    private bool _syncingCamera; // true while we adjust the camera ourselves (avoids a render feedback loop)
 
     /// <summary>The currently picked 3D object (highlighted), or null.</summary>
     public Model3DObject? SelectedModel { get; private set; }
@@ -109,7 +110,12 @@ public sealed class Cad3DView : Control
         Invalidate();
     }
 
-    private void OnCameraChanged(object? sender, EventArgs e) => Invalidate();
+    private void OnCameraChanged(object? sender, EventArgs e)
+    {
+        if (_syncingCamera)
+            return; // our own resize/auto-fit during render must not re-trigger a render
+        Invalidate();
+    }
 
     private void Invalidate()
     {
@@ -122,13 +128,21 @@ public sealed class Cad3DView : Control
         if (Camera is not { } camera || Bounds.Width <= 0 || Bounds.Height <= 0)
             return;
 
-        double scaling = Scaling;
-        camera.Resize(Math.Max(1, Bounds.Width * scaling), Math.Max(1, Bounds.Height * scaling));
-
-        if (_autoFitPending && Document?.GetModelBounds() is { } bounds)
+        _syncingCamera = true;
+        try
         {
-            camera.ZoomToFit(bounds);
-            _autoFitPending = false;
+            double scaling = Scaling;
+            camera.Resize(Math.Max(1, Bounds.Width * scaling), Math.Max(1, Bounds.Height * scaling));
+
+            if (_autoFitPending && Document?.GetModelBounds() is { } bounds)
+            {
+                camera.ZoomToFit(bounds);
+                _autoFitPending = false;
+            }
+        }
+        finally
+        {
+            _syncingCamera = false;
         }
     }
 
@@ -145,8 +159,16 @@ public sealed class Cad3DView : Control
 
         if (_sceneInvalid)
         {
-            using (ILockedFramebuffer fb = _bitmap!.Lock())
+            try
+            {
+                using ILockedFramebuffer fb = _bitmap!.Lock();
                 _renderer.Render(document, camera, fb.Address, fb.Size.Width, fb.Size.Height, fb.RowBytes, Background, SelectedModel, Mode);
+            }
+            catch (Exception ex)
+            {
+                // A render failure must never take down the whole app; skip this frame instead.
+                System.Diagnostics.Debug.WriteLine($"3D render failed: {ex}");
+            }
             _sceneInvalid = false;
         }
 
@@ -214,9 +236,16 @@ public sealed class Cad3DView : Control
             && Math.Abs(pos.X - _pressPoint.X) < 3 && Math.Abs(pos.Y - _pressPoint.Y) < 3;
         if (wasClick && Document is { } document && Camera is { } camera)
         {
-            double scaling = Scaling;
-            var device = new Point2D(pos.X * scaling, pos.Y * scaling);
-            SelectedModel = Picker3D.Pick(camera, device, document.Models)?.Object;
+            try
+            {
+                double scaling = Scaling;
+                var device = new Point2D(pos.X * scaling, pos.Y * scaling);
+                SelectedModel = Picker3D.Pick(camera, device, document.Models)?.Object;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"3D pick failed: {ex}");
+            }
             Invalidate();
         }
 
