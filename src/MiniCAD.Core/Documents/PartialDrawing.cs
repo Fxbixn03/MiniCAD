@@ -41,6 +41,15 @@ public sealed class PartialDrawing
     /// <summary>Hatch/annotation size factor relative to the 1:100 authoring base.</summary>
     public double ModelScaleFactor => ReferenceScale / 100.0;
 
+    /// <summary>Base elevation (Z) of this Teilbild's planar geometry, in world units.</summary>
+    public double BaseHeight { get; set; }
+
+    /// <summary>
+    /// Default component height used when extruding this Teilbild's geometry to 3D (e.g. a wall
+    /// height). 0 means "no default height" (the extrusion tool then asks for one).
+    /// </summary>
+    public double Height { get; set; }
+
     /// <summary>Shown (Active or Locked).</summary>
     public bool IsVisible => State != ElementState.Off;
 

@@ -702,6 +702,14 @@
                                             </ComboBox>
                                             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2"
                                                         VerticalAlignment="Center" Margin="6,0,0,0"
+                                                        ToolTip.Tip="Höhe für 3D: Basis-Z und Bauteilhöhe (Extrusion)">
+                                                <TextBlock Text="Z" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                                                <TextBox Text="{Binding BaseHeightText}" Width="40" FontFamily="{StaticResource Font.Mono}" />
+                                                <TextBlock Text="H" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                                                <TextBox Text="{Binding HeightText}" Width="40" FontFamily="{StaticResource Font.Mono}" />
+                                            </StackPanel>
+                                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2"
+                                                        VerticalAlignment="Center" Margin="6,0,0,0"
                                                         ToolTip.Tip="Bezugsmaßstab 1:n (skaliert die Schraffurdichte)">
                                                 <TextBlock Text="1:" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
                                                 <TextBox Text="{Binding ScaleDenominator}" Width="44" FontFamily="{StaticResource Font.Mono}" />

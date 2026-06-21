@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using MiniCAD.App.Input;
 using MiniCAD.Core.Documents;
 
 namespace MiniCAD.App.ViewModels;
@@ -15,6 +16,8 @@ public partial class PartialDrawingItemViewModel : ViewModelBase
         _name = model.Name;
         _state = model.State;
         _scaleDenominator = (int)model.ReferenceScale;
+        _baseHeightText = model.BaseHeight.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+        _heightText = model.Height.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     public PartialDrawing Model { get; }
@@ -37,6 +40,25 @@ public partial class PartialDrawingItemViewModel : ViewModelBase
     {
         if (value > 0)
             _document.SetPartialDrawingReferenceScale(Model, value);
+    }
+
+    /// <summary>Base elevation (Z) of the Teilbild as editable text.</summary>
+    [ObservableProperty]
+    private string _baseHeightText;
+
+    /// <summary>Default extrusion height of the Teilbild as editable text.</summary>
+    [ObservableProperty]
+    private string _heightText;
+
+    partial void OnBaseHeightTextChanged(string value) => ApplyHeights();
+
+    partial void OnHeightTextChanged(string value) => ApplyHeights();
+
+    private void ApplyHeights()
+    {
+        double baseHeight = CoordinateFormat.TryParse(BaseHeightText, out double b) ? b : Model.BaseHeight;
+        double height = CoordinateFormat.TryParse(HeightText, out double h) ? h : Model.Height;
+        _document.SetPartialDrawingHeights(Model, baseHeight, height);
     }
 
     /// <summary>State as a 0/1/2 index for the dropdown (Aktiv / Passiv / Aus).</summary>

@@ -261,12 +261,16 @@ public static class DocumentMapper
         Name = partialDrawing.Name,
         State = partialDrawing.State,
         ReferenceScale = partialDrawing.ReferenceScale,
+        BaseHeight = partialDrawing.BaseHeight,
+        Height = partialDrawing.Height,
     };
 
     private static PartialDrawing FromDto(PartialDrawingDto dto) => new(dto.Id, dto.Name)
     {
         State = dto.State ?? DeriveState(dto.Visible, locked: false),
         ReferenceScale = dto.ReferenceScale,
+        BaseHeight = dto.BaseHeight,
+        Height = dto.Height,
     };
 
     // Maps legacy visible/locked flags onto the three-state model for older files.

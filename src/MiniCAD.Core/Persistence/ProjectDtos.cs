@@ -143,6 +143,12 @@ public sealed class PartialDrawingDto
     /// <summary>Reference scale denominator (e.g. 100 for 1:100).</summary>
     public double ReferenceScale { get; set; } = 100.0;
 
+    /// <summary>Base elevation (Z) of the Teilbild's geometry.</summary>
+    public double BaseHeight { get; set; }
+
+    /// <summary>Default extrusion/component height for the Teilbild (0 = none).</summary>
+    public double Height { get; set; }
+
     // Legacy field (pre-state files). Read for backward compatibility, never written.
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? Visible { get; set; }

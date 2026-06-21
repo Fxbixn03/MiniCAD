@@ -9,6 +9,20 @@ namespace MiniCAD.Core.Tests;
 public class PartialDrawingTests
 {
     [Fact]
+    public void TeilbildHeights_AreSettableAndPersist()
+    {
+        var doc = new CadDocument();
+        doc.SetPartialDrawingHeights(doc.DefaultPartialDrawing, baseHeight: 300, height: 275);
+
+        MiniCAD.Core.Persistence.DocumentDto dto = MiniCAD.Core.Persistence.DocumentMapper.ToDto(doc);
+        var restored = new CadDocument();
+        MiniCAD.Core.Persistence.DocumentMapper.Apply(dto, restored);
+
+        restored.DefaultPartialDrawing.BaseHeight.Should().Be(300);
+        restored.DefaultPartialDrawing.Height.Should().Be(275);
+    }
+
+    [Fact]
     public void NewDocument_HasOneDefaultTeilbild()
     {
         var document = new CadDocument();

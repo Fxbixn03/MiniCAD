@@ -266,6 +266,17 @@ public sealed class CadDocument : ICadDocument
         Raise(DocumentChangedEventArgs.ForPartialDrawing(DocumentChangeKind.PartialDrawingModified, partialDrawing));
     }
 
+    /// <summary>Sets a Teilbild's base elevation and default extrusion height (for 3D), then notifies.</summary>
+    public void SetPartialDrawingHeights(PartialDrawing partialDrawing, double baseHeight, double height)
+    {
+        if (partialDrawing.BaseHeight.Equals(baseHeight) && partialDrawing.Height.Equals(height))
+            return;
+
+        partialDrawing.BaseHeight = baseHeight;
+        partialDrawing.Height = height;
+        Raise(DocumentChangedEventArgs.ForPartialDrawing(DocumentChangeKind.PartialDrawingModified, partialDrawing));
+    }
+
     public void RenamePartialDrawing(PartialDrawing partialDrawing, string name)
     {
         partialDrawing.Name = name;
