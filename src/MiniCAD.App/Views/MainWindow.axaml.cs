@@ -1,11 +1,13 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.VisualTree;
 using MiniCAD.App.Input;
 using MiniCAD.App.ViewModels;
 using MiniCAD.App.ViewModels.Toolbar;
@@ -25,24 +27,100 @@ public partial class MainWindow : Window
     private MainWindowViewModel? _boundViewModel;
     private TextEditRequest? _activeEdit;
 
+    // In-process drag payload: "toolbar" (dock the whole bar) or "group:<id>" (reorder a block).
+    private static readonly DataFormat<string> ToolbarDragFormat =
+        DataFormat.CreateInProcessFormat<string>("minicad.toolbar.drag");
+
     public MainWindow()
     {
         InitializeComponent();
         Canvas.CursorWorldMoved += OnCursorWorldMoved;
         Canvas.DoubleClicked += OnCanvasDoubleClicked;
         DataContextChanged += OnDataContextChanged;
+
+        DragDrop.AddDragOverHandler(this, OnToolbarDragOver);
+        DragDrop.AddDropHandler(this, OnToolbarDrop);
     }
 
-    // ----- Toolbar block reordering (via each block's grip flyout) -----
+    // ----- Toolbar drag & drop (reorder blocks / re-dock the whole bar) -----
 
-    private void OnToolGroupMoveForward(object? sender, RoutedEventArgs e) => MoveToolGroup(sender, -1);
-
-    private void OnToolGroupMoveBackward(object? sender, RoutedEventArgs e) => MoveToolGroup(sender, +1);
-
-    private void MoveToolGroup(object? sender, int delta)
+    /// <summary>Starts dragging a single tool block (the grip is the drag source).</summary>
+    private async void OnToolGroupGripPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (ViewModel is { } vm && (sender as Control)?.DataContext is ToolGroupViewModel group)
-            vm.Toolbar.MoveGroupBy(group.Id, delta);
+        if (ViewModel is not { } vm || vm.Toolbar.DragLocked)
+            return;
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+            return;
+        if ((sender as Control)?.DataContext is not ToolGroupViewModel group)
+            return;
+
+        e.Handled = true;
+        await StartToolbarDrag(e, "group:" + group.Id);
+    }
+
+    /// <summary>Starts dragging the whole toolbar (the handle is the drag source).</summary>
+    private async void OnToolbarHandlePressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (ViewModel is not { } vm || vm.Toolbar.DragLocked)
+            return;
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+            return;
+
+        e.Handled = true;
+        await StartToolbarDrag(e, "toolbar");
+    }
+
+    private static async Task StartToolbarDrag(PointerPressedEventArgs e, string payload)
+    {
+        var data = new DataTransfer();
+        data.Add(DataTransferItem.Create(ToolbarDragFormat, payload));
+        try
+        {
+            await DragDrop.DoDragDropAsync(e, data, DragDropEffects.Move);
+        }
+        catch
+        {
+            // A failed drag must never crash the app.
+        }
+    }
+
+    private void OnToolbarDragOver(object? sender, DragEventArgs e)
+        => e.DragEffects = e.DataTransfer.Contains(ToolbarDragFormat) ? DragDropEffects.Move : DragDropEffects.None;
+
+    private void OnToolbarDrop(object? sender, DragEventArgs e)
+    {
+        if (ViewModel is not { } vm)
+            return;
+        string? payload = e.DataTransfer.TryGetValue(ToolbarDragFormat);
+        if (payload is null)
+            return;
+
+        if (payload == "toolbar")
+        {
+            // Dock to the edge nearest the drop point.
+            Point p = e.GetPosition(this);
+            double w = Bounds.Width, h = Bounds.Height;
+            double[] dist = { p.X, w - p.X, p.Y, h - p.Y }; // left, right, top, bottom
+            int min = Array.IndexOf(dist, dist.Min());
+            vm.Toolbar.Dock = min switch
+            {
+                1 => ToolbarDock.Right,
+                2 => ToolbarDock.Top,
+                3 => ToolbarDock.Bottom,
+                _ => ToolbarDock.Left,
+            };
+        }
+        else if (payload.StartsWith("group:", StringComparison.Ordinal))
+        {
+            string sourceId = payload["group:".Length..];
+            ToolGroupViewModel? target = (e.Source as Visual)?
+                .GetSelfAndVisualAncestors()
+                .Select(a => a.DataContext)
+                .OfType<ToolGroupViewModel>()
+                .FirstOrDefault();
+            if (target is not null)
+                vm.Toolbar.MoveGroup(sourceId, target.Id);
+        }
     }
 
     private MainWindowViewModel? ViewModel => DataContext as MainWindowViewModel;

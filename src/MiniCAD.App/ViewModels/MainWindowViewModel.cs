@@ -183,16 +183,6 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>The configurable tool rail (blocks, dock edge, per-tool visibility).</summary>
     public ToolbarViewModel Toolbar { get; }
 
-    /// <summary>Docks the toolbar to an edge (Left/Right/Top/Bottom).</summary>
-    [RelayCommand]
-    private void SetToolbarDock(string dock) => Toolbar.Dock = dock switch
-    {
-        "Right" => ToolbarDock.Right,
-        "Top" => ToolbarDock.Top,
-        "Bottom" => ToolbarDock.Bottom,
-        _ => ToolbarDock.Left,
-    };
-
     private ToolbarViewModel BuildToolbar()
     {
         ToolbarItemViewModel Btn(string id, string label, string tip, string icon,

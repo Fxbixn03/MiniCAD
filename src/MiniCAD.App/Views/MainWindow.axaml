@@ -41,7 +41,7 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <DockPanel>
+    <DockPanel DragDrop.AllowDrop="True">
         <!-- ===== Top menu bar: wordmark · menus · document title · actions ===== -->
         <Border DockPanel.Dock="Top" Background="{DynamicResource Brush.SurfaceChrome}"
                 BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,0,0,1">
@@ -365,18 +365,11 @@
         <Border DockPanel.Dock="{Binding Toolbar.PanelDock}" Background="{DynamicResource Brush.SurfaceChrome}"
                 BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="1">
             <DockPanel>
-                <Button DockPanel.Dock="{Binding Toolbar.HandleDock}" Classes="rail" Margin="2"
-                        ToolTip.Tip="Werkzeugleiste andocken (Links/Rechts/Oben/Unten)">
+                <Border DockPanel.Dock="{Binding Toolbar.HandleDock}" Margin="2" Padding="4"
+                        Background="Transparent" Cursor="Hand" PointerPressed="OnToolbarHandlePressed"
+                        ToolTip.Tip="Werkzeugleiste an einen Rand ziehen (Links/Rechts/Oben/Unten)">
                     <Path Classes="ico" Data="M5,4 H19 M5,9 H19 M5,14 H19 M5,19 H19" />
-                    <Button.Flyout>
-                        <MenuFlyout>
-                            <MenuItem Header="Andocken: _Links" Command="{Binding SetToolbarDockCommand}" CommandParameter="Left" />
-                            <MenuItem Header="Andocken: _Rechts" Command="{Binding SetToolbarDockCommand}" CommandParameter="Right" />
-                            <MenuItem Header="Andocken: _Oben" Command="{Binding SetToolbarDockCommand}" CommandParameter="Top" />
-                            <MenuItem Header="Andocken: _Unten" Command="{Binding SetToolbarDockCommand}" CommandParameter="Bottom" />
-                        </MenuFlyout>
-                    </Button.Flyout>
-                </Button>
+                </Border>
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding Toolbar.Groups}" Margin="3">
                         <ItemsControl.ItemsPanel>
@@ -387,16 +380,12 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="toolbar:ToolGroupViewModel">
                               <StackPanel Orientation="{Binding Orientation}" Spacing="1">
-                                <Button Classes="rail" Padding="2" ToolTip.Tip="Block verschieben (Reihenfolge ändern)">
+                                <Border Background="Transparent" Cursor="Hand" Padding="2"
+                                        PointerPressed="OnToolGroupGripPressed"
+                                        ToolTip.Tip="Block ziehen, um die Reihenfolge zu ändern">
                                     <Path Classes="ico" Opacity="0.45"
                                           Data="M9,5 H11 V7 H9 Z M13,5 H15 V7 H13 Z M9,11 H11 V13 H9 Z M13,11 H15 V13 H13 Z M9,17 H11 V19 H9 Z M13,17 H15 V19 H13 Z" />
-                                    <Button.Flyout>
-                                        <MenuFlyout>
-                                            <MenuItem Header="Block nach _vorn" Click="OnToolGroupMoveForward" />
-                                            <MenuItem Header="Block nach _hinten" Click="OnToolGroupMoveBackward" />
-                                        </MenuFlyout>
-                                    </Button.Flyout>
-                                </Button>
+                                </Border>
                                 <ItemsControl ItemsSource="{Binding Items}" Margin="1">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>

@@ -86,6 +86,13 @@ public sealed class AppConfig
         set => _config.ToolbarLayout = value;
     }
 
+    /// <summary>When true, toolbar drag-and-drop (reorder/dock) is locked.</summary>
+    public bool LockToolbarDragDrop
+    {
+        get => _config.LockToolbarDragDrop;
+        set => _config.LockToolbarDragDrop = value;
+    }
+
     /// <summary>Recent project paths, most-recent first.</summary>
     public IReadOnlyList<string> RecentProjects => Parse(_config.RecentProjects);
 

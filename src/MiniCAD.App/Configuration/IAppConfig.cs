@@ -44,4 +44,8 @@ public interface IAppConfig
     /// <summary>Toolbar layout (dock edge, block order, hidden tools) as JSON.</summary>
     [Option(DefaultValue = "")]
     string ToolbarLayout { get; set; }
+
+    /// <summary>When true, toolbar drag-and-drop (reorder/dock) is locked.</summary>
+    [Option(DefaultValue = false)]
+    bool LockToolbarDragDrop { get; set; }
 }

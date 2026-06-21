@@ -89,8 +89,11 @@
                     <!-- Werkzeugleiste -->
                     <StackPanel Spacing="12" IsVisible="{Binding IsToolbar}">
                       <StackPanel Spacing="12" DataContext="{Binding Toolbar}" x:DataType="toolbar:ToolbarViewModel">
+                        <CheckBox Content="Drag &amp; Drop der Werkzeugleiste sperren" IsChecked="{Binding DragLocked}"
+                                  ToolTip.Tip="Verhindert das Verschieben von Blöcken und das Umdocken per Ziehen" />
+                        <Border Height="1" Background="{DynamicResource Brush.BorderSubtle}" />
                         <TextBlock Text="Sichtbare Werkzeuge" FontWeight="SemiBold" Foreground="{DynamicResource Brush.TextMuted}" />
-                        <TextBlock Text="Einzelne Werkzeuge ein- oder ausblenden. Reihenfolge der Blöcke und Andocken erfolgt direkt in der Werkzeugleiste."
+                        <TextBlock Text="Einzelne Werkzeuge ein- oder ausblenden. Blöcke per Griff ziehen zum Umsortieren, die Werkzeugleiste am oberen Griff an einen Rand ziehen."
                                    Foreground="{DynamicResource Brush.TextFaint}" TextWrapping="Wrap" />
                         <ItemsControl ItemsSource="{Binding Groups}">
                             <ItemsControl.ItemTemplate>

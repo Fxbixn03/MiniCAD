@@ -62,7 +62,14 @@ public partial class ToolbarViewModel : ViewModelBase
 
         LoadLayout();
         ApplyOrientation();
+        _dragLocked = AppConfig.Instance.LockToolbarDragDrop;
     }
+
+    /// <summary>When true, the user cannot reorder blocks or re-dock the bar by dragging.</summary>
+    [ObservableProperty]
+    private bool _dragLocked;
+
+    partial void OnDragLockedChanged(bool value) => AppConfig.Instance.LockToolbarDragDrop = value;
 
     private void ApplyOrientation()
     {
@@ -112,21 +119,6 @@ public partial class ToolbarViewModel : ViewModelBase
     {
         foreach (ToolbarItemViewModel item in AllItems)
             item.Refresh();
-    }
-
-    /// <summary>Shifts a group by <paramref name="delta"/> positions (context-menu reorder fallback).</summary>
-    public void MoveGroupBy(string id, int delta)
-    {
-        ToolGroupViewModel? g = Groups.FirstOrDefault(x => x.Id == id);
-        if (g is null)
-            return;
-        int i = Groups.IndexOf(g);
-        int j = System.Math.Clamp(i + delta, 0, Groups.Count - 1);
-        if (i == j)
-            return;
-        Groups.Move(i, j);
-        if (!_loading)
-            SaveLayout();
     }
 
     /// <summary>Moves the group with <paramref name="sourceId"/> to be before/after <paramref name="targetId"/>.</summary>
