@@ -173,6 +173,8 @@ public sealed class PointDto
 [JsonDerivedType(typeof(LinearDimensionDto), "lineardim")]
 [JsonDerivedType(typeof(AngularDimensionDto), "angulardim")]
 [JsonDerivedType(typeof(RadialDimensionDto), "radialdim")]
+[JsonDerivedType(typeof(ElevationDimensionDto), "elevationdim")]
+[JsonDerivedType(typeof(OrdinateDimensionDto), "ordinatedim")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -336,4 +338,17 @@ public sealed class RadialDimensionDto : DimensionDto
     public PointDto EdgePoint { get; set; } = new();
     public PointDto TextPoint { get; set; } = new();
     public bool IsDiameter { get; set; }
+}
+
+public sealed class ElevationDimensionDto : DimensionDto
+{
+    public PointDto Position { get; set; } = new();
+    public double ZValue { get; set; }
+}
+
+public sealed class OrdinateDimensionDto : DimensionDto
+{
+    public PointDto Position { get; set; } = new();
+    public PointDto LeaderEnd { get; set; } = new();
+    public PointDto Origin { get; set; } = new();
 }

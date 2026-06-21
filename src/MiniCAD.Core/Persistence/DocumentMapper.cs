@@ -346,6 +346,17 @@ public static class DocumentMapper
                 TextPoint = ToDto(dim.TextPoint),
                 IsDiameter = dim.IsDiameter,
             }, dim),
+            ElevationDimensionEntity dim => FillDimDto(new ElevationDimensionDto
+            {
+                Position = ToDto(dim.Position),
+                ZValue = dim.ZValue,
+            }, dim),
+            OrdinateDimensionEntity dim => FillDimDto(new OrdinateDimensionDto
+            {
+                Position = ToDto(dim.Position),
+                LeaderEnd = ToDto(dim.LeaderEnd),
+                Origin = ToDto(dim.Origin),
+            }, dim),
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -403,6 +414,10 @@ public static class DocumentMapper
                 FromDto(dim.Vertex), FromDto(dim.P1), FromDto(dim.P2), FromDto(dim.ArcPoint)), dim),
             RadialDimensionDto dim => FillDim(new RadialDimensionEntity(
                 FromDto(dim.Center), FromDto(dim.EdgePoint), FromDto(dim.TextPoint), dim.IsDiameter), dim),
+            ElevationDimensionDto dim => FillDim(new ElevationDimensionEntity(
+                FromDto(dim.Position), dim.ZValue), dim),
+            OrdinateDimensionDto dim => FillDim(new OrdinateDimensionEntity(
+                FromDto(dim.Position), FromDto(dim.LeaderEnd), FromDto(dim.Origin)), dim),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

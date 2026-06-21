@@ -87,6 +87,8 @@
                         <MenuItem Header="_Maß (linear / ausgerichtet)" Command="{Binding ActivateLinearDimensionCommand}" InputGesture="D" />
                         <MenuItem Header="Maß (_Winkel)" Command="{Binding ActivateAngularDimensionCommand}" InputGesture="W" />
                         <MenuItem Header="Maß (_Radius / Durchmesser)" Command="{Binding ActivateRadialDimensionCommand}" InputGesture="Shift+D" />
+                        <MenuItem Header="_Höhenkote" Command="{Binding ActivateElevationDimensionCommand}" InputGesture="H" />
+                        <MenuItem Header="_Koordinatenmaß (Ordinate)" Command="{Binding ActivateOrdinateDimensionCommand}" InputGesture="I" />
                         <Separator />
                         <MenuItem Header="_Nullpunkt setzen" Command="{Binding ActivateSetNullPointCommand}" />
                             <MenuItem Header="Nullpunkt zu_rücksetzen" Command="{Binding ResetNullPointCommand}" />
@@ -245,6 +247,19 @@
                 <ComboBox MinWidth="110" ItemsSource="{Binding ContinueModeOptions}" SelectedItem="{Binding ContinueMode}"
                           ToolTip.Tip="Einzeln / Kette (fortgesetzt) / Basislinie" />
                 <TextBlock Text="1./2. Punkt, dann Maßlinie · Folge: weiter klicken" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Inline Z value, shown while the elevation (Höhenkote) tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsElevationDimensionActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding ElevationDimensionOptions}" x:DataType="vm:ElevationDimensionOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="HÖHENKOTE" VerticalAlignment="Center" />
+                <TextBlock Text="Z" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                <TextBox Width="80" Text="{Binding ZText}" FontFamily="{StaticResource Font.Mono}" />
+                <TextBlock Text="Punkt klicken setzt die Höhenkote (±0 / +/-)" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
             </StackPanel>
         </Border>
 

@@ -20,6 +20,8 @@ public enum ShortcutAction
     LinearDimension,
     AngularDimension,
     RadialDimension,
+    ElevationDimension,
+    OrdinateDimension,
     Delete,
     Undo,
     Redo,

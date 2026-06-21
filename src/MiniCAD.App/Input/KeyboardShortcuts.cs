@@ -31,6 +31,8 @@ public sealed class KeyboardShortcuts
         (ShortcutAction.LinearDimension, "Maß (linear)", "D"),
         (ShortcutAction.AngularDimension, "Maß (Winkel)", "W"),
         (ShortcutAction.RadialDimension, "Maß (Radius/⌀)", "Shift+D"),
+        (ShortcutAction.ElevationDimension, "Höhenkote", "H"),
+        (ShortcutAction.OrdinateDimension, "Koordinatenmaß", "I"),
         (ShortcutAction.Move, "Verschieben", "M"),
         (ShortcutAction.Copy, "Kopieren", "Shift+C"),
         (ShortcutAction.Rotate, "Drehen", "Shift+R"),

@@ -37,6 +37,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly LinearDimensionTool _linearDimensionTool = new();
     private readonly AngularDimensionTool _angularDimensionTool = new();
     private readonly RadialDimensionTool _radialDimensionTool = new();
+    private readonly ElevationDimensionTool _elevationDimensionTool = new();
+    private readonly OrdinateDimensionTool _ordinateDimensionTool = new();
     private readonly SetNullPointTool _setNullPointTool = new();
 
     // Editing tools operating on the current selection (Epic: Bearbeitungswerkzeuge).
@@ -71,6 +73,7 @@ public partial class MainWindowViewModel : ViewModelBase
         LeaderOptions = new LeaderOptionsViewModel(_leaderTool);
         DimensionOptions = new DimensionOptionsViewModel(_linearDimensionTool);
         RadialDimensionOptions = new RadialDimensionOptionsViewModel(_radialDimensionTool);
+        ElevationDimensionOptions = new ElevationDimensionOptionsViewModel(_elevationDimensionTool);
         TextStyles = new TextStylesViewModel(Document);
 
         // Text and leader tools can't open a UI field themselves; re-raise their requests so the
@@ -126,6 +129,8 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<LinearDimensionEntity>(_linearDimensionTool);
         Tools.RegisterQuickSelectTool<AngularDimensionEntity>(_angularDimensionTool);
         Tools.RegisterQuickSelectTool<RadialDimensionEntity>(_radialDimensionTool);
+        Tools.RegisterQuickSelectTool<ElevationDimensionEntity>(_elevationDimensionTool);
+        Tools.RegisterQuickSelectTool<OrdinateDimensionEntity>(_ordinateDimensionTool);
 
         Tools.SetActiveTool(_selectTool);
     }
@@ -187,6 +192,9 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Inline radius/diameter toggle, shown while the radial dimension tool is active.</summary>
     public RadialDimensionOptionsViewModel RadialDimensionOptions { get; }
 
+    /// <summary>Inline Z value, shown while the elevation (Höhenkote) tool is active.</summary>
+    public ElevationDimensionOptionsViewModel ElevationDimensionOptions { get; }
+
     /// <summary>The text-style management panel (Textstile tab).</summary>
     public TextStylesViewModel TextStyles { get; }
 
@@ -198,7 +206,8 @@ public partial class MainWindowViewModel : ViewModelBase
         => tool == _lineTool || tool == _rectangleTool || tool == _circleTool
         || tool == _arcTool || tool == _ellipseTool || tool == _polylineTool || tool == _splineTool
         || tool == _pointTool || tool == _textTool || tool == _leaderTool
-        || tool == _linearDimensionTool || tool == _angularDimensionTool || tool == _setNullPointTool
+        || tool == _linearDimensionTool || tool == _angularDimensionTool
+        || tool == _elevationDimensionTool || tool == _ordinateDimensionTool || tool == _setNullPointTool
         || tool == _moveTool || tool == _copyTool || tool == _rotateTool
         || tool == _mirrorTool || tool == _scaleTool || tool == _offsetTool;
 
@@ -295,6 +304,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsLinearDimensionActive => Tools.ActiveTool == _linearDimensionTool;
     public bool IsAngularDimensionActive => Tools.ActiveTool == _angularDimensionTool;
     public bool IsRadialDimensionActive => Tools.ActiveTool == _radialDimensionTool;
+    public bool IsElevationDimensionActive => Tools.ActiveTool == _elevationDimensionTool;
+    public bool IsOrdinateDimensionActive => Tools.ActiveTool == _ordinateDimensionTool;
     public bool IsSetNullPointActive => Tools.ActiveTool == _setNullPointTool;
     public bool IsMoveActive => Tools.ActiveTool == _moveTool;
     public bool IsCopyActive => Tools.ActiveTool == _copyTool;
@@ -324,6 +335,8 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsLinearDimensionActive));
         OnPropertyChanged(nameof(IsAngularDimensionActive));
         OnPropertyChanged(nameof(IsRadialDimensionActive));
+        OnPropertyChanged(nameof(IsElevationDimensionActive));
+        OnPropertyChanged(nameof(IsOrdinateDimensionActive));
         OnPropertyChanged(nameof(IsSetNullPointActive));
         OnPropertyChanged(nameof(IsMoveActive));
         OnPropertyChanged(nameof(IsCopyActive));
@@ -461,6 +474,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void ActivateRadialDimension() => ActivateDrawingTool(_radialDimensionTool);
+
+    [RelayCommand]
+    private void ActivateElevationDimension() => ActivateDrawingTool(_elevationDimensionTool);
+
+    [RelayCommand]
+    private void ActivateOrdinateDimension() => ActivateDrawingTool(_ordinateDimensionTool);
 
     /// <summary>
     /// Double-click handler: if a text entity sits under <paramref name="world"/>, switch to the
@@ -658,6 +677,8 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.LinearDimension: ActivateLinearDimension(); return true;
             case ShortcutAction.AngularDimension: ActivateAngularDimension(); return true;
             case ShortcutAction.RadialDimension: ActivateRadialDimension(); return true;
+            case ShortcutAction.ElevationDimension: ActivateElevationDimension(); return true;
+            case ShortcutAction.OrdinateDimension: ActivateOrdinateDimension(); return true;
             case ShortcutAction.Move: ActivateMoveCommand.Execute(null); return true;
             case ShortcutAction.Copy: ActivateCopyCommand.Execute(null); return true;
             case ShortcutAction.Rotate: ActivateRotateCommand.Execute(null); return true;

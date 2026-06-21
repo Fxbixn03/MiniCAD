@@ -57,7 +57,7 @@ public abstract class DimensionEntity : Entity
     protected virtual string Suffix => string.Empty;
 
     /// <summary>The text shown on the dimension: the override, or the formatted measured value.</summary>
-    public string DisplayText => TextOverride ?? Prefix + FormatValue(MeasuredValue) + Suffix;
+    public virtual string DisplayText => TextOverride ?? Prefix + FormatValue(MeasuredValue) + Suffix;
 
     protected string FormatValue(double value)
         => value.ToString("F" + DecimalPlaces.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
