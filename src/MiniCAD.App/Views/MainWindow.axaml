@@ -83,6 +83,7 @@
                             <MenuItem Header="In _Hilfskonstruktion umwandeln" Command="{Binding ConvertConstructionCommand}" />
                             <Separator />
                             <MenuItem Header="_Zerlegen (Explodieren)" Command="{Binding ExplodeSelectionCommand}" InputGesture="Ctrl+Shift+X" />
+                            <MenuItem Header="_Verbinden (Join)" Command="{Binding JoinSelectionCommand}" InputGesture="Ctrl+J" />
                             <Separator />
                             <MenuItem Header="_Löschen" Command="{Binding DeleteSelectionCommand}" InputGesture="Delete" />
                         </MenuItem>

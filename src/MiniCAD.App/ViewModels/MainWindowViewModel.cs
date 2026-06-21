@@ -106,6 +106,7 @@ public partial class MainWindowViewModel : ViewModelBase
             GroupSelectionCommand.NotifyCanExecuteChanged();
             UngroupSelectionCommand.NotifyCanExecuteChanged();
             ExplodeSelectionCommand.NotifyCanExecuteChanged();
+            JoinSelectionCommand.NotifyCanExecuteChanged();
             ExtrudeSelectionCommand.NotifyCanExecuteChanged();
             RevolveSelectionCommand.NotifyCanExecuteChanged();
         };
@@ -475,6 +476,38 @@ public partial class MainWindowViewModel : ViewModelBase
         _commands.Execute(new CompositeCommand("Zerlegen", commands));
         Tools.Selection.Set(newParts);
         StatusMessage = $"Zerlegt in {newParts.Count} Einzelelemente.";
+    }
+
+    /// <summary>Joins selected lines/open polylines that meet at endpoints into polylines (#186).</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void JoinSelection()
+    {
+        const double tolerance = 1e-6;
+        IReadOnlyList<IEntity> candidates = EntityJoiner.CollectJoinable(Tools.Selection.Items);
+        if (candidates.Count < 2)
+        {
+            StatusMessage = "Zum Verbinden mindestens zwei Linien/offene Polylinien wählen.";
+            return;
+        }
+
+        IReadOnlyList<IEntity> joined = EntityJoiner.Join(candidates, tolerance);
+        if (joined.Count >= candidates.Count)
+        {
+            StatusMessage = "Keine anschließenden Segmente gefunden (gemeinsame Endpunkte nötig).";
+            return;
+        }
+
+        var commands = new List<IUndoableCommand>();
+        foreach (IEntity original in candidates)
+            commands.Add(new RemoveEntityCommand(Document, original));
+        foreach (IEntity result in joined)
+            commands.Add(new AddEntityCommand(Document, result));
+
+        _commands.Execute(new CompositeCommand("Verbinden", commands));
+        Tools.Selection.Set(joined);
+        StatusMessage = joined.Count == 1
+            ? "Zu einer Polylinie verbunden."
+            : $"Zu {joined.Count} Polylinien verbunden.";
     }
 
     /// <summary>Removes the selected entities from their group.</summary>
