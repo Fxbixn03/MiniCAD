@@ -74,4 +74,99 @@ public sealed class Mesh3D
         };
         return new Mesh3D(v, tris);
     }
+
+    /// <summary>A cylinder of the given radius/height about the Z axis, centred at <paramref name="center"/>.</summary>
+    public static Mesh3D Cylinder(double radius, double height, int segments = 24, Point3D center = default)
+    {
+        segments = Math.Max(3, segments);
+        double hz = height / 2;
+        var verts = new List<Point3D>();
+        var tris = new List<int>();
+
+        for (int i = 0; i < segments; i++)
+        {
+            double a = 2 * Math.PI * i / segments;
+            double x = center.X + radius * Math.Cos(a);
+            double y = center.Y + radius * Math.Sin(a);
+            verts.Add(new Point3D(x, y, center.Z - hz)); // bottom ring: even
+            verts.Add(new Point3D(x, y, center.Z + hz)); // top ring: odd
+        }
+
+        int cb = verts.Count; verts.Add(new Point3D(center.X, center.Y, center.Z - hz));
+        int ct = verts.Count; verts.Add(new Point3D(center.X, center.Y, center.Z + hz));
+
+        for (int i = 0; i < segments; i++)
+        {
+            int b0 = i * 2, t0 = i * 2 + 1;
+            int b1 = (i + 1) % segments * 2, t1 = b1 + 1;
+            tris.AddRange(new[] { b0, b1, t1, b0, t1, t0 }); // side
+            tris.AddRange(new[] { cb, b1, b0 });             // bottom cap
+            tris.AddRange(new[] { ct, t0, t1 });             // top cap
+        }
+
+        return new Mesh3D(verts, tris);
+    }
+
+    /// <summary>A cone (apex up the Z axis) of the given base radius/height, centred at <paramref name="center"/>.</summary>
+    public static Mesh3D Cone(double radius, double height, int segments = 24, Point3D center = default)
+    {
+        segments = Math.Max(3, segments);
+        double hz = height / 2;
+        var verts = new List<Point3D>();
+        var tris = new List<int>();
+
+        for (int i = 0; i < segments; i++)
+        {
+            double a = 2 * Math.PI * i / segments;
+            verts.Add(new Point3D(center.X + radius * Math.Cos(a), center.Y + radius * Math.Sin(a), center.Z - hz));
+        }
+
+        int apex = verts.Count; verts.Add(new Point3D(center.X, center.Y, center.Z + hz));
+        int baseCenter = verts.Count; verts.Add(new Point3D(center.X, center.Y, center.Z - hz));
+
+        for (int i = 0; i < segments; i++)
+        {
+            int b0 = i, b1 = (i + 1) % segments;
+            tris.AddRange(new[] { b0, b1, apex });       // side
+            tris.AddRange(new[] { baseCenter, b1, b0 }); // base cap
+        }
+
+        return new Mesh3D(verts, tris);
+    }
+
+    /// <summary>A UV sphere of the given radius, centred at <paramref name="center"/>.</summary>
+    public static Mesh3D Sphere(double radius, int segments = 24, int rings = 16, Point3D center = default)
+    {
+        segments = Math.Max(3, segments);
+        rings = Math.Max(2, rings);
+        var verts = new List<Point3D>();
+        var tris = new List<int>();
+
+        for (int r = 0; r <= rings; r++)
+        {
+            double phi = Math.PI * r / rings;          // 0..π (pole to pole)
+            double z = Math.Cos(phi), rad = Math.Sin(phi);
+            for (int s = 0; s <= segments; s++)
+            {
+                double theta = 2 * Math.PI * s / segments;
+                verts.Add(new Point3D(
+                    center.X + radius * rad * Math.Cos(theta),
+                    center.Y + radius * rad * Math.Sin(theta),
+                    center.Z + radius * z));
+            }
+        }
+
+        int stride = segments + 1;
+        for (int r = 0; r < rings; r++)
+        {
+            for (int s = 0; s < segments; s++)
+            {
+                int a = r * stride + s;
+                int b = a + stride;
+                tris.AddRange(new[] { a, b, a + 1, a + 1, b, b + 1 });
+            }
+        }
+
+        return new Mesh3D(verts, tris);
+    }
 }

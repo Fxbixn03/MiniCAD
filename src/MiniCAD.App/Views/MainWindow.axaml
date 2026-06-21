@@ -99,7 +99,7 @@
                             <Separator />
                             <MenuItem Header="_Standard-Layer einfügen" Command="{Binding AddStandardLayersCommand}" />
                             <Separator />
-                            <MenuItem Header="3D-_Quader einfügen" Command="{Binding InsertBox3DCommand}" />
+                            <MenuItem Header="3D-_Quader einfügen" Command="{Binding InsertPrimitive3DCommand}" CommandParameter="Box" />
                             <Separator />
                             <MenuItem Header="_Teilbild-Auswahl…" Click="OnPartialDrawingSelection" />
                             <Separator />
@@ -507,7 +507,12 @@
                             <Button Content="Vorn" Command="{Binding SetView3DCommand}" CommandParameter="Front" />
                             <Button Content="Rechts" Command="{Binding SetView3DCommand}" CommandParameter="Right" />
                             <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
-                            <Button Content="Quader +" Command="{Binding InsertBox3DCommand}" />
+                            <TextBlock Text="+" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                            <Button Content="Quader" Command="{Binding InsertPrimitive3DCommand}" CommandParameter="Box" />
+                            <Button Content="Zylinder" Command="{Binding InsertPrimitive3DCommand}" CommandParameter="Cylinder" />
+                            <Button Content="Kugel" Command="{Binding InsertPrimitive3DCommand}" CommandParameter="Sphere" />
+                            <Button Content="Kegel" Command="{Binding InsertPrimitive3DCommand}" CommandParameter="Cone" />
+                            <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
                             <Button Content="Abdocken ⧉" Click="OnDetach3D" />
                             <TextBlock Text="Linksziehen: orbit · Mittelziehen: pan · Rad: zoom"
                                        Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="8,0,0,0" />

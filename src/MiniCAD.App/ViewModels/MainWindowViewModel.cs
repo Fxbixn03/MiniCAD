@@ -687,18 +687,22 @@ public partial class MainWindowViewModel : ViewModelBase
         StatusMessage = "Bild als Unterlage eingefügt.";
     }
 
-    /// <summary>Adds a 3D box to the model space (a starting primitive for the 3D view).</summary>
+    /// <summary>Adds a primitive 3D body to the model space (Box/Cylinder/Sphere/Cone).</summary>
     [RelayCommand]
-    private void InsertBox3D()
+    private void InsertPrimitive3D(string kind)
     {
-        var model = new Model3DObject(Mesh3D.Box(1000, 1000, 1000), "Quader")
+        (Mesh3D mesh, string name) = kind switch
         {
-            Color = new Core.Styling.Color(120, 200, 255),
+            "Cylinder" => (Mesh3D.Cylinder(500, 1000), "Zylinder"),
+            "Sphere" => (Mesh3D.Sphere(500), "Kugel"),
+            "Cone" => (Mesh3D.Cone(500, 1000), "Kegel"),
+            _ => (Mesh3D.Box(1000, 1000, 1000), "Quader"),
         };
-        Document.AddModelObject(model);
+
+        Document.AddModelObject(new Model3DObject(mesh, name) { Color = new Core.Styling.Color(120, 200, 255) });
         if (Document.GetModelBounds() is { } bounds)
             Camera3D.ZoomToFit(bounds);
-        StatusMessage = "3D-Quader eingefügt – zur 3D-Ansicht wechseln.";
+        StatusMessage = $"3D-Körper „{name}“ eingefügt – zur 3D-Ansicht wechseln.";
     }
 
     /// <summary>Sets the 3D camera to a standard view (0=Iso, 1=Top, 2=Front, 3=Right).</summary>
