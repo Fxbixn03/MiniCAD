@@ -21,6 +21,9 @@ public enum DocumentChangeKind
     /// <summary>The document's text styles changed (added/removed/edited).</summary>
     TextStylesChanged,
 
+    /// <summary>The document's dimension styles changed (added/removed/edited).</summary>
+    DimStylesChanged,
+
     /// <summary>The whole document was replaced (e.g. a project was loaded).</summary>
     Reloaded,
 }

@@ -21,6 +21,8 @@ public sealed class CadDocument : ICadDocument
     private readonly List<HatchPattern> _patterns = new();
     private readonly List<TextStyle> _textStyles = new();
     private readonly Dictionary<Guid, TextStyle> _textStylesById = new();
+    private readonly List<DimStyle> _dimStyles = new();
+    private readonly Dictionary<Guid, DimStyle> _dimStylesById = new();
 
     public CadDocument()
     {
@@ -35,6 +37,10 @@ public sealed class CadDocument : ICadDocument
         DefaultTextStyle = new TextStyle("Standard");
         RegisterTextStyle(DefaultTextStyle);
         ActiveTextStyle = DefaultTextStyle;
+
+        DefaultDimStyle = new DimStyle("Standard");
+        RegisterDimStyle(DefaultDimStyle);
+        ActiveDimStyle = DefaultDimStyle;
     }
 
     public IReadOnlyList<Layer> Layers => _layers;
@@ -60,6 +66,12 @@ public sealed class CadDocument : ICadDocument
     public TextStyle DefaultTextStyle { get; private set; }
 
     public TextStyle ActiveTextStyle { get; set; }
+
+    public IReadOnlyList<DimStyle> DimStyles => _dimStyles;
+
+    public DimStyle DefaultDimStyle { get; private set; }
+
+    public DimStyle ActiveDimStyle { get; set; }
 
     public event EventHandler<DocumentChangedEventArgs>? Changed;
 
@@ -354,6 +366,90 @@ public sealed class CadDocument : ICadDocument
         _textStylesById[style.Id] = style;
     }
 
+    // ----- Dimension styles -----
+
+    public DimStyle AddDimStyle(string name)
+    {
+        var style = new DimStyle(name);
+        RegisterDimStyle(style);
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.DimStylesChanged));
+        return style;
+    }
+
+    public bool RemoveDimStyle(DimStyle style)
+    {
+        if (style == DefaultDimStyle || !_dimStyles.Remove(style))
+            return false;
+
+        _dimStylesById.Remove(style.Id);
+
+        foreach (IEntity entity in _entities)
+        {
+            if (entity is DimensionEntity dim && dim.DimStyleId == style.Id)
+                ApplyDimStyle(dim, DefaultDimStyle);
+        }
+
+        if (ActiveDimStyle == style)
+            ActiveDimStyle = DefaultDimStyle;
+
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.DimStylesChanged));
+        return true;
+    }
+
+    public DimStyle? FindDimStyle(Guid id) => _dimStylesById.GetValueOrDefault(id);
+
+    public void RenameDimStyle(DimStyle style, string name)
+    {
+        style.Name = name;
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.DimStylesChanged));
+    }
+
+    /// <summary>Updates a dim style's appearance and re-applies it to every assigned dimension.</summary>
+    public void UpdateDimStyle(DimStyle style, double textHeight, double arrowSize,
+        double extensionOffset, double extensionOvershoot, int decimalPlaces)
+    {
+        style.TextHeight = textHeight <= 0.0 ? 1.0 : textHeight;
+        style.ArrowSize = arrowSize < 0.0 ? 0.0 : arrowSize;
+        style.ExtensionOffset = extensionOffset < 0.0 ? 0.0 : extensionOffset;
+        style.ExtensionOvershoot = extensionOvershoot < 0.0 ? 0.0 : extensionOvershoot;
+        style.DecimalPlaces = decimalPlaces < 0 ? 0 : decimalPlaces;
+
+        foreach (IEntity entity in _entities)
+        {
+            if (entity is DimensionEntity dim && dim.DimStyleId == style.Id)
+                ApplyDimStyle(dim, style);
+        }
+
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.DimStylesChanged));
+    }
+
+    /// <summary>Assigns <paramref name="style"/> to a dimension (adopting its look) and notifies.</summary>
+    public void AssignDimStyle(IEntity entity, DimStyle style)
+    {
+        if (entity is not DimensionEntity dim)
+            return;
+
+        ApplyDimStyle(dim, style);
+        Raise(DocumentChangedEventArgs.ForEntity(DocumentChangeKind.EntityModified, entity));
+    }
+
+    /// <summary>Copies a dim style's appearance and link onto a dimension entity.</summary>
+    public static void ApplyDimStyle(DimensionEntity dim, DimStyle style)
+    {
+        dim.DimStyleId = style.Id;
+        dim.TextHeight = style.TextHeight;
+        dim.ArrowSize = style.ArrowSize;
+        dim.ExtensionOffset = style.ExtensionOffset;
+        dim.ExtensionOvershoot = style.ExtensionOvershoot;
+        dim.DecimalPlaces = style.DecimalPlaces;
+    }
+
+    private void RegisterDimStyle(DimStyle style)
+    {
+        _dimStyles.Add(style);
+        _dimStylesById[style.Id] = style;
+    }
+
     // ----- Patterns (Muster) -----
 
     /// <summary>Adds a project-specific hatch pattern.</summary>
@@ -483,6 +579,15 @@ public sealed class CadDocument : ICadDocument
             RegisterTextStyle(new TextStyle("Standard"));
         DefaultTextStyle = FindTextStyle(contents.DefaultTextStyleId) ?? _textStyles[0];
         ActiveTextStyle = FindTextStyle(contents.ActiveTextStyleId) ?? DefaultTextStyle;
+
+        _dimStyles.Clear();
+        _dimStylesById.Clear();
+        foreach (DimStyle style in contents.DimStyles)
+            RegisterDimStyle(style);
+        if (_dimStyles.Count == 0)
+            RegisterDimStyle(new DimStyle("Standard"));
+        DefaultDimStyle = FindDimStyle(contents.DefaultDimStyleId) ?? _dimStyles[0];
+        ActiveDimStyle = FindDimStyle(contents.ActiveDimStyleId) ?? DefaultDimStyle;
 
         _entities.Clear();
         foreach (IEntity entity in contents.Entities)

@@ -42,6 +42,14 @@ public interface ICadDocument
 
     TextStyle? FindTextStyle(Guid id);
 
+    /// <summary>The named dimension styles defined for this document.</summary>
+    IReadOnlyList<DimStyle> DimStyles { get; }
+
+    /// <summary>The dimension style applied to newly created dimensions.</summary>
+    DimStyle ActiveDimStyle { get; set; }
+
+    DimStyle? FindDimStyle(Guid id);
+
     /// <summary>Looks up a pattern by id across the project patterns and the global library.</summary>
     HatchPattern? FindPattern(Guid id);
 

@@ -17,6 +17,7 @@ public enum ShortcutAction
     Point,
     Text,
     Leader,
+    LinearDimension,
     Delete,
     Undo,
     Redo,

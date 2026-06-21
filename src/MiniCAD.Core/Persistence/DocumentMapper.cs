@@ -25,6 +25,8 @@ public static class DocumentMapper
             ActivePartialDrawingId = document.ActivePartialDrawing.Id,
             DefaultTextStyleId = document.DefaultTextStyle.Id,
             ActiveTextStyleId = document.ActiveTextStyle.Id,
+            DefaultDimStyleId = document.DefaultDimStyle.Id,
+            ActiveDimStyleId = document.ActiveDimStyle.Id,
             OriginX = document.CoordinateSystem.Origin.X,
             OriginY = document.CoordinateSystem.Origin.Y,
             OriginZ = document.CoordinateSystem.Origin.Z,
@@ -35,6 +37,9 @@ public static class DocumentMapper
 
         foreach (TextStyle style in document.TextStyles)
             dto.TextStyles.Add(ToDto(style));
+
+        foreach (DimStyle style in document.DimStyles)
+            dto.DimStyles.Add(ToDto(style));
 
         foreach (PartialDrawing partialDrawing in document.PartialDrawings)
             dto.PartialDrawings.Add(ToDto(partialDrawing));
@@ -68,6 +73,8 @@ public static class DocumentMapper
 
         List<TextStyle> textStyles = dto.TextStyles.Select(FromDto).ToList();
 
+        List<DimStyle> dimStyles = dto.DimStyles.Select(FromDto).ToList();
+
         List<IEntity> entities = dto.Entities.Select(FromDto).ToList();
         foreach (IEntity entity in entities)
         {
@@ -90,6 +97,9 @@ public static class DocumentMapper
             TextStyles = textStyles,
             DefaultTextStyleId = dto.DefaultTextStyleId,
             ActiveTextStyleId = dto.ActiveTextStyleId,
+            DimStyles = dimStyles,
+            DefaultDimStyleId = dto.DefaultDimStyleId,
+            ActiveDimStyleId = dto.ActiveDimStyleId,
             Origin = new Point3D(dto.OriginX, dto.OriginY, dto.OriginZ),
         });
     }
@@ -137,6 +147,46 @@ public static class DocumentMapper
 
     private static TextStyle FromDto(TextStyleDto dto)
         => new(dto.Id, dto.Name, dto.FontFamily, dto.Height, dto.WidthFactor);
+
+    private static DimStyleDto ToDto(DimStyle style) => new()
+    {
+        Id = style.Id,
+        Name = style.Name,
+        TextHeight = style.TextHeight,
+        ArrowSize = style.ArrowSize,
+        ExtensionOffset = style.ExtensionOffset,
+        ExtensionOvershoot = style.ExtensionOvershoot,
+        DecimalPlaces = style.DecimalPlaces,
+    };
+
+    private static DimStyle FromDto(DimStyleDto dto) => new(
+        dto.Id, dto.Name, dto.TextHeight, dto.ArrowSize, dto.ExtensionOffset, dto.ExtensionOvershoot, dto.DecimalPlaces);
+
+    /// <summary>Copies the shared dimension fields onto the persisted DTO and returns it.</summary>
+    private static T FillDimDto<T>(T dto, DimensionEntity dim) where T : DimensionDto
+    {
+        dto.DimStyleId = dim.DimStyleId;
+        dto.TextHeight = dim.TextHeight;
+        dto.ArrowSize = dim.ArrowSize;
+        dto.ExtensionOffset = dim.ExtensionOffset;
+        dto.ExtensionOvershoot = dim.ExtensionOvershoot;
+        dto.DecimalPlaces = dim.DecimalPlaces;
+        dto.TextOverride = dim.TextOverride;
+        return dto;
+    }
+
+    /// <summary>Restores the shared dimension fields from the DTO onto the entity.</summary>
+    private static T FillDim<T>(T dim, DimensionDto dto) where T : DimensionEntity
+    {
+        dim.DimStyleId = dto.DimStyleId;
+        dim.TextHeight = dto.TextHeight;
+        dim.ArrowSize = dto.ArrowSize;
+        dim.ExtensionOffset = dto.ExtensionOffset;
+        dim.ExtensionOvershoot = dto.ExtensionOvershoot;
+        dim.DecimalPlaces = dto.DecimalPlaces;
+        dim.TextOverride = dto.TextOverride;
+        return dim;
+    }
 
     private static LayerDto ToDto(Layer layer) => new()
     {
@@ -275,6 +325,13 @@ public static class DocumentMapper
                 Height = image.Height,
                 Rotation = image.Rotation,
             },
+            LinearDimensionEntity dim => FillDimDto(new LinearDimensionDto
+            {
+                P1 = ToDto(dim.P1),
+                P2 = ToDto(dim.P2),
+                DimLinePoint = ToDto(dim.DimLinePoint),
+                Orientation = dim.Kind.ToString(),
+            }, dim),
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -325,6 +382,9 @@ public static class DocumentMapper
                 leader.Points.Select(FromDto), leader.Text, leader.TextHeight, leader.ArrowSize),
             ImageDto image => new ImageEntity(
                 Convert.FromBase64String(image.Data), FromDto(image.Origin), image.Width, image.Height, image.Rotation),
+            LinearDimensionDto dim => FillDim(new LinearDimensionEntity(
+                FromDto(dim.P1), FromDto(dim.P2), FromDto(dim.DimLinePoint),
+                Enum.TryParse(dim.Orientation, out LinearDimensionKind kind) ? kind : LinearDimensionKind.Aligned), dim),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

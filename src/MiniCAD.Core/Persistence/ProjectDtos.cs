@@ -39,6 +39,13 @@ public sealed class DocumentDto
 
     public Guid ActiveTextStyleId { get; set; }
 
+    /// <summary>Named dimension styles defined for the document.</summary>
+    public List<DimStyleDto> DimStyles { get; set; } = new();
+
+    public Guid DefaultDimStyleId { get; set; }
+
+    public Guid ActiveDimStyleId { get; set; }
+
     public List<EntityDto> Entities { get; set; } = new();
 
     /// <summary>The user-defined origin (Nullpunkt) in absolute world coordinates.</summary>
@@ -74,6 +81,17 @@ public sealed class TextStyleDto
     public string FontFamily { get; set; } = string.Empty;
     public double Height { get; set; } = 12.0;
     public double WidthFactor { get; set; } = 1.0;
+}
+
+public sealed class DimStyleDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = "Standard";
+    public double TextHeight { get; set; } = 12.0;
+    public double ArrowSize { get; set; } = 10.0;
+    public double ExtensionOffset { get; set; } = 3.0;
+    public double ExtensionOvershoot { get; set; } = 5.0;
+    public int DecimalPlaces { get; set; }
 }
 
 public sealed class PartialDrawingDto
@@ -152,6 +170,7 @@ public sealed class PointDto
 [JsonDerivedType(typeof(MTextDto), "mtext")]
 [JsonDerivedType(typeof(LeaderDto), "leader")]
 [JsonDerivedType(typeof(ImageDto), "image")]
+[JsonDerivedType(typeof(LinearDimensionDto), "lineardim")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -277,4 +296,26 @@ public sealed class ImageDto : EntityDto
     public double Width { get; set; }
     public double Height { get; set; }
     public double Rotation { get; set; }
+}
+
+/// <summary>Shared persisted fields of every dimension (style link + denormalized appearance).</summary>
+public abstract class DimensionDto : EntityDto
+{
+    public Guid DimStyleId { get; set; }
+    public double TextHeight { get; set; } = 12.0;
+    public double ArrowSize { get; set; } = 10.0;
+    public double ExtensionOffset { get; set; } = 3.0;
+    public double ExtensionOvershoot { get; set; } = 5.0;
+    public int DecimalPlaces { get; set; }
+    public string? TextOverride { get; set; }
+}
+
+public sealed class LinearDimensionDto : DimensionDto
+{
+    public PointDto P1 { get; set; } = new();
+    public PointDto P2 { get; set; } = new();
+    public PointDto DimLinePoint { get; set; } = new();
+
+    /// <summary>Aligned / Horizontal / Vertical (named to avoid the polymorphic "kind" discriminator).</summary>
+    public string Orientation { get; set; } = "Aligned";
 }

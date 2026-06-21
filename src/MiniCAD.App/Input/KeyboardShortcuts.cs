@@ -28,6 +28,7 @@ public sealed class KeyboardShortcuts
         (ShortcutAction.Point, "Punkt", "N"),
         (ShortcutAction.Text, "Text", "X"),
         (ShortcutAction.Leader, "Führungslinie", "G"),
+        (ShortcutAction.LinearDimension, "Maß (linear)", "D"),
         (ShortcutAction.Move, "Verschieben", "M"),
         (ShortcutAction.Copy, "Kopieren", "Shift+C"),
         (ShortcutAction.Rotate, "Drehen", "Shift+R"),

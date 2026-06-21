@@ -34,6 +34,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly PointTool _pointTool = new();
     private readonly TextTool _textTool = new();
     private readonly LeaderTool _leaderTool = new();
+    private readonly LinearDimensionTool _linearDimensionTool = new();
     private readonly SetNullPointTool _setNullPointTool = new();
 
     // Editing tools operating on the current selection (Epic: Bearbeitungswerkzeuge).
@@ -66,6 +67,7 @@ public partial class MainWindowViewModel : ViewModelBase
         PointOptions = new PointOptionsViewModel(_pointTool);
         TextOptions = new TextOptionsViewModel(_textTool, Document);
         LeaderOptions = new LeaderOptionsViewModel(_leaderTool);
+        DimensionOptions = new DimensionOptionsViewModel(_linearDimensionTool);
         TextStyles = new TextStylesViewModel(Document);
 
         // Text and leader tools can't open a UI field themselves; re-raise their requests so the
@@ -118,6 +120,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<TextEntity>(_textTool);
         Tools.RegisterQuickSelectTool<MTextEntity>(_textTool);
         Tools.RegisterQuickSelectTool<LeaderEntity>(_leaderTool);
+        Tools.RegisterQuickSelectTool<LinearDimensionEntity>(_linearDimensionTool);
 
         Tools.SetActiveTool(_selectTool);
     }
@@ -173,6 +176,9 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Inline label height, shown while the leader tool is active.</summary>
     public LeaderOptionsViewModel LeaderOptions { get; }
 
+    /// <summary>Inline orientation selector, shown while the linear dimension tool is active.</summary>
+    public DimensionOptionsViewModel DimensionOptions { get; }
+
     /// <summary>The text-style management panel (Textstile tab).</summary>
     public TextStylesViewModel TextStyles { get; }
 
@@ -183,7 +189,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool IsCoordinateTool(ITool? tool)
         => tool == _lineTool || tool == _rectangleTool || tool == _circleTool
         || tool == _arcTool || tool == _ellipseTool || tool == _polylineTool || tool == _splineTool
-        || tool == _pointTool || tool == _textTool || tool == _leaderTool || tool == _setNullPointTool
+        || tool == _pointTool || tool == _textTool || tool == _leaderTool
+        || tool == _linearDimensionTool || tool == _setNullPointTool
         || tool == _moveTool || tool == _copyTool || tool == _rotateTool
         || tool == _mirrorTool || tool == _scaleTool || tool == _offsetTool;
 
@@ -277,6 +284,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsPointActive => Tools.ActiveTool == _pointTool;
     public bool IsTextActive => Tools.ActiveTool == _textTool;
     public bool IsLeaderActive => Tools.ActiveTool == _leaderTool;
+    public bool IsLinearDimensionActive => Tools.ActiveTool == _linearDimensionTool;
     public bool IsSetNullPointActive => Tools.ActiveTool == _setNullPointTool;
     public bool IsMoveActive => Tools.ActiveTool == _moveTool;
     public bool IsCopyActive => Tools.ActiveTool == _copyTool;
@@ -303,6 +311,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsPointActive));
         OnPropertyChanged(nameof(IsTextActive));
         OnPropertyChanged(nameof(IsLeaderActive));
+        OnPropertyChanged(nameof(IsLinearDimensionActive));
         OnPropertyChanged(nameof(IsSetNullPointActive));
         OnPropertyChanged(nameof(IsMoveActive));
         OnPropertyChanged(nameof(IsCopyActive));
@@ -431,6 +440,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void ActivateLeader() => ActivateDrawingTool(_leaderTool);
+
+    [RelayCommand]
+    private void ActivateLinearDimension() => ActivateDrawingTool(_linearDimensionTool);
 
     /// <summary>
     /// Double-click handler: if a text entity sits under <paramref name="world"/>, switch to the
@@ -625,6 +637,7 @@ public partial class MainWindowViewModel : ViewModelBase
             case ShortcutAction.Point: ActivatePoint(); return true;
             case ShortcutAction.Text: ActivateText(); return true;
             case ShortcutAction.Leader: ActivateLeader(); return true;
+            case ShortcutAction.LinearDimension: ActivateLinearDimension(); return true;
             case ShortcutAction.Move: ActivateMoveCommand.Execute(null); return true;
             case ShortcutAction.Copy: ActivateCopyCommand.Execute(null); return true;
             case ShortcutAction.Rotate: ActivateRotateCommand.Execute(null); return true;

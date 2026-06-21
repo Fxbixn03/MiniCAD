@@ -37,6 +37,9 @@
     <!-- Leader: an arrow with a knee line ending under a text baseline. -->
     <StreamGeometry x:Key="Icon.Leader">M3,18 L9,12 L13,12 M3,18 L6,17.5 M3,18 L3.5,15 M13,8 H21 M13,12 H21</StreamGeometry>
 
+    <!-- Dimension: two extension lines with an arrowed dimension line between them. -->
+    <StreamGeometry x:Key="Icon.Dimension">M4,5 V19 M20,5 V19 M4,12 H20 M4,12 L7,9.5 M4,12 L7,14.5 M20,12 L17,9.5 M20,12 L17,14.5</StreamGeometry>
+
     <!-- Ellipse: a wide oval outline. -->
     <StreamGeometry x:Key="Icon.Ellipse">M21,12 A9,5.5 0 1 1 3,12 A9,5.5 0 1 1 21,12 Z</StreamGeometry>
 

@@ -84,6 +84,7 @@
                             <MenuItem Header="_Text / Beschriftung" Command="{Binding ActivateTextCommand}" InputGesture="X" />
                         <MenuItem Header="_Führungslinie / Callout" Command="{Binding ActivateLeaderCommand}" InputGesture="G" />
                         <MenuItem Header="_Bild als Unterlage…" Click="OnInsertImage" />
+                        <MenuItem Header="_Maß (linear / ausgerichtet)" Command="{Binding ActivateLinearDimensionCommand}" InputGesture="D" />
                         <Separator />
                         <MenuItem Header="_Nullpunkt setzen" Command="{Binding ActivateSetNullPointCommand}" />
                             <MenuItem Header="Nullpunkt zu_rücksetzen" Command="{Binding ResetNullPointCommand}" />
@@ -229,6 +230,19 @@
             </StackPanel>
         </Border>
 
+        <!-- Inline dimension orientation, shown while the linear dimension tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsLinearDimensionActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding DimensionOptions}" x:DataType="vm:DimensionOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="MASS" VerticalAlignment="Center" />
+                <TextBlock Text="Art" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                <ComboBox MinWidth="120" ItemsSource="{Binding KindOptions}" SelectedItem="{Binding Kind}" />
+                <TextBlock Text="1. Punkt, 2. Punkt, dann Maßlinie platzieren" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
+        </Border>
+
         <!-- Inline arc-mode selector, shown while the arc tool is active. -->
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
                 BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
@@ -326,6 +340,10 @@
                 <Button Classes="rail" Classes.active="{Binding IsLeaderActive}"
                         Command="{Binding ActivateLeaderCommand}" ToolTip.Tip="Führungslinie / Callout  ·  G">
                     <Path Classes="ico" Data="{StaticResource Icon.Leader}" />
+                </Button>
+                <Button Classes="rail" Classes.active="{Binding IsLinearDimensionActive}"
+                        Command="{Binding ActivateLinearDimensionCommand}" ToolTip.Tip="Maß (linear / ausgerichtet)  ·  D">
+                    <Path Classes="ico" Data="{StaticResource Icon.Dimension}" />
                 </Button>
 
                 <Border Classes="raildiv" />

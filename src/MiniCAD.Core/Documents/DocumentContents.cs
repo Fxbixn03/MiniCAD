@@ -26,6 +26,13 @@ public sealed record DocumentContents(
 
     public Guid ActiveTextStyleId { get; init; }
 
+    /// <summary>The document's named dimension styles.</summary>
+    public IReadOnlyList<DimStyle> DimStyles { get; init; } = Array.Empty<DimStyle>();
+
+    public Guid DefaultDimStyleId { get; init; }
+
+    public Guid ActiveDimStyleId { get; init; }
+
     /// <summary>The user-defined origin (Nullpunkt) in absolute world coordinates.</summary>
     public Point3D Origin { get; init; } = Point3D.Origin;
 }
