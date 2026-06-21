@@ -147,6 +147,21 @@ public class BlockTests
     }
 
     [Fact]
+    public void SymbolSerializer_RoundTripsABlockDefinition()
+    {
+        BlockDefinition def = MakeBlock();
+        def.AttributeKeys.Add("Raumname");
+
+        string json = SymbolSerializer.Serialize(def);
+        BlockDefinition restored = SymbolSerializer.Deserialize(json);
+
+        restored.Name.Should().Be("Winkel");
+        restored.Entities.Should().HaveCount(2);
+        restored.Entities.OfType<LineEntity>().Should().HaveCount(2);
+        restored.AttributeKeys.Should().Equal("Raumname");
+    }
+
+    [Fact]
     public void Block_SurvivesPersistenceRoundTrip_AndRelinks()
     {
         var doc = new CadDocument();

@@ -191,7 +191,8 @@ public static class DocumentMapper
     private static LayerFavorite FromDto(LayerFavoriteDto dto) => new(
         dto.Id, dto.Name, dto.States.ToDictionary(e => e.LayerId, e => e.State));
 
-    private static BlockDefinitionDto ToDto(BlockDefinition definition) => new()
+    /// <summary>Maps a block definition to its DTO (used for the cross-project symbol library).</summary>
+    public static BlockDefinitionDto ToDto(BlockDefinition definition) => new()
     {
         Id = definition.Id,
         Name = definition.Name,
@@ -200,7 +201,8 @@ public static class DocumentMapper
         AttributeKeys = definition.AttributeKeys.ToList(),
     };
 
-    private static BlockDefinition FromDto(BlockDefinitionDto dto)
+    /// <summary>Maps a block-definition DTO back to a definition (symbol library).</summary>
+    public static BlockDefinition FromDto(BlockDefinitionDto dto)
     {
         var definition = new BlockDefinition(dto.Id, dto.Name, FromDto(dto.BasePoint), dto.Entities.Select(FromDto));
         definition.AttributeKeys.AddRange(dto.AttributeKeys);

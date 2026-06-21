@@ -912,6 +912,40 @@
                         </DockPanel>
                     </TabItem>
 
+                    <!-- ===== Bibliothek ===== -->
+                    <TabItem ToolTip.Tip="Symbolbibliothek">
+                        <TabItem.Header>
+                            <Border Classes="tabicon">
+                                <Path Classes="icotab" Width="22" Height="22" Data="{StaticResource Icon.Library}" />
+                            </Border>
+                        </TabItem.Header>
+                        <DockPanel Margin="10" DataContext="{Binding Library}" x:DataType="vm:LibraryViewModel">
+                            <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,8">
+                                <TextBlock Classes="eyebrow" Text="DOKUMENTBLOCK → BIBLIOTHEK" />
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Content="Speichern" Command="{Binding SaveToLibraryCommand}"
+                                            ToolTip.Tip="Gewählten Dokumentblock projektübergreifend speichern" />
+                                    <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding DocumentBlocks}"
+                                              SelectedItem="{Binding SelectedDocumentBlock}" />
+                                </DockPanel>
+                            </StackPanel>
+
+                            <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="0,8,0,0">
+                                <Border Height="150" CornerRadius="4" Background="{DynamicResource Brush.SurfaceSunken}"
+                                        BorderBrush="{DynamicResource Brush.BorderDefault}" BorderThickness="1">
+                                    <Image Source="{Binding Preview}" Stretch="Uniform" Margin="4" />
+                                </Border>
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <Button Content="Einfügen" Command="{Binding InsertSymbolCommand}" />
+                                    <Button Content="Aktualisieren" Command="{Binding RefreshLibraryCommand}" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding Status}" Foreground="{DynamicResource Brush.StatusOk}" TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <ListBox ItemsSource="{Binding Symbols}" SelectedItem="{Binding SelectedSymbol}" />
+                        </DockPanel>
+                    </TabItem>
+
                     <!-- ===== Assistent ===== -->
                     <TabItem ToolTip.Tip="Assistent">
                         <TabItem.Header>

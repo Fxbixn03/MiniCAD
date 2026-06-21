@@ -77,6 +77,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ElevationDimensionOptions = new ElevationDimensionOptionsViewModel(_elevationDimensionTool);
         TextStyles = new TextStylesViewModel(Document);
         Blocks = new BlocksViewModel(Document, Tools.Selection, _commands, Tools, _blockInsertTool);
+        Library = new LibraryViewModel(Document, Tools, _blockInsertTool);
 
         // Text and leader tools can't open a UI field themselves; re-raise their requests so the
         // view can show the shared inline editor.
@@ -206,6 +207,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>The block library panel (Blöcke tab).</summary>
     public BlocksViewModel Blocks { get; }
+
+    /// <summary>The cross-project symbol library panel (Bibliothek tab).</summary>
+    public LibraryViewModel Library { get; }
 
     public bool IsBlockInsertActive => Tools.ActiveTool == _blockInsertTool;
 
