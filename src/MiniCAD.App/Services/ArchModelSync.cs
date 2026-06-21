@@ -45,8 +45,10 @@ public sealed class ArchModelSync
             foreach (Model3DObject derived in _document.Models.Where(m => m.IsDerived).ToList())
                 _document.RemoveModelObject(derived);
 
-            foreach (WallEntity wall in _document.Entities.OfType<WallEntity>())
-                _document.AddModelObject(WallModelBuilder.BuildModel(wall));
+            var walls = _document.Entities.OfType<WallEntity>();
+            var openings = _document.Entities.OfType<OpeningEntity>();
+            foreach (Model3DObject model in ArchModelBuilder.Build(walls, openings))
+                _document.AddModelObject(model);
         }
         finally
         {

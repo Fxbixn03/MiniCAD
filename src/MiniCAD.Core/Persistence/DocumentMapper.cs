@@ -481,6 +481,14 @@ public static class DocumentMapper
                 Height = wall.Height,
                 BaseElevation = wall.BaseElevation,
             },
+            OpeningEntity opening => new OpeningDto
+            {
+                Start = ToDto(opening.Start),
+                End = ToDto(opening.End),
+                Width = opening.Width,
+                Height = opening.Height,
+                BaseElevation = opening.BaseElevation,
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -555,6 +563,8 @@ public static class DocumentMapper
                 FromDto(detail.Center), detail.Radius, detail.Label, detail.Reference, detail.TextHeight),
             WallDto wall => new WallEntity(
                 FromDto(wall.Start), FromDto(wall.End), wall.Thickness, wall.Height, wall.BaseElevation),
+            OpeningDto opening => new OpeningEntity(
+                FromDto(opening.Start), FromDto(opening.End), opening.Width, opening.Height, opening.BaseElevation),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

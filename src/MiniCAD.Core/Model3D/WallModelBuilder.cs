@@ -11,7 +11,7 @@ namespace MiniCAD.Core.Model3D;
 /// </summary>
 public static class WallModelBuilder
 {
-    private static readonly Color WallColor = new(205, 200, 190);
+    public static readonly Color WallColor = new(205, 200, 190);
 
     public static Mesh3D BuildMesh(WallEntity wall)
         => Extruder.Extrude(wall.Footprint(), wall.BaseElevation, wall.Height);

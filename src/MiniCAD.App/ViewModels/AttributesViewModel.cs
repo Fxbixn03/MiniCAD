@@ -128,6 +128,20 @@ public partial class AttributesViewModel : ViewModelBase
     [ObservableProperty]
     private double _wallBaseElevation;
 
+    // ----- Opening / recess (Aussparung) geometry -----
+
+    [ObservableProperty]
+    private bool _isOpening;
+
+    [ObservableProperty]
+    private double _openingWidth;
+
+    [ObservableProperty]
+    private double _openingHeight;
+
+    [ObservableProperty]
+    private double _openingBaseElevation;
+
     // ----- Area fill (solid/gradient) for a closed polyline -----
 
     [ObservableProperty]
@@ -204,6 +218,7 @@ public partial class AttributesViewModel : ViewModelBase
             IsParametricSymbol = false;
             SymbolParameters.Clear();
             IsWall = false;
+            IsOpening = false;
             _suppress = false;
             return;
         }
@@ -261,6 +276,15 @@ public partial class AttributesViewModel : ViewModelBase
             WallThickness = wall.Thickness;
             WallHeight = wall.Height;
             WallBaseElevation = wall.BaseElevation;
+        }
+
+        // Opening / recess geometry.
+        IsOpening = items.Count == 1 && items[0] is OpeningEntity;
+        if (items[0] is OpeningEntity opening)
+        {
+            OpeningWidth = opening.Width;
+            OpeningHeight = opening.Height;
+            OpeningBaseElevation = opening.BaseElevation;
         }
 
         // Area fill: a single closed polyline (same condition as the hatch fill).
@@ -449,6 +473,25 @@ public partial class AttributesViewModel : ViewModelBase
         ApplyToSelection("Wand ändern", _ => (
             () => { wall.Thickness = newThickness; wall.Height = newHeight; wall.BaseElevation = newBase; },
             () => { wall.Thickness = oldThickness; wall.Height = oldHeight; wall.BaseElevation = oldBase; }));
+    }
+
+    partial void OnOpeningWidthChanged(double value) => ApplyOpening();
+
+    partial void OnOpeningHeightChanged(double value) => ApplyOpening();
+
+    partial void OnOpeningBaseElevationChanged(double value) => ApplyOpening();
+
+    private void ApplyOpening()
+    {
+        if (_suppress || _selection.Items.Count != 1 || _selection.Items[0] is not OpeningEntity opening)
+            return;
+
+        double newWidth = OpeningWidth, newHeight = OpeningHeight, newBase = OpeningBaseElevation;
+        double oldWidth = opening.Width, oldHeight = opening.Height, oldBase = opening.BaseElevation;
+
+        ApplyToSelection("Aussparung ändern", _ => (
+            () => { opening.Width = newWidth; opening.Height = newHeight; opening.BaseElevation = newBase; },
+            () => { opening.Width = oldWidth; opening.Height = oldHeight; opening.BaseElevation = oldBase; }));
     }
 
     partial void OnUseAreaFillChanged(bool value) => ApplyAreaFill();

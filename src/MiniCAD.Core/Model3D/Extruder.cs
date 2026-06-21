@@ -15,6 +15,11 @@ public static class Extruder
         if (n < 3 || Math.Abs(height) <= GeometryMath.Epsilon)
             return new Mesh3D(Array.Empty<Point3D>(), Array.Empty<int>());
 
+        // Normalize to counter-clockwise so the side walls and the (CCW) caps wind consistently —
+        // a closed, consistently-oriented manifold, which boolean operations (CSG) rely on.
+        if (SignedArea(profile) < 0)
+            profile = profile.Reverse().ToList();
+
         double topZ = baseZ + height;
         var verts = new List<Point3D>(2 * n);
         foreach (Point2D p in profile) verts.Add(new Point3D(p.X, p.Y, baseZ));   // bottom: 0..n-1
@@ -36,5 +41,16 @@ public static class Extruder
         }
 
         return new Mesh3D(verts, tris);
+    }
+
+    private static double SignedArea(IReadOnlyList<Point2D> profile)
+    {
+        double area = 0;
+        for (int i = 0; i < profile.Count; i++)
+        {
+            Point2D a = profile[i], b = profile[(i + 1) % profile.Count];
+            area += a.X * b.Y - b.X * a.Y;
+        }
+        return area / 2;
     }
 }
