@@ -210,6 +210,16 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnDetach3D(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel is not { } viewModel)
+            return;
+
+        // Same document (live model), independent camera.
+        var window = new View3DWindow(viewModel.Document, new MiniCAD.Core.Viewing.Camera3D());
+        window.Show(this);
+    }
+
     private void OnExit(object? sender, RoutedEventArgs e) => Close();
 
     private void OnPartialDrawingSelection(object? sender, RoutedEventArgs e)

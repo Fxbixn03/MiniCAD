@@ -99,6 +99,8 @@
                             <Separator />
                             <MenuItem Header="_Standard-Layer einfügen" Command="{Binding AddStandardLayersCommand}" />
                             <Separator />
+                            <MenuItem Header="3D-_Quader einfügen" Command="{Binding InsertBox3DCommand}" />
+                            <Separator />
                             <MenuItem Header="_Teilbild-Auswahl…" Click="OnPartialDrawingSelection" />
                             <Separator />
                             <MenuItem Header="_Einstellungen…" Click="OnOpenSettings" />
@@ -480,17 +482,40 @@
                 <ColumnDefinition Width="300" MinWidth="230" MaxWidth="600" />
             </Grid.ColumnDefinitions>
 
-            <controls:CadCanvasControl Grid.Column="0" x:Name="Canvas"
-                                       Document="{Binding Document}" Viewport="{Binding Viewport}" Tools="{Binding Tools}"
-                                       ShowGrid="{Binding Settings.ShowGrid}" SceneBackground="{Binding Settings.BackgroundColor}" />
+            <TabControl Grid.Column="0" Padding="0">
+                <TabItem Header="2D">
+                    <Panel>
+                        <controls:CadCanvasControl x:Name="Canvas"
+                                                   Document="{Binding Document}" Viewport="{Binding Viewport}" Tools="{Binding Tools}"
+                                                   ShowGrid="{Binding Settings.ShowGrid}" SceneBackground="{Binding Settings.BackgroundColor}" />
 
-            <!-- In-place text editor, positioned over the canvas at the insertion point (code-behind). -->
-            <TextBox Grid.Column="0" x:Name="InlineTextEditor" IsVisible="False"
-                     HorizontalAlignment="Left" VerticalAlignment="Top" MinWidth="80"
-                     FontFamily="{StaticResource Font.Mono}" Padding="4,2"
-                     Background="{DynamicResource Brush.SurfaceChromeAlt}" Foreground="{DynamicResource Brush.TextBody}"
-                     BorderBrush="{DynamicResource Brush.Brand}" BorderThickness="1"
-                     KeyDown="OnInlineTextEditorKeyDown" LostFocus="OnInlineTextEditorLostFocus" />
+                        <!-- In-place text editor, positioned over the canvas at the insertion point (code-behind). -->
+                        <TextBox x:Name="InlineTextEditor" IsVisible="False"
+                                 HorizontalAlignment="Left" VerticalAlignment="Top" MinWidth="80"
+                                 FontFamily="{StaticResource Font.Mono}" Padding="4,2"
+                                 Background="{DynamicResource Brush.SurfaceChromeAlt}" Foreground="{DynamicResource Brush.TextBody}"
+                                 BorderBrush="{DynamicResource Brush.Brand}" BorderThickness="1"
+                                 KeyDown="OnInlineTextEditorKeyDown" LostFocus="OnInlineTextEditorLostFocus" />
+                    </Panel>
+                </TabItem>
+                <TabItem Header="3D">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4" Margin="6"
+                                    Background="{DynamicResource Brush.SurfaceChrome}">
+                            <Button Content="Iso" Command="{Binding SetView3DCommand}" CommandParameter="Iso" />
+                            <Button Content="Oben" Command="{Binding SetView3DCommand}" CommandParameter="Top" />
+                            <Button Content="Vorn" Command="{Binding SetView3DCommand}" CommandParameter="Front" />
+                            <Button Content="Rechts" Command="{Binding SetView3DCommand}" CommandParameter="Right" />
+                            <Border Width="1" Background="{DynamicResource Brush.BorderStrong}" Margin="4,2" />
+                            <Button Content="Quader +" Command="{Binding InsertBox3DCommand}" />
+                            <Button Content="Abdocken ⧉" Click="OnDetach3D" />
+                            <TextBlock Text="Linksziehen: orbit · Mittelziehen: pan · Rad: zoom"
+                                       Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="8,0,0,0" />
+                        </StackPanel>
+                        <controls:Cad3DView Document="{Binding Document}" Camera="{Binding Camera3D}" />
+                    </DockPanel>
+                </TabItem>
+            </TabControl>
 
             <GridSplitter Grid.Column="1" Width="5" Background="{DynamicResource Brush.BorderStrong}"
                           ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" />

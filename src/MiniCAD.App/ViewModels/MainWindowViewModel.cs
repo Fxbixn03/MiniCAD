@@ -11,6 +11,7 @@ using MiniCAD.Core.Commands;
 using MiniCAD.Core.Documents;
 using MiniCAD.Core.Entities;
 using MiniCAD.Core.Geometry;
+using MiniCAD.Core.Model3D;
 using MiniCAD.Core.Persistence;
 using MiniCAD.Core.Tools;
 using MiniCAD.Core.Viewing;
@@ -154,6 +155,9 @@ public partial class MainWindowViewModel : ViewModelBase
     public CadDocument Document { get; }
 
     public Viewport Viewport { get; } = new();
+
+    /// <summary>The shared 3D camera for the model-space view(s).</summary>
+    public Camera3D Camera3D { get; } = new();
 
     public ToolManager Tools { get; }
 
@@ -681,6 +685,35 @@ public partial class MainWindowViewModel : ViewModelBase
         _commands.Execute(new AddEntityCommand(Document, image));
         Tools.Selection.Set(image);
         StatusMessage = "Bild als Unterlage eingefügt.";
+    }
+
+    /// <summary>Adds a 3D box to the model space (a starting primitive for the 3D view).</summary>
+    [RelayCommand]
+    private void InsertBox3D()
+    {
+        var model = new Model3DObject(Mesh3D.Box(1000, 1000, 1000), "Quader")
+        {
+            Color = new Core.Styling.Color(120, 200, 255),
+        };
+        Document.AddModelObject(model);
+        if (Document.GetModelBounds() is { } bounds)
+            Camera3D.ZoomToFit(bounds);
+        StatusMessage = "3D-Quader eingefügt – zur 3D-Ansicht wechseln.";
+    }
+
+    /// <summary>Sets the 3D camera to a standard view (0=Iso, 1=Top, 2=Front, 3=Right).</summary>
+    [RelayCommand]
+    private void SetView3D(string view)
+    {
+        Camera3D.SetStandardView(view switch
+        {
+            "Top" => StandardView.Top,
+            "Front" => StandardView.Front,
+            "Right" => StandardView.Right,
+            _ => StandardView.Iso,
+        });
+        if (Document.GetModelBounds() is { } bounds)
+            Camera3D.ZoomToFit(bounds);
     }
 
     [RelayCommand]

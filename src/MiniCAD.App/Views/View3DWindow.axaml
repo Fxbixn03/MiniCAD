@@ -1,0 +1,13 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:MiniCAD.App.Controls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="480"
+        x:Class="MiniCAD.App.Views.View3DWindow"
+        Title="3D-Ansicht"
+        Width="640" Height="480"
+        Background="#0c1020"
+        WindowStartupLocation="CenterOwner">
+    <controls:Cad3DView x:Name="View3D" />
+</Window>
