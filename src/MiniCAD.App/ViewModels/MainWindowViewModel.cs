@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using MiniCAD.Core.Coordinates;
 using System.IO;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -772,6 +773,19 @@ public partial class MainWindowViewModel : ViewModelBase
         });
         if (Document.GetModelBounds() is { } bounds)
             Camera3D.ZoomToFit(bounds);
+    }
+
+    /// <summary>Sets the active work plane (UCS) used for planar operations.</summary>
+    [RelayCommand]
+    private void SetWorkPlane(string plane)
+    {
+        Document.ActiveWorkPlane = plane switch
+        {
+            "Front" => WorkPlane.Front,
+            "Right" => WorkPlane.Right,
+            _ => WorkPlane.Top,
+        };
+        StatusMessage = $"Arbeitsebene: {plane}";
     }
 
     [RelayCommand]

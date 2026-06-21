@@ -31,6 +31,9 @@ public interface ICadDocument
     /// <summary>The reference frame carrying the user-defined origin (Nullpunkt).</summary>
     CoordinateSystem CoordinateSystem { get; }
 
+    /// <summary>The active work plane (UCS) for planar operations (default: world XY).</summary>
+    Coordinates.WorkPlane ActiveWorkPlane { get; set; }
+
     /// <summary>The hatch patterns defined for this project (in addition to the global library).</summary>
     IReadOnlyList<HatchPattern> Patterns { get; }
 

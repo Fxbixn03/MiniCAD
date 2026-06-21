@@ -102,6 +102,11 @@
                             <MenuItem Header="3D-_Quader einfügen" Command="{Binding InsertPrimitive3DCommand}" CommandParameter="Box" />
                             <MenuItem Header="_Extrudieren (2D-Profil → 3D)" Command="{Binding ExtrudeSelectionCommand}" />
                             <MenuItem Header="_Rotationskörper (Revolve)" Command="{Binding RevolveSelectionCommand}" />
+                            <MenuItem Header="_Arbeitsebene">
+                                <MenuItem Header="_Draufsicht (XY)" Command="{Binding SetWorkPlaneCommand}" CommandParameter="Top" />
+                                <MenuItem Header="_Vorn (XZ)" Command="{Binding SetWorkPlaneCommand}" CommandParameter="Front" />
+                                <MenuItem Header="_Seite (YZ)" Command="{Binding SetWorkPlaneCommand}" CommandParameter="Right" />
+                            </MenuItem>
                             <Separator />
                             <MenuItem Header="_Teilbild-Auswahl…" Click="OnPartialDrawingSelection" />
                             <Separator />

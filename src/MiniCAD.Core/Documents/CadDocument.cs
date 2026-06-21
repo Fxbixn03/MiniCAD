@@ -64,6 +64,9 @@ public sealed class CadDocument : ICadDocument
 
     public CoordinateSystem CoordinateSystem { get; } = new();
 
+    /// <summary>The active work plane (UCS) new planar operations are referenced to (default: world XY).</summary>
+    public Coordinates.WorkPlane ActiveWorkPlane { get; set; } = Coordinates.WorkPlane.Top;
+
     public IReadOnlyList<HatchPattern> Patterns => _patterns;
 
     public IReadOnlyList<TextStyle> TextStyles => _textStyles;
