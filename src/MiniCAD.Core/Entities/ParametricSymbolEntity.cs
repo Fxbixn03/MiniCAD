@@ -59,6 +59,9 @@ public sealed class ParametricSymbolEntity : Entity, IEditableEntity
         }
     }
 
+    /// <summary>The generated geometry as independent world-space entities (used by Explode, #185).</summary>
+    public IReadOnlyList<IEntity> Explode() => Instantiate().ToList();
+
     public override Rect2D Bounds
     {
         get

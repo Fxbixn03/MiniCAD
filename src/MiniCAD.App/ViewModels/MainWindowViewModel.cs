@@ -105,6 +105,7 @@ public partial class MainWindowViewModel : ViewModelBase
             ConvertConstructionCommand.NotifyCanExecuteChanged();
             GroupSelectionCommand.NotifyCanExecuteChanged();
             UngroupSelectionCommand.NotifyCanExecuteChanged();
+            ExplodeSelectionCommand.NotifyCanExecuteChanged();
             ExtrudeSelectionCommand.NotifyCanExecuteChanged();
             RevolveSelectionCommand.NotifyCanExecuteChanged();
         };
@@ -442,6 +443,38 @@ public partial class MainWindowViewModel : ViewModelBase
         }).ToList();
 
         _commands.Execute(new CompositeCommand("Gruppieren", commands));
+    }
+
+    /// <summary>Explodes the selected composite entities into their constituent parts (#185).</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ExplodeSelection()
+    {
+        var commands = new List<IUndoableCommand>();
+        var newParts = new List<IEntity>();
+
+        foreach (IEntity entity in Tools.Selection.Items.ToList())
+        {
+            IReadOnlyList<IEntity> parts = EntityExploder.Explode(entity);
+            if (parts.Count == 0)
+                continue;
+
+            commands.Add(new RemoveEntityCommand(Document, entity));
+            foreach (IEntity part in parts)
+            {
+                commands.Add(new AddEntityCommand(Document, part));
+                newParts.Add(part);
+            }
+        }
+
+        if (commands.Count == 0)
+        {
+            StatusMessage = "Nichts zu zerlegen – die Auswahl enthält keine zusammengesetzten Objekte.";
+            return;
+        }
+
+        _commands.Execute(new CompositeCommand("Zerlegen", commands));
+        Tools.Selection.Set(newParts);
+        StatusMessage = $"Zerlegt in {newParts.Count} Einzelelemente.";
     }
 
     /// <summary>Removes the selected entities from their group.</summary>

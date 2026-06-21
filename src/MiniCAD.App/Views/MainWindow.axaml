@@ -82,6 +82,8 @@
                             <MenuItem Header="Gruppierung auf_heben" Command="{Binding UngroupSelectionCommand}" InputGesture="Ctrl+Shift+G" />
                             <MenuItem Header="In _Hilfskonstruktion umwandeln" Command="{Binding ConvertConstructionCommand}" />
                             <Separator />
+                            <MenuItem Header="_Zerlegen (Explodieren)" Command="{Binding ExplodeSelectionCommand}" InputGesture="Ctrl+Shift+X" />
+                            <Separator />
                             <MenuItem Header="_Löschen" Command="{Binding DeleteSelectionCommand}" InputGesture="Delete" />
                         </MenuItem>
                         <MenuItem Header="_Werkzeuge">

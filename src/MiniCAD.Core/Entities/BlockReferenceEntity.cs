@@ -82,6 +82,9 @@ public sealed class BlockReferenceEntity : Entity, IEditableEntity
         }
     }
 
+    /// <summary>The block's contents as independent world-space entities (used by Explode, #185).</summary>
+    public IReadOnlyList<IEntity> Explode() => Instantiate().ToList();
+
     public override Rect2D Bounds
     {
         get
