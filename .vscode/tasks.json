@@ -99,6 +99,26 @@
                 "isDefault": true
             },
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "CAD - deploy",
+            "detail": "Publiziert eine self-contained Single-File-Linux-Build und legt sie unter ~/Applications/MiniCAD ab.",
+            "type": "shell",
+            "command": "echo",
+            "args": ["Deploy wird nur unter Linux unterstützt."],
+            "linux": {
+                "command": "bash",
+                "args": ["${workspaceFolder}/scripts/deploy-linux.sh"]
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": "$msCompile"
         }
     ]
 }
