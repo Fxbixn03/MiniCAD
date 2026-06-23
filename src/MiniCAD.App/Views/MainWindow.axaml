@@ -98,6 +98,10 @@
                             <MenuItem Header="Ä_hnliche auswählen (Typ + Layer)" Command="{Binding SelectSimilarCommand}" />
                             <MenuItem Header="Gleichen _Typ auswählen" Command="{Binding SelectSameTypeCommand}" />
                             <Separator />
+                            <MenuItem Header="_Isolieren (übrige ausblenden)" Command="{Binding IsolateSelectionCommand}" />
+                            <MenuItem Header="A_usblenden" Command="{Binding HideSelectionCommand}" />
+                            <MenuItem Header="Alle _einblenden" Command="{Binding ShowAllCommand}" />
+                            <Separator />
                             <MenuItem Header="_Gruppieren" Command="{Binding GroupSelectionCommand}" InputGesture="Ctrl+G" />
                             <MenuItem Header="Gruppierung auf_heben" Command="{Binding UngroupSelectionCommand}" InputGesture="Ctrl+Shift+G" />
                             <MenuItem Header="In _Hilfskonstruktion umwandeln" Command="{Binding ConvertConstructionCommand}" />

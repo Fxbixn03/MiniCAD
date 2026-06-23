@@ -97,6 +97,9 @@ public sealed class SkiaSceneRenderer
                     if (entity.PartialDrawingId != partialDrawing.Id)
                         return;
 
+                    if (document.IsEntityHidden(entity))
+                        return;
+
                     Layer? layer = document.FindLayer(entity.LayerId);
                     if (layer is { IsVisible: false })
                         return;

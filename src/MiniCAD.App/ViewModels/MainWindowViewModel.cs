@@ -118,6 +118,8 @@ public partial class MainWindowViewModel : ViewModelBase
             UngroupSelectionCommand.NotifyCanExecuteChanged();
             SelectSimilarCommand.NotifyCanExecuteChanged();
             SelectSameTypeCommand.NotifyCanExecuteChanged();
+            IsolateSelectionCommand.NotifyCanExecuteChanged();
+            HideSelectionCommand.NotifyCanExecuteChanged();
             ExplodeSelectionCommand.NotifyCanExecuteChanged();
             JoinSelectionCommand.NotifyCanExecuteChanged();
             ExtrudeSelectionCommand.NotifyCanExecuteChanged();
@@ -705,6 +707,41 @@ public partial class MainWindowViewModel : ViewModelBase
         StatusMessage = $"{matches.Count} ähnliche Objekt(e) ausgewählt.";
     }
 
+    /// <summary>True while some objects are temporarily isolated/hidden (#231).</summary>
+    public bool HasHiddenEntities => Document.HasHiddenEntities;
+
+    /// <summary>Hides everything except the current selection (Allplan "isolieren", #231).</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void IsolateSelection()
+    {
+        if (Tools.Selection.IsEmpty)
+            return;
+
+        Document.IsolateEntities(Tools.Selection.Items.ToList());
+        StatusMessage = "Auswahl isoliert – die übrigen Objekte sind ausgeblendet.";
+    }
+
+    /// <summary>Temporarily hides the current selection (#231).</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void HideSelection()
+    {
+        if (Tools.Selection.IsEmpty)
+            return;
+
+        var items = Tools.Selection.Items.ToList();
+        Document.HideEntities(items);
+        Tools.Selection.Clear();
+        StatusMessage = $"{items.Count} Objekt(e) ausgeblendet.";
+    }
+
+    /// <summary>Shows every isolated/hidden object again (#231).</summary>
+    [RelayCommand(CanExecute = nameof(HasHiddenEntities))]
+    private void ShowAll()
+    {
+        Document.ShowAllEntities();
+        StatusMessage = "Alle Objekte wieder eingeblendet.";
+    }
+
     /// <summary>Removes the selected entities from their group.</summary>
     [RelayCommand(CanExecute = nameof(HasSelection))]
     private void UngroupSelection()
@@ -756,9 +793,16 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void OnDocumentChanged(object? sender, DocumentChangedEventArgs e)
     {
-        // Content edits mark the project dirty; loading/replacing does not.
-        if (e.Kind is not DocumentChangeKind.Reloaded)
+        // Content edits mark the project dirty; loading/replacing and the transient isolate/hide
+        // state (which is never persisted) do not.
+        if (e.Kind is not (DocumentChangeKind.Reloaded or DocumentChangeKind.VisibilityChanged))
             IsDirty = true;
+
+        if (e.Kind is DocumentChangeKind.VisibilityChanged or DocumentChangeKind.Reloaded or DocumentChangeKind.Cleared)
+        {
+            OnPropertyChanged(nameof(HasHiddenEntities));
+            ShowAllCommand.NotifyCanExecuteChanged();
+        }
 
         OnPropertyChanged(nameof(StatusText));
     }

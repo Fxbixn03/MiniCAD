@@ -100,6 +100,12 @@ public interface ICadDocument
     /// <summary>True if the entity's layer and Teilbild are both editable (Active).</summary>
     bool IsEntityEditable(IEntity entity);
 
+    /// <summary>
+    /// True if the entity is temporarily hidden via isolate/hide (#231) — independent of layers.
+    /// Default <c>false</c> so implementations without the feature behave as before.
+    /// </summary>
+    bool IsEntityHidden(IEntity entity) => false;
+
     /// <summary>Resolves the effective stroke for an entity: override → layer → default.</summary>
     StrokeStyle ResolveStroke(IEntity entity);
 

@@ -33,6 +33,9 @@ public enum DocumentChangeKind
     /// <summary>The 3D model space changed (object added/removed/modified).</summary>
     ModelsChanged,
 
+    /// <summary>The transient isolate/hide set changed (entities shown or hidden, #231).</summary>
+    VisibilityChanged,
+
     /// <summary>The whole document was replaced (e.g. a project was loaded).</summary>
     Reloaded,
 }

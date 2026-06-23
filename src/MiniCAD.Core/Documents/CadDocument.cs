@@ -28,6 +28,7 @@ public sealed class CadDocument : ICadDocument
     private readonly List<BlockDefinition> _blockDefinitions = new();
     private readonly Dictionary<Guid, BlockDefinition> _blockDefinitionsById = new();
     private readonly List<Model3DObject> _models = new();
+    private readonly HashSet<Guid> _hiddenEntityIds = new();
 
     public CadDocument()
     {
@@ -710,6 +711,8 @@ public sealed class CadDocument : ICadDocument
 
     public bool IsEntityVisible(IEntity entity)
     {
+        if (_hiddenEntityIds.Contains(entity.Id.Value))
+            return false;
         if (FindLayer(entity.LayerId) is { IsVisible: false })
             return false;
         if (FindPartialDrawing(entity.PartialDrawingId) is { IsVisible: false })
@@ -719,11 +722,61 @@ public sealed class CadDocument : ICadDocument
 
     public bool IsEntityEditable(IEntity entity)
     {
+        // Hidden entities can't be picked or edited until shown again.
+        if (_hiddenEntityIds.Contains(entity.Id.Value))
+            return false;
         if (FindLayer(entity.LayerId) is { IsEditable: false })
             return false;
         if (FindPartialDrawing(entity.PartialDrawingId) is { IsEditable: false })
             return false;
         return true;
+    }
+
+    // ----- Isolate / temporary hide (#231) -----
+
+    /// <summary>True while any entities are temporarily hidden via isolate/hide.</summary>
+    public bool HasHiddenEntities => _hiddenEntityIds.Count > 0;
+
+    public bool IsEntityHidden(IEntity entity) => _hiddenEntityIds.Contains(entity.Id.Value);
+
+    /// <summary>Temporarily hides the given entities (transient, never persisted).</summary>
+    public void HideEntities(IEnumerable<IEntity> entities)
+    {
+        ArgumentNullException.ThrowIfNull(entities);
+
+        bool changed = false;
+        foreach (IEntity entity in entities)
+            changed |= _hiddenEntityIds.Add(entity.Id.Value);
+
+        if (changed)
+            Raise(new DocumentChangedEventArgs(DocumentChangeKind.VisibilityChanged));
+    }
+
+    /// <summary>Hides everything except <paramref name="entities"/> (Allplan "isolieren").</summary>
+    public void IsolateEntities(IEnumerable<IEntity> entities)
+    {
+        ArgumentNullException.ThrowIfNull(entities);
+
+        var keep = new HashSet<Guid>(entities.Select(e => e.Id.Value));
+        bool changed = false;
+        foreach (IEntity entity in _entities)
+        {
+            if (!keep.Contains(entity.Id.Value))
+                changed |= _hiddenEntityIds.Add(entity.Id.Value);
+        }
+
+        if (changed)
+            Raise(new DocumentChangedEventArgs(DocumentChangeKind.VisibilityChanged));
+    }
+
+    /// <summary>Clears the isolate/hide set so every entity is visible again.</summary>
+    public void ShowAllEntities()
+    {
+        if (_hiddenEntityIds.Count == 0)
+            return;
+
+        _hiddenEntityIds.Clear();
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.VisibilityChanged));
     }
 
     public StrokeStyle ResolveStroke(IEntity entity)
@@ -755,6 +808,7 @@ public sealed class CadDocument : ICadDocument
             return;
 
         _entities.Clear();
+        _hiddenEntityIds.Clear();
         Raise(new DocumentChangedEventArgs(DocumentChangeKind.Cleared));
     }
 
@@ -821,6 +875,7 @@ public sealed class CadDocument : ICadDocument
         foreach (IEntity entity in contents.Entities)
             _entities.Add(entity);
 
+        _hiddenEntityIds.Clear();
         CoordinateSystem.Origin = contents.Origin;
 
         HealOnLoad();
