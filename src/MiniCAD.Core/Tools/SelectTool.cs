@@ -35,6 +35,9 @@ public sealed class SelectTool : ToolBase
     private Point2D _lastPickPoint;
     private bool _hasLastPick;
 
+    // Pre-highlight of the entity under the cursor while idle (#226).
+    private IEntity? _hoverEntity;
+
     public override string Name => "Auswahl";
 
     protected override bool HasActiveOperation => _dragging || _gripEntity is not null || _boxing;
@@ -43,6 +46,8 @@ public sealed class SelectTool : ToolBase
     {
         if (input.Button != ToolButton.Left)
             return;
+
+        _hoverEntity = null; // an operation is starting; drop the pre-highlight
 
         // Grip editing takes precedence: if a single editable entity is selected and the
         // press lands on one of its grips, start a grip drag instead of a pick/move.
@@ -99,7 +104,10 @@ public sealed class SelectTool : ToolBase
         }
 
         if (!_dragging)
+        {
+            UpdateHover(input.World);
             return;
+        }
 
         Vector2D delta = input.World - _lastWorld;
         if (delta == Vector2D.Zero)
@@ -180,6 +188,7 @@ public sealed class SelectTool : ToolBase
         _dragging = false;
         _boxing = false;
         _hasLastPick = false;
+        _hoverEntity = null;
         _dragTargets = new List<IEntity>();
         ClearSnap();
     }
@@ -187,6 +196,10 @@ public sealed class SelectTool : ToolBase
     public override IReadOnlyList<OverlayItem> GetOverlay()
     {
         var items = new List<OverlayItem>();
+
+        // Pre-highlight the entity under the cursor while idle (#226).
+        if (!HasActiveOperation && _hoverEntity is { } hover && !Context.Selection.Contains(hover))
+            items.Add(new OverlayItem(hover, ToolStyle.Hover));
 
         if (_boxing)
         {
@@ -365,6 +378,17 @@ public sealed class SelectTool : ToolBase
         _hasLastPick = true;
         _lastPickPoint = world;
         return result;
+    }
+
+    /// <summary>Updates the idle pre-highlight to the entity under the cursor (#226).</summary>
+    private void UpdateHover(Point2D world)
+    {
+        IEntity? hover = PickCandidates(world).FirstOrDefault();
+        if (!ReferenceEquals(hover, _hoverEntity))
+        {
+            _hoverEntity = hover;
+            Context.RequestRedraw();
+        }
     }
 
     /// <summary>The editable entities under <paramref name="world"/>, topmost first.</summary>

@@ -11,6 +11,9 @@ public static class ToolStyle
     /// <summary>Highlight drawn over selected entities.</summary>
     public static readonly StrokeStyle Selection = new(new Color(255, 170, 40, 255), 2.5);
 
+    /// <summary>Subtle pre-highlight drawn over the entity under the cursor (#226).</summary>
+    public static readonly StrokeStyle Hover = new(new Color(255, 210, 130, 180), 2.0);
+
     /// <summary>Marker drawn at the current snap target.</summary>
     public static readonly StrokeStyle SnapMarker = new(new Color(120, 255, 140, 255), 1.5);
 

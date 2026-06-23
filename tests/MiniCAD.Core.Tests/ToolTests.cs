@@ -578,4 +578,27 @@ public class ToolTests
         tool.PointerDown(Click(x, y));
         tool.PointerUp(Click(x, y, ToolButton.None));
     }
+
+    [Fact]
+    public void SelectTool_HoverOverEntity_AddsPreHighlightOverlay()
+    {
+        (CadDocument doc, _) = Setup<SelectTool>(out SelectTool tool);
+        var line = new LineEntity(new Point2D(0, 0), new Point2D(10, 0));
+        doc.AddEntity(line);
+
+        tool.PointerMove(Click(5, 0, ToolButton.None)); // hover over the line while idle
+
+        tool.GetOverlay().Should().Contain(o => ReferenceEquals(o.Entity, line));
+    }
+
+    [Fact]
+    public void SelectTool_HoverOnEmptySpace_HasNoHighlight()
+    {
+        (CadDocument doc, _) = Setup<SelectTool>(out SelectTool tool);
+        doc.AddEntity(new LineEntity(new Point2D(0, 0), new Point2D(10, 0)));
+
+        tool.PointerMove(Click(5, 50, ToolButton.None)); // far from the line
+
+        tool.GetOverlay().Should().BeEmpty();
+    }
 }
