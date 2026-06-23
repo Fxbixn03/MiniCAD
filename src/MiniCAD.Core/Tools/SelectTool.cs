@@ -31,6 +31,10 @@ public sealed class SelectTool : ToolBase
     private Point2D _boxStart;
     private Point2D _boxCurrent;
 
+    // Pick cycling: repeated clicks at the same spot step through overlapping objects (#227).
+    private Point2D _lastPickPoint;
+    private bool _hasLastPick;
+
     public override string Name => "Auswahl";
 
     protected override bool HasActiveOperation => _dragging || _gripEntity is not null || _boxing;
@@ -45,11 +49,12 @@ public sealed class SelectTool : ToolBase
         if (TryStartGripDrag(input.World))
             return;
 
-        IEntity? hit = PickTopmost(input.World);
+        IEntity? hit = PickCycling(input.World, input.HasShift);
         if (hit is null)
         {
             // Empty space: begin a rubber-band box. A drag selects by window/crossing; a click
             // without a drag clears the selection (resolved on release).
+            _hasLastPick = false;
             _boxing = true;
             _boxStart = input.World;
             _boxCurrent = input.World;
@@ -142,6 +147,7 @@ public sealed class SelectTool : ToolBase
             // The move is already applied; record the net translation so undo can reverse it.
             Context.Push(new TransformEntitiesCommand(
                 Context.Document, _dragTargets, Matrix2D.Translation(_totalDelta)));
+            _hasLastPick = false; // a move breaks the same-spot cycle anchor
         }
 
         _dragTargets = new List<IEntity>();
@@ -173,6 +179,7 @@ public sealed class SelectTool : ToolBase
         _gripBefore = null;
         _dragging = false;
         _boxing = false;
+        _hasLastPick = false;
         _dragTargets = new List<IEntity>();
         ClearSnap();
     }
@@ -330,12 +337,44 @@ public sealed class SelectTool : ToolBase
         Context.Selection.Clear();
     }
 
-    private IEntity? PickTopmost(Point2D world)
+    /// <summary>
+    /// Picks the entity under <paramref name="world"/>, cycling through stacked objects: clicking
+    /// the same spot again (with the topmost already selected) steps to the next one underneath, so
+    /// overlapping geometry stays reachable (#227). Shift-picks and moved clicks always take the
+    /// topmost.
+    /// </summary>
+    private IEntity? PickCycling(Point2D world, bool hasShift)
+    {
+        List<IEntity> candidates = PickCandidates(world);
+        if (candidates.Count == 0)
+        {
+            _hasLastPick = false;
+            return null;
+        }
+
+        IEntity result = candidates[0];
+        if (!hasShift && candidates.Count > 1 && _hasLastPick
+            && _lastPickPoint.DistanceTo(world) <= Context.PickTolerance
+            && Context.Selection.Count == 1)
+        {
+            int current = candidates.IndexOf(Context.Selection.Items[0]);
+            if (current >= 0)
+                result = candidates[(current + 1) % candidates.Count];
+        }
+
+        _hasLastPick = true;
+        _lastPickPoint = world;
+        return result;
+    }
+
+    /// <summary>The editable entities under <paramref name="world"/>, topmost first.</summary>
+    private List<IEntity> PickCandidates(Point2D world)
     {
         double tolerance = Context.PickTolerance;
         IReadOnlyList<IEntity> entities = Context.Document.Entities;
 
-        // Iterate back-to-front so the visually topmost entity wins. Only editable entities
+        var hits = new List<IEntity>();
+        // Iterate back-to-front so the visually topmost entity comes first. Only editable entities
         // (Active layer and Active Teilbild) can be picked for selection/editing.
         for (int i = entities.Count - 1; i >= 0; i--)
         {
@@ -344,9 +383,9 @@ public sealed class SelectTool : ToolBase
                 continue;
 
             if (entity.HitTest(world, tolerance))
-                return entity;
+                hits.Add(entity);
         }
 
-        return null;
+        return hits;
     }
 }

@@ -537,4 +537,45 @@ public class ToolTests
         line.Start.Should().Be(new Point2D(5, 5));
         line.End.Should().Be(new Point2D(7, 5));
     }
+
+    [Fact]
+    public void SelectTool_RepeatedClickSameSpot_CyclesOverlappingObjects()
+    {
+        (CadDocument doc, TestToolContext ctx) = Setup<SelectTool>(out SelectTool tool);
+        var lower = new LineEntity(new Point2D(0, 0), new Point2D(10, 0));
+        var upper = new LineEntity(new Point2D(0, 0), new Point2D(8, 0));
+        doc.AddEntity(lower);
+        doc.AddEntity(upper);
+
+        // (2,0) lies on both lines but is no vertex/midpoint grip of either.
+        ClickAt(tool, 2, 0);
+        ctx.Selection.Items.Should().ContainSingle().Which.Should().BeSameAs(upper, "topmost first");
+
+        ClickAt(tool, 2, 0);
+        ctx.Selection.Items.Should().ContainSingle().Which.Should().BeSameAs(lower, "cycles to the one underneath");
+
+        ClickAt(tool, 2, 0);
+        ctx.Selection.Items.Should().ContainSingle().Which.Should().BeSameAs(upper, "wraps around");
+    }
+
+    [Fact]
+    public void SelectTool_ClickingDifferentSpot_DoesNotCycle()
+    {
+        (CadDocument doc, TestToolContext ctx) = Setup<SelectTool>(out SelectTool tool);
+        var lower = new LineEntity(new Point2D(0, 0), new Point2D(10, 0));
+        var upper = new LineEntity(new Point2D(0, 0), new Point2D(8, 0));
+        doc.AddEntity(lower);
+        doc.AddEntity(upper);
+
+        ClickAt(tool, 2, 0);
+        ClickAt(tool, 3, 0); // a new spot resets the cycle -> topmost again
+
+        ctx.Selection.Items.Should().ContainSingle().Which.Should().BeSameAs(upper);
+    }
+
+    private static void ClickAt(SelectTool tool, double x, double y)
+    {
+        tool.PointerDown(Click(x, y));
+        tool.PointerUp(Click(x, y, ToolButton.None));
+    }
 }
