@@ -54,6 +54,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly BlockInsertTool _blockInsertTool = new();
     private readonly ParametricInsertTool _parametricInsertTool = new();
     private readonly SetNullPointTool _setNullPointTool = new();
+    private readonly NorthArrowTool _northArrowTool = new();
+    private readonly ScaleBarTool _scaleBarTool = new();
 
     // Editing tools operating on the current selection (Epic: Bearbeitungswerkzeuge).
     private readonly MoveTool _moveTool = new(copy: false);
@@ -385,6 +387,7 @@ public partial class MainWindowViewModel : ViewModelBase
         || tool == _linearDimensionTool || tool == _angularDimensionTool
         || tool == _elevationDimensionTool || tool == _ordinateDimensionTool
         || tool == _blockInsertTool || tool == _parametricInsertTool || tool == _setNullPointTool
+        || tool == _northArrowTool || tool == _scaleBarTool
         || tool == _moveTool || tool == _copyTool || tool == _rotateTool
         || tool == _mirrorTool || tool == _scaleTool || tool == _offsetTool;
 
@@ -963,6 +966,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void ActivateMultiline() => ActivateDrawingTool(_multilineTool);
+
+    [RelayCommand]
+    private void ActivateNorthArrow() => ActivateDrawingTool(_northArrowTool);
+
+    [RelayCommand]
+    private void ActivateScaleBar() => ActivateDrawingTool(_scaleBarTool);
 
     [RelayCommand]
     private void ActivatePolyline() => ActivateDrawingTool(_polylineTool);

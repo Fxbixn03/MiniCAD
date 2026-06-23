@@ -512,6 +512,19 @@ public static class DocumentMapper
                 Height = beam.Height,
                 BaseElevation = beam.BaseElevation,
             },
+            NorthArrowEntity north => new NorthArrowDto
+            {
+                Position = ToDto(north.Position),
+                Size = north.Size,
+                Direction = north.Direction,
+            },
+            ScaleBarEntity scaleBar => new ScaleBarDto
+            {
+                Start = ToDto(scaleBar.Start),
+                End = ToDto(scaleBar.End),
+                Divisions = scaleBar.Divisions,
+                Height = scaleBar.Height,
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -594,6 +607,9 @@ public static class DocumentMapper
                 slab.Outline.Select(FromDto), slab.Thickness, slab.BaseElevation),
             BeamDto beam => new BeamEntity(
                 FromDto(beam.Start), FromDto(beam.End), beam.Width, beam.Height, beam.BaseElevation),
+            NorthArrowDto north => new NorthArrowEntity(FromDto(north.Position), north.Size, north.Direction),
+            ScaleBarDto scaleBar => new ScaleBarEntity(
+                FromDto(scaleBar.Start), FromDto(scaleBar.End), scaleBar.Divisions, scaleBar.Height),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

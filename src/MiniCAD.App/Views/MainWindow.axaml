@@ -134,6 +134,9 @@
                             <Separator />
                             <MenuItem Header="_Standard-Layer einfügen" Command="{Binding AddStandardLayersCommand}" />
                             <Separator />
+                            <MenuItem Header="_Nordpfeil" Command="{Binding ActivateNorthArrowCommand}" />
+                            <MenuItem Header="_Maßstabsbalken" Command="{Binding ActivateScaleBarCommand}" />
+                            <Separator />
                             <MenuItem Header="3D-_Quader einfügen" Command="{Binding InsertPrimitive3DCommand}" CommandParameter="Box" />
                             <MenuItem Header="_Extrudieren (2D-Profil → 3D)" Command="{Binding ExtrudeSelectionCommand}" />
                             <MenuItem Header="_Rotationskörper (Revolve)" Command="{Binding RevolveSelectionCommand}" />

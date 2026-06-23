@@ -251,6 +251,8 @@ public sealed class Model3DDto
 [JsonDerivedType(typeof(ColumnDto), "column")]
 [JsonDerivedType(typeof(SlabDto), "slab")]
 [JsonDerivedType(typeof(BeamDto), "beam")]
+[JsonDerivedType(typeof(NorthArrowDto), "northarrow")]
+[JsonDerivedType(typeof(ScaleBarDto), "scalebar")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -523,4 +525,19 @@ public sealed class BeamDto : EntityDto
     public double Width { get; set; } = 240.0;
     public double Height { get; set; } = 400.0;
     public double BaseElevation { get; set; } = 2500.0;
+}
+
+public sealed class NorthArrowDto : EntityDto
+{
+    public PointDto Position { get; set; } = new();
+    public double Size { get; set; } = 60.0;
+    public double Direction { get; set; } = Math.PI / 2.0;
+}
+
+public sealed class ScaleBarDto : EntityDto
+{
+    public PointDto Start { get; set; } = new();
+    public PointDto End { get; set; } = new();
+    public int Divisions { get; set; } = 4;
+    public double Height { get; set; } = 20.0;
 }
