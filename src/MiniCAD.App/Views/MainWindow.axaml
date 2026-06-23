@@ -102,6 +102,13 @@
                             <MenuItem Header="A_usblenden" Command="{Binding HideSelectionCommand}" />
                             <MenuItem Header="Alle _einblenden" Command="{Binding ShowAllCommand}" />
                             <Separator />
+                            <MenuItem Header="Reihenfolge">
+                                <MenuItem Header="Ganz nach _vorne" Command="{Binding BringToFrontCommand}" />
+                                <MenuItem Header="Ganz nach _hinten" Command="{Binding SendToBackCommand}" />
+                                <MenuItem Header="Eine Ebene nach _vorne" Command="{Binding BringForwardCommand}" />
+                                <MenuItem Header="Eine Ebene nach h_inten" Command="{Binding SendBackwardCommand}" />
+                            </MenuItem>
+                            <Separator />
                             <MenuItem Header="_Gruppieren" Command="{Binding GroupSelectionCommand}" InputGesture="Ctrl+G" />
                             <MenuItem Header="Gruppierung auf_heben" Command="{Binding UngroupSelectionCommand}" InputGesture="Ctrl+Shift+G" />
                             <MenuItem Header="In _Hilfskonstruktion umwandeln" Command="{Binding ConvertConstructionCommand}" />

@@ -111,6 +111,24 @@ public sealed class CadDocument : ICadDocument
     public void NotifyEntityModified(IEntity entity)
         => Raise(DocumentChangedEventArgs.ForEntity(DocumentChangeKind.EntityModified, entity));
 
+    /// <summary>The entities in their current paint order (a copy; index 0 is drawn first/back).</summary>
+    public IReadOnlyList<IEntity> GetEntityOrder() => _entities.ToList();
+
+    /// <summary>
+    /// Replaces the paint order with <paramref name="order"/>, which must be a permutation of the
+    /// current entities (same instances). Used by the draw-order commands (#197).
+    /// </summary>
+    public void SetEntityOrder(IReadOnlyList<IEntity> order)
+    {
+        ArgumentNullException.ThrowIfNull(order);
+        if (order.Count != _entities.Count)
+            throw new ArgumentException("The new order must contain exactly the current entities.", nameof(order));
+
+        _entities.Clear();
+        _entities.AddRange(order);
+        Raise(new DocumentChangedEventArgs(DocumentChangeKind.EntityModified));
+    }
+
     // ----- Layers -----
 
     public Layer AddLayer(string name, StrokeStyle stroke)

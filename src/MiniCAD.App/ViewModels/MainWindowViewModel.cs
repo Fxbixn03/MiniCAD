@@ -126,6 +126,10 @@ public partial class MainWindowViewModel : ViewModelBase
             SelectSameTypeCommand.NotifyCanExecuteChanged();
             IsolateSelectionCommand.NotifyCanExecuteChanged();
             HideSelectionCommand.NotifyCanExecuteChanged();
+            BringToFrontCommand.NotifyCanExecuteChanged();
+            SendToBackCommand.NotifyCanExecuteChanged();
+            BringForwardCommand.NotifyCanExecuteChanged();
+            SendBackwardCommand.NotifyCanExecuteChanged();
             ExplodeSelectionCommand.NotifyCanExecuteChanged();
             JoinSelectionCommand.NotifyCanExecuteChanged();
             ExtrudeSelectionCommand.NotifyCanExecuteChanged();
@@ -730,6 +734,35 @@ public partial class MainWindowViewModel : ViewModelBase
 
         Tools.Selection.Set(matches);
         StatusMessage = $"{matches.Count} ähnliche Objekt(e) ausgewählt.";
+    }
+
+    /// <summary>Moves the selection to the very front of the paint order (#197).</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void BringToFront() => Reorder(DrawOrder.BringToFront);
+
+    /// <summary>Moves the selection to the very back of the paint order (#197).</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void SendToBack() => Reorder(DrawOrder.SendToBack);
+
+    /// <summary>Moves the selection one step toward the front (#197).</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void BringForward() => Reorder(DrawOrder.BringForward);
+
+    /// <summary>Moves the selection one step toward the back (#197).</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void SendBackward() => Reorder(DrawOrder.SendBackward);
+
+    private void Reorder(Func<IReadOnlyList<IEntity>, IReadOnlyCollection<IEntity>, IReadOnlyList<IEntity>> op)
+    {
+        if (Tools.Selection.IsEmpty)
+            return;
+
+        IReadOnlyList<IEntity> before = Document.GetEntityOrder();
+        IReadOnlyList<IEntity> after = op(before, Tools.Selection.Items.ToList());
+        if (before.SequenceEqual(after))
+            return;
+
+        _commands.Execute(new ReorderEntitiesCommand(Document, before, after));
     }
 
     /// <summary>True while some objects are temporarily isolated/hidden (#231).</summary>
