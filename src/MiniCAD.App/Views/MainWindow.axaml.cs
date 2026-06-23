@@ -459,6 +459,14 @@ public partial class MainWindow : Window
         new DocumentInfoWindow(viewModel.Document).Show(this);
     }
 
+    private void OnFindReplace(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel is not { } viewModel)
+            return;
+
+        new FindReplaceWindow(viewModel).Show(this);
+    }
+
     private async void OnPurge(object? sender, RoutedEventArgs e)
     {
         if (ViewModel is not { } viewModel)

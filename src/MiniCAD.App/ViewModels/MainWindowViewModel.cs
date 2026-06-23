@@ -701,6 +701,40 @@ public partial class MainWindowViewModel : ViewModelBase
         StatusMessage = $"Bereinigt: {result.NetRemoved} Objekt(e) entfernt.";
     }
 
+    /// <summary>Counts the visible text objects containing <paramref name="query"/> (#238).</summary>
+    public int CountTextMatches(string query, bool matchCase, bool wholeWord)
+        => TextSearch.Find(Document.Entities.Where(Document.IsEntityVisible), query, matchCase, wholeWord).Count;
+
+    /// <summary>
+    /// Replaces <paramref name="search"/> with <paramref name="replacement"/> in every visible text
+    /// object, as one undoable step; returns how many objects changed (#238).
+    /// </summary>
+    public int ReplaceAllText(string search, string replacement, bool matchCase, bool wholeWord)
+    {
+        if (string.IsNullOrEmpty(search))
+            return 0;
+
+        var commands = new List<IUndoableCommand>();
+        foreach (ITextEntity text in TextSearch.Find(Document.Entities.Where(Document.IsEntityVisible), search, matchCase, wholeWord))
+        {
+            string oldText = text.Text;
+            string newText = TextSearch.Replace(oldText, search, replacement, matchCase, wholeWord);
+            if (newText == oldText)
+                continue;
+
+            ITextEntity captured = text;
+            commands.Add(new SetEntityPropertyCommand("Text ersetzen", Document, (IEntity)text,
+                () => captured.Text = newText, () => captured.Text = oldText));
+        }
+
+        if (commands.Count == 0)
+            return 0;
+
+        _commands.Execute(commands.Count == 1 ? commands[0] : new CompositeCommand("Text ersetzen", commands));
+        StatusMessage = $"{commands.Count} Textobjekt(e) ersetzt.";
+        return commands.Count;
+    }
+
     /// <summary>
     /// Removes the unused definitions selected by <paramref name="options"/> via the undo history,
     /// reporting how many of each kind were purged (#233).
