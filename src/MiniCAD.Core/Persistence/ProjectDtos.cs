@@ -254,6 +254,8 @@ public sealed class Model3DDto
 [JsonDerivedType(typeof(NorthArrowDto), "northarrow")]
 [JsonDerivedType(typeof(ScaleBarDto), "scalebar")]
 [JsonDerivedType(typeof(MultiLeaderDto), "multileader")]
+[JsonDerivedType(typeof(ConstructionLineDto), "xline")]
+[JsonDerivedType(typeof(RayDto), "ray")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -550,4 +552,16 @@ public sealed class MultiLeaderDto : EntityDto
     public string Text { get; set; } = string.Empty;
     public double TextHeight { get; set; } = 12.0;
     public double ArrowSize { get; set; } = 12.0;
+}
+
+public sealed class ConstructionLineDto : EntityDto
+{
+    public PointDto BasePoint { get; set; } = new();
+    public double Direction { get; set; }
+}
+
+public sealed class RayDto : EntityDto
+{
+    public PointDto BasePoint { get; set; } = new();
+    public double Direction { get; set; }
 }

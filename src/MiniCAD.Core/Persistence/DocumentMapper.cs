@@ -533,6 +533,16 @@ public static class DocumentMapper
                 TextHeight = multiLeader.TextHeight,
                 ArrowSize = multiLeader.ArrowSize,
             },
+            ConstructionLineEntity xline => new ConstructionLineDto
+            {
+                BasePoint = ToDto(xline.BasePoint),
+                Direction = xline.DirectionAngle,
+            },
+            RayEntity ray => new RayDto
+            {
+                BasePoint = ToDto(ray.BasePoint),
+                Direction = ray.DirectionAngle,
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -621,6 +631,8 @@ public static class DocumentMapper
             MultiLeaderDto multiLeader => new MultiLeaderEntity(
                 FromDto(multiLeader.Landing), multiLeader.Tips.Select(FromDto), multiLeader.Text,
                 multiLeader.TextHeight, multiLeader.ArrowSize),
+            ConstructionLineDto xline => new ConstructionLineEntity(FromDto(xline.BasePoint), xline.Direction),
+            RayDto ray => new RayEntity(FromDto(ray.BasePoint), ray.Direction),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 

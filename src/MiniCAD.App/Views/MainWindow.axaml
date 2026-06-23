@@ -382,6 +382,19 @@
             </StackPanel>
         </Border>
 
+        <!-- Inline construction-line options (line vs ray), shown while that tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsConstructionLineActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding ConstructionLineOptions}" x:DataType="vm:ConstructionLineOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="HILFSLINIE" VerticalAlignment="Center" />
+                <ToggleButton IsChecked="{Binding Ray}" Content="{Binding ModeLabel}" MinWidth="100"
+                              ToolTip.Tip="Hilfslinie (beidseitig unendlich) ⟷ Strahl (halb-unendlich)" />
+                <TextBlock Text="Basispunkt klicken, dann Richtung" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
+        </Border>
+
         <!-- Inline double-line options (width + justification), shown while the multiline tool is active. -->
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
                 BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"

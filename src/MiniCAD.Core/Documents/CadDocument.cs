@@ -814,6 +814,10 @@ public sealed class CadDocument : ICadDocument
             if (!IsEntityVisible(entity))
                 continue;
 
+            // Infinite construction lines/rays (#195) must not blow up the drawing extent.
+            if (entity is IUnboundedEntity)
+                continue;
+
             bounds = bounds is { } current ? current.Union(entity.Bounds) : entity.Bounds;
         }
 
