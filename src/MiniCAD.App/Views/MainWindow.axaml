@@ -95,6 +95,8 @@
                             </MenuItem>
                             <MenuItem Header="_Array (Raster / polar)" Command="{Binding ActivateArrayCommand}" InputGesture="Shift+A" />
                             <Separator />
+                            <MenuItem Header="_Lasso-Auswahl (Freihand)" ToggleType="CheckBox" IsChecked="{Binding LassoSelection}" />
+                            <Separator />
                             <MenuItem Header="Ä_hnliche auswählen (Typ + Layer)" Command="{Binding SelectSimilarCommand}" />
                             <MenuItem Header="Gleichen _Typ auswählen" Command="{Binding SelectSameTypeCommand}" />
                             <Separator />

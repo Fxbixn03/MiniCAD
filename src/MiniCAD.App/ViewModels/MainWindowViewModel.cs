@@ -815,6 +815,12 @@ public partial class MainWindowViewModel : ViewModelBase
         _commands.Execute(new ReorderEntitiesCommand(Document, before, after));
     }
 
+    /// <summary>When on, an empty-space drag selects with a freehand lasso instead of a box (#228).</summary>
+    [ObservableProperty]
+    private bool _lassoSelection;
+
+    partial void OnLassoSelectionChanged(bool value) => _selectTool.Lasso = value;
+
     /// <summary>True while some objects are temporarily isolated/hidden (#231).</summary>
     public bool HasHiddenEntities => Document.HasHiddenEntities;
 

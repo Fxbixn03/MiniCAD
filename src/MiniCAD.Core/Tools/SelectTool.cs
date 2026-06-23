@@ -38,6 +38,12 @@ public sealed class SelectTool : ToolBase
     // Pre-highlight of the entity under the cursor while idle (#226).
     private IEntity? _hoverEntity;
 
+    // Freehand lasso selection (#228): the recorded drag path when Lasso is on.
+    private readonly List<Point2D> _lassoPath = new();
+
+    /// <summary>When true an empty-space drag selects with a freehand lasso instead of a box (#228).</summary>
+    public bool Lasso { get; set; }
+
     public override string Name => "Auswahl";
 
     protected override bool HasActiveOperation => _dragging || _gripEntity is not null || _boxing;
@@ -63,6 +69,8 @@ public sealed class SelectTool : ToolBase
             _boxing = true;
             _boxStart = input.World;
             _boxCurrent = input.World;
+            _lassoPath.Clear();
+            _lassoPath.Add(input.World);
             return;
         }
 
@@ -91,6 +99,8 @@ public sealed class SelectTool : ToolBase
         if (_boxing)
         {
             _boxCurrent = input.World;
+            if (Lasso)
+                _lassoPath.Add(input.World);
             Context.RequestRedraw();
             return;
         }
@@ -189,6 +199,7 @@ public sealed class SelectTool : ToolBase
         _boxing = false;
         _hasLastPick = false;
         _hoverEntity = null;
+        _lassoPath.Clear();
         _dragTargets = new List<IEntity>();
         ClearSnap();
     }
@@ -203,9 +214,16 @@ public sealed class SelectTool : ToolBase
 
         if (_boxing)
         {
-            Rect2D box = Rect2D.FromPoints(_boxStart, _boxCurrent);
-            var marker = PolylineEntity.Rectangle(box.Min, box.Max);
-            items.Add(new OverlayItem(marker, IsCrossingDrag ? ToolStyle.CrossingBox : ToolStyle.WindowBox));
+            var style = IsCrossingDrag ? ToolStyle.CrossingBox : ToolStyle.WindowBox;
+            if (Lasso && _lassoPath.Count >= 2)
+            {
+                items.Add(new OverlayItem(new PolylineEntity(_lassoPath, isClosed: true), style));
+            }
+            else
+            {
+                Rect2D box = Rect2D.FromPoints(_boxStart, _boxCurrent);
+                items.Add(new OverlayItem(PolylineEntity.Rectangle(box.Min, box.Max), style));
+            }
         }
 
         if (SingleEditableSelection() is { } editable)
@@ -224,9 +242,19 @@ public sealed class SelectTool : ToolBase
     private void FinishBox(bool additive)
     {
         _boxing = false;
+        double slack = Context.PickTolerance;
+
+        // A freehand lasso of meaningful size selects by polygon containment/crossing (#228).
+        if (Lasso && _lassoPath.Count >= 3 && LassoExtent() > slack)
+        {
+            FinishLasso(additive);
+            _lassoPath.Clear();
+            return;
+        }
+
+        _lassoPath.Clear();
 
         // A box smaller than the pick tolerance is really a click on empty space.
-        double slack = Context.PickTolerance;
         if (Math.Abs(_boxCurrent.X - _boxStart.X) < slack && Math.Abs(_boxCurrent.Y - _boxStart.Y) < slack)
         {
             if (!additive)
@@ -254,6 +282,36 @@ public sealed class SelectTool : ToolBase
 
         ExpandSelectionToGroups();
         Context.RequestRedraw();
+    }
+
+    private void FinishLasso(bool additive)
+    {
+        // Drawn right→left is a crossing lasso (also takes touched objects), like the box.
+        bool crossing = _lassoPath[^1].X < _lassoPath[0].X;
+
+        if (!additive)
+            Context.Selection.Clear();
+
+        IEnumerable<IEntity> editable = Context.Document.Entities.Where(Context.Document.IsEntityEditable);
+        foreach (IEntity entity in LassoSelection.Select(_lassoPath, editable, crossing))
+            Context.Selection.Add(entity);
+
+        ExpandSelectionToGroups();
+        Context.RequestRedraw();
+    }
+
+    private double LassoExtent()
+    {
+        double minX = double.MaxValue, minY = double.MaxValue, maxX = double.MinValue, maxY = double.MinValue;
+        foreach (Point2D p in _lassoPath)
+        {
+            minX = Math.Min(minX, p.X);
+            minY = Math.Min(minY, p.Y);
+            maxX = Math.Max(maxX, p.X);
+            maxY = Math.Max(maxY, p.Y);
+        }
+
+        return Math.Max(maxX - minX, maxY - minY);
     }
 
     /// <summary>Pulls in every member of any group a selected entity belongs to.</summary>
