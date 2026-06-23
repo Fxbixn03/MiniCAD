@@ -40,6 +40,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly EllipseTool _ellipseTool = new();
     private readonly RegularPolygonTool _polygonTool = new();
     private readonly DonutTool _donutTool = new();
+    private readonly MultilineTool _multilineTool = new();
     private readonly PolylineTool _polylineTool = new();
     private readonly SplineTool _splineTool = new();
     private readonly PointTool _pointTool = new();
@@ -88,6 +89,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ArcOptions = new ArcOptionsViewModel(_arcTool);
         PolygonOptions = new PolygonOptionsViewModel(_polygonTool);
         DonutOptions = new DonutOptionsViewModel(_donutTool);
+        MultilineOptions = new MultilineOptionsViewModel(_multilineTool);
         PointOptions = new PointOptionsViewModel(_pointTool);
         TextOptions = new TextOptionsViewModel(_textTool, Document);
         LeaderOptions = new LeaderOptionsViewModel(_leaderTool);
@@ -217,6 +219,7 @@ public partial class MainWindowViewModel : ViewModelBase
             Btn("polygon", "Vieleck", "Regelmäßiges n-Eck", "M12,3 L20,7.5 L20,16.5 L12,21 L4,16.5 L4,7.5 Z", ActivatePolygonCommand, () => IsPolygonActive),
             Btn("donut", "Donut", "Donut / Ring", "M3,12 a9,9 0 1 0 18,0 a9,9 0 1 0 -18,0 M8,12 a4,4 0 1 0 8,0 a4,4 0 1 0 -8,0", ActivateDonutCommand, () => IsDonutActive),
             Btn("polyline", "Polylinie", "Polylinie  ·  P", "Icon.Polyline", ActivatePolylineCommand, () => IsPolylineActive),
+            Btn("multiline", "Doppellinie", "Doppel-/Parallellinie", "M3,9 H21 M3,15 H21", ActivateMultilineCommand, () => IsMultilineActive),
             Btn("spline", "Spline", "Spline  ·  K", "Icon.Spline", ActivateSplineCommand, () => IsSplineActive),
             Btn("point", "Punkt", "Punkt / Knoten  ·  N", "Icon.Point", ActivatePointCommand, () => IsPointActive),
             Btn("text", "Text", "Text / Beschriftung  ·  X", "Icon.Text", ActivateTextCommand, () => IsTextActive),
@@ -330,6 +333,9 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Inline donut options (inner radius), shown while the donut tool is active.</summary>
     public DonutOptionsViewModel DonutOptions { get; }
 
+    /// <summary>Inline double-line options (width / justification), shown while the multiline tool is active.</summary>
+    public MultilineOptionsViewModel MultilineOptions { get; }
+
     /// <summary>Inline marker style/size, shown while the point tool is active.</summary>
     public PointOptionsViewModel PointOptions { get; }
 
@@ -370,7 +376,7 @@ public partial class MainWindowViewModel : ViewModelBase
         => tool == _lineTool || tool == _wallTool || tool == _openingTool
         || tool == _columnTool || tool == _slabTool || tool == _beamTool || tool == _rectangleTool || tool == _circleTool
         || tool == _arcTool || tool == _ellipseTool || tool == _polygonTool || tool == _donutTool
-        || tool == _polylineTool || tool == _splineTool
+        || tool == _multilineTool || tool == _polylineTool || tool == _splineTool
         || tool == _pointTool || tool == _textTool || tool == _leaderTool
         || tool == _linearDimensionTool || tool == _angularDimensionTool
         || tool == _elevationDimensionTool || tool == _ordinateDimensionTool
@@ -486,6 +492,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsEllipseActive => Tools.ActiveTool == _ellipseTool;
     public bool IsPolygonActive => Tools.ActiveTool == _polygonTool;
     public bool IsDonutActive => Tools.ActiveTool == _donutTool;
+    public bool IsMultilineActive => Tools.ActiveTool == _multilineTool;
     public bool IsPolylineActive => Tools.ActiveTool == _polylineTool;
     public bool IsSplineActive => Tools.ActiveTool == _splineTool;
     public bool IsPointActive => Tools.ActiveTool == _pointTool;
@@ -525,6 +532,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsEllipseActive));
         OnPropertyChanged(nameof(IsPolygonActive));
         OnPropertyChanged(nameof(IsDonutActive));
+        OnPropertyChanged(nameof(IsMultilineActive));
         OnPropertyChanged(nameof(IsPolylineActive));
         OnPropertyChanged(nameof(IsSplineActive));
         OnPropertyChanged(nameof(IsPointActive));
@@ -919,6 +927,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void ActivateDonut() => ActivateDrawingTool(_donutTool);
+
+    [RelayCommand]
+    private void ActivateMultiline() => ActivateDrawingTool(_multilineTool);
 
     [RelayCommand]
     private void ActivatePolyline() => ActivateDrawingTool(_polylineTool);

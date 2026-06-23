@@ -369,6 +369,21 @@
             </StackPanel>
         </Border>
 
+        <!-- Inline double-line options (width + justification), shown while the multiline tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsMultilineActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding MultilineOptions}" x:DataType="vm:MultilineOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="DOPPELLINIE" VerticalAlignment="Center" />
+                <TextBlock Text="Abstand" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                <TextBox Width="70" Text="{Binding WidthText}" FontFamily="{StaticResource Font.Mono}" />
+                <TextBlock Text="Justierung" Foreground="{DynamicResource Brush.TextMuted}" VerticalAlignment="Center" />
+                <ComboBox MinWidth="100" ItemsSource="{Binding JustificationOptions}" SelectedItem="{Binding Justification}" />
+                <TextBlock Text="Punkte setzen, ⏎/Rechtsklick/Doppelklick beendet" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
+        </Border>
+
         <!-- Inline fillet/chamfer parameters, shown while that tool is active. -->
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
                 BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
