@@ -665,6 +665,23 @@ public partial class MainWindowViewModel : ViewModelBase
         StatusMessage = $"Bereinigt: {result.NetRemoved} Objekt(e) entfernt.";
     }
 
+    /// <summary>
+    /// Removes the unused definitions selected by <paramref name="options"/> via the undo history,
+    /// reporting how many of each kind were purged (#233).
+    /// </summary>
+    public void ApplyPurge(PurgeOptions options)
+    {
+        PurgeReport report = Document.FindPurgeable(options);
+        if (report.IsEmpty)
+        {
+            StatusMessage = "Bereinigen: keine ungenutzten Definitionen gefunden.";
+            return;
+        }
+
+        _commands.Execute(new PurgeCommand(Document, report));
+        StatusMessage = $"Bereinigt: {report.Summary()}.";
+    }
+
     /// <summary>Removes the selected entities from their group.</summary>
     [RelayCommand(CanExecute = nameof(HasSelection))]
     private void UngroupSelection()

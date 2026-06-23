@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:docs="using:MiniCAD.Core.Documents"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="520" d:DesignHeight="440"
+        x:Class="MiniCAD.App.Views.DocumentAuditWindow"
+        Title="Prüfen &amp; Reparieren"
+        Width="520" Height="440"
+        Background="{DynamicResource Brush.SurfaceApp}"
+        Foreground="{DynamicResource Brush.TextBody}"
+        CanResize="True" WindowStartupLocation="CenterOwner">
+    <DockPanel Margin="14">
+        <TextBlock DockPanel.Dock="Top" x:Name="SummaryText" FontWeight="SemiBold" Margin="0,0,0,8" />
+
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="Erneut prüfen" Click="OnRecheck" />
+            <Button Content="Prüfen &amp; reparieren" Click="OnRepair" />
+            <Button Content="Schließen" Click="OnClose" />
+        </StackPanel>
+
+        <Border Background="{DynamicResource Brush.SurfacePanel}" CornerRadius="4">
+            <ScrollViewer Padding="10">
+                <ItemsControl x:Name="FindingsHost">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="docs:AuditFinding">
+                            <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,3">
+                                <TextBlock Grid.Column="0" Text="{Binding Severity}" Width="70"
+                                           Foreground="{DynamicResource Brush.TextMuted}" />
+                                <TextBlock Grid.Column="1" Text="{Binding Description}" TextWrapping="Wrap" />
+                                <TextBlock Grid.Column="2" Text="repariert" Margin="8,0,0,0"
+                                           IsVisible="{Binding Repaired}" Foreground="{DynamicResource Brush.StatusOk}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+    </DockPanel>
+</Window>

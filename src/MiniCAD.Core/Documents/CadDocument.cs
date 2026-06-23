@@ -615,6 +615,97 @@ public sealed class CadDocument : ICadDocument
         return PatternLibrary.Find(id);
     }
 
+    // ----- Document maintenance (Purge / #233) -----
+
+    /// <summary>Returns the unused definitions a purge would remove, without mutating anything.</summary>
+    public PurgeReport FindPurgeable(PurgeOptions? options = null) => PurgeAnalyzer.FindPurgeable(this, options);
+
+    /// <summary>Removes all unused definitions per <paramref name="options"/>; returns what was removed.</summary>
+    public PurgeReport PurgeUnused(PurgeOptions? options = null)
+    {
+        PurgeReport report = FindPurgeable(options);
+        RemovePurged(report);
+        return report;
+    }
+
+    /// <summary>Removes exactly the definitions listed in <paramref name="report"/> (the purge step).</summary>
+    public void RemovePurged(PurgeReport report)
+    {
+        ArgumentNullException.ThrowIfNull(report);
+
+        foreach (Layer layer in report.Layers)
+        {
+            _layers.Remove(layer);
+            _layersById.Remove(layer.Id);
+        }
+
+        foreach (PartialDrawing partialDrawing in report.PartialDrawings)
+        {
+            _partialDrawings.Remove(partialDrawing);
+            _partialDrawingsById.Remove(partialDrawing.Id);
+        }
+
+        foreach (TextStyle style in report.TextStyles)
+        {
+            _textStyles.Remove(style);
+            _textStylesById.Remove(style.Id);
+        }
+
+        foreach (DimStyle style in report.DimStyles)
+        {
+            _dimStyles.Remove(style);
+            _dimStylesById.Remove(style.Id);
+        }
+
+        foreach (BlockDefinition definition in report.BlockDefinitions)
+        {
+            _blockDefinitions.Remove(definition);
+            _blockDefinitionsById.Remove(definition.Id);
+        }
+
+        foreach (HatchPattern pattern in report.Patterns)
+            _patterns.Remove(pattern);
+
+        RaisePurgeNotifications(report, DocumentChangeKind.LayerRemoved, DocumentChangeKind.PartialDrawingRemoved);
+    }
+
+    /// <summary>Re-registers the definitions listed in <paramref name="report"/> (purge undo).</summary>
+    public void InsertPurged(PurgeReport report)
+    {
+        ArgumentNullException.ThrowIfNull(report);
+
+        foreach (Layer layer in report.Layers)
+            RegisterLayer(layer);
+        foreach (PartialDrawing partialDrawing in report.PartialDrawings)
+            RegisterPartialDrawing(partialDrawing);
+        foreach (TextStyle style in report.TextStyles)
+            RegisterTextStyle(style);
+        foreach (DimStyle style in report.DimStyles)
+            RegisterDimStyle(style);
+        foreach (BlockDefinition definition in report.BlockDefinitions)
+            RegisterBlockDefinition(definition);
+        foreach (HatchPattern pattern in report.Patterns)
+            _patterns.Add(pattern);
+
+        RaisePurgeNotifications(report, DocumentChangeKind.LayerAdded, DocumentChangeKind.PartialDrawingAdded);
+    }
+
+    private void RaisePurgeNotifications(PurgeReport report, DocumentChangeKind layerKind, DocumentChangeKind partialDrawingKind)
+    {
+        foreach (Layer layer in report.Layers)
+            Raise(DocumentChangedEventArgs.ForLayer(layerKind, layer));
+        foreach (PartialDrawing partialDrawing in report.PartialDrawings)
+            Raise(DocumentChangedEventArgs.ForPartialDrawing(partialDrawingKind, partialDrawing));
+        if (report.TextStyles.Count > 0)
+            Raise(new DocumentChangedEventArgs(DocumentChangeKind.TextStylesChanged));
+        if (report.DimStyles.Count > 0)
+            Raise(new DocumentChangedEventArgs(DocumentChangeKind.DimStylesChanged));
+        if (report.BlockDefinitions.Count > 0)
+            Raise(new DocumentChangedEventArgs(DocumentChangeKind.BlocksChanged));
+        if (report.Patterns.Count > 0)
+            Raise(new DocumentChangedEventArgs(DocumentChangeKind.PatternsChanged));
+    }
+
     // ----- Queries -----
 
     public bool IsEntityVisible(IEntity entity)
@@ -732,7 +823,37 @@ public sealed class CadDocument : ICadDocument
 
         CoordinateSystem.Origin = contents.Origin;
 
+        HealOnLoad();
+
         Raise(new DocumentChangedEventArgs(DocumentChangeKind.Reloaded));
+    }
+
+    /// <summary>
+    /// Quietly repairs a freshly loaded document so a damaged file opens instead of crashing
+    /// (#234 self-heal): references that point to a missing definition fall back to the document
+    /// defaults, and objects that can't be salvaged (block references without a definition,
+    /// degenerate geometry, duplicate ids) are dropped. No change events are raised — the single
+    /// <see cref="DocumentChangeKind.Reloaded"/> the caller raises afterwards covers everything.
+    /// </summary>
+    private void HealOnLoad()
+    {
+        foreach (IEntity entity in _entities)
+        {
+            if (entity.LayerId != Guid.Empty && !_layersById.ContainsKey(entity.LayerId))
+                entity.LayerId = DefaultLayer.Id;
+            if (entity.PartialDrawingId != Guid.Empty && !_partialDrawingsById.ContainsKey(entity.PartialDrawingId))
+                entity.PartialDrawingId = DefaultPartialDrawing.Id;
+            if (entity is ITextEntity text && text.TextStyleId != Guid.Empty && !_textStylesById.ContainsKey(text.TextStyleId))
+                ApplyTextStyle(text, DefaultTextStyle);
+            if (entity is DimensionEntity dim && dim.DimStyleId != Guid.Empty && !_dimStylesById.ContainsKey(dim.DimStyleId))
+                ApplyDimStyle(dim, DefaultDimStyle);
+        }
+
+        var seenIds = new HashSet<Guid>();
+        _entities.RemoveAll(entity =>
+            DocumentAudit.IsOrphanBlockReference(this, entity)
+            || DocumentAudit.IsDegenerate(entity)
+            || !seenIds.Add(entity.Id.Value));
     }
 
     private void RegisterLayer(Layer layer)

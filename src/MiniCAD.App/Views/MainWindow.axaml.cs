@@ -451,6 +451,33 @@ public partial class MainWindow : Window
         new MassTakeoffWindow(rows).Show(this);
     }
 
+    private void OnDocumentInfo(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel is not { } viewModel)
+            return;
+
+        new DocumentInfoWindow(viewModel.Document).Show(this);
+    }
+
+    private async void OnPurge(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel is not { } viewModel)
+            return;
+
+        var dialog = new PurgeWindow(viewModel.Document);
+        MiniCAD.Core.Documents.PurgeOptions? options = await dialog.ShowDialog<MiniCAD.Core.Documents.PurgeOptions?>(this);
+        if (options is not null)
+            viewModel.ApplyPurge(options);
+    }
+
+    private void OnAudit(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel is not { } viewModel)
+            return;
+
+        new DocumentAuditWindow(viewModel.Document).Show(this);
+    }
+
     private void OnExit(object? sender, RoutedEventArgs e) => Close();
 
     private void OnPartialDrawingSelection(object? sender, RoutedEventArgs e)

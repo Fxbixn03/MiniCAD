@@ -1,0 +1,36 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="380"
+        x:Class="MiniCAD.App.Views.PurgeWindow"
+        Title="Bereinigen (Purge)"
+        Width="420" Height="380"
+        Background="{DynamicResource Brush.SurfaceApp}"
+        Foreground="{DynamicResource Brush.TextBody}"
+        CanResize="False" WindowStartupLocation="CenterOwner">
+    <DockPanel Margin="16">
+        <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" Foreground="{DynamicResource Brush.TextMuted}"
+                   Text="Ungenutzte Definitionen entfernen. Geschützte Einträge (Standard-Stile, aktiver/Default-Layer und -Teilbild) bleiben immer erhalten."
+                   Margin="0,0,0,12" />
+
+        <StackPanel DockPanel.Dock="Top" Spacing="6">
+            <CheckBox x:Name="LayersCheck" Content="Ungenutzte Layer" IsChecked="True" />
+            <CheckBox x:Name="PartialDrawingsCheck" Content="Leere Teilbilder" IsChecked="True" />
+            <CheckBox x:Name="TextStylesCheck" Content="Ungenutzte Textstile" IsChecked="True" />
+            <CheckBox x:Name="DimStylesCheck" Content="Ungenutzte Maßstile" IsChecked="True" />
+            <CheckBox x:Name="BlocksCheck" Content="Nicht referenzierte Blöcke" IsChecked="True" />
+            <CheckBox x:Name="PatternsCheck" Content="Ungenutzte Schraffurmuster" IsChecked="True" />
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button x:Name="PurgeButton" Content="Bereinigen" Click="OnPurge" />
+            <Button Content="Abbrechen" Click="OnCancel" />
+        </StackPanel>
+
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfacePanel}" CornerRadius="4"
+                Padding="10" Margin="0,12,0,0">
+            <TextBlock x:Name="PreviewText" TextWrapping="Wrap" />
+        </Border>
+    </DockPanel>
+</Window>

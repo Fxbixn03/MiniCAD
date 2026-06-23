@@ -134,6 +134,10 @@
                             <MenuItem Header="Schnitt aus _Modell erzeugen (#93)" Command="{Binding GenerateSectionCommand}" />
                             <MenuItem Header="_Massenauszug (3D)…" Click="OnMassTakeoff" />
                             <Separator />
+                            <MenuItem Header="Dokument-_Info / Statistik…" Click="OnDocumentInfo" />
+                            <MenuItem Header="_Bereinigen (Purge)…" Click="OnPurge" />
+                            <MenuItem Header="_Prüfen &amp; Reparieren (Audit)…" Click="OnAudit" />
+                            <Separator />
                             <MenuItem Header="_Teilbild-Auswahl…" Click="OnPartialDrawingSelection" />
                             <Separator />
                             <MenuItem Header="_Einstellungen…" Click="OnOpenSettings" />
