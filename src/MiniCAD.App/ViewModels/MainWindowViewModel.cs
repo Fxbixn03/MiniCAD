@@ -46,6 +46,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly PointTool _pointTool = new();
     private readonly TextTool _textTool = new();
     private readonly LeaderTool _leaderTool = new();
+    private readonly MultiLeaderTool _multiLeaderTool = new();
     private readonly LinearDimensionTool _linearDimensionTool = new();
     private readonly AngularDimensionTool _angularDimensionTool = new();
     private readonly RadialDimensionTool _radialDimensionTool = new();
@@ -107,6 +108,7 @@ public partial class MainWindowViewModel : ViewModelBase
         // view can show the shared inline editor.
         _textTool.EditRequested += request => TextEditRequested?.Invoke(request);
         _leaderTool.EditRequested += request => TextEditRequested?.Invoke(request);
+        _multiLeaderTool.EditRequested += request => TextEditRequested?.Invoke(request);
 
         Document.Changed += OnDocumentChanged;
         Document.CoordinateSystem.Changed += OnOriginChanged;
@@ -174,6 +176,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Tools.RegisterQuickSelectTool<TextEntity>(_textTool);
         Tools.RegisterQuickSelectTool<MTextEntity>(_textTool);
         Tools.RegisterQuickSelectTool<LeaderEntity>(_leaderTool);
+        Tools.RegisterQuickSelectTool<MultiLeaderEntity>(_multiLeaderTool);
         Tools.RegisterQuickSelectTool<LinearDimensionEntity>(_linearDimensionTool);
         Tools.RegisterQuickSelectTool<AngularDimensionEntity>(_angularDimensionTool);
         Tools.RegisterQuickSelectTool<RadialDimensionEntity>(_radialDimensionTool);
@@ -383,7 +386,7 @@ public partial class MainWindowViewModel : ViewModelBase
         || tool == _columnTool || tool == _slabTool || tool == _beamTool || tool == _rectangleTool || tool == _circleTool
         || tool == _arcTool || tool == _ellipseTool || tool == _polygonTool || tool == _donutTool
         || tool == _multilineTool || tool == _polylineTool || tool == _splineTool
-        || tool == _pointTool || tool == _textTool || tool == _leaderTool
+        || tool == _pointTool || tool == _textTool || tool == _leaderTool || tool == _multiLeaderTool
         || tool == _linearDimensionTool || tool == _angularDimensionTool
         || tool == _elevationDimensionTool || tool == _ordinateDimensionTool
         || tool == _blockInsertTool || tool == _parametricInsertTool || tool == _setNullPointTool
@@ -1021,6 +1024,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void ActivateLeader() => ActivateDrawingTool(_leaderTool);
+
+    [RelayCommand]
+    private void ActivateMultiLeader() => ActivateDrawingTool(_multiLeaderTool);
 
     [RelayCommand]
     private void ActivateLinearDimension() => ActivateDrawingTool(_linearDimensionTool);

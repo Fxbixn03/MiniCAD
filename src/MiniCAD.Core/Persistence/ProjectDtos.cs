@@ -253,6 +253,7 @@ public sealed class Model3DDto
 [JsonDerivedType(typeof(BeamDto), "beam")]
 [JsonDerivedType(typeof(NorthArrowDto), "northarrow")]
 [JsonDerivedType(typeof(ScaleBarDto), "scalebar")]
+[JsonDerivedType(typeof(MultiLeaderDto), "multileader")]
 public abstract class EntityDto
 {
     public Guid LayerId { get; set; }
@@ -540,4 +541,13 @@ public sealed class ScaleBarDto : EntityDto
     public PointDto End { get; set; } = new();
     public int Divisions { get; set; } = 4;
     public double Height { get; set; } = 20.0;
+}
+
+public sealed class MultiLeaderDto : EntityDto
+{
+    public PointDto Landing { get; set; } = new();
+    public List<PointDto> Tips { get; set; } = new();
+    public string Text { get; set; } = string.Empty;
+    public double TextHeight { get; set; } = 12.0;
+    public double ArrowSize { get; set; } = 12.0;
 }

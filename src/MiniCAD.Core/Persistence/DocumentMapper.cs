@@ -525,6 +525,14 @@ public static class DocumentMapper
                 Divisions = scaleBar.Divisions,
                 Height = scaleBar.Height,
             },
+            MultiLeaderEntity multiLeader => new MultiLeaderDto
+            {
+                Landing = ToDto(multiLeader.Landing),
+                Tips = multiLeader.Tips.Select(ToDto).ToList(),
+                Text = multiLeader.Text,
+                TextHeight = multiLeader.TextHeight,
+                ArrowSize = multiLeader.ArrowSize,
+            },
             _ => throw new NotSupportedException($"Entity type '{entity.GetType().Name}' cannot be serialized."),
         };
 
@@ -610,6 +618,9 @@ public static class DocumentMapper
             NorthArrowDto north => new NorthArrowEntity(FromDto(north.Position), north.Size, north.Direction),
             ScaleBarDto scaleBar => new ScaleBarEntity(
                 FromDto(scaleBar.Start), FromDto(scaleBar.End), scaleBar.Divisions, scaleBar.Height),
+            MultiLeaderDto multiLeader => new MultiLeaderEntity(
+                FromDto(multiLeader.Landing), multiLeader.Tips.Select(FromDto), multiLeader.Text,
+                multiLeader.TextHeight, multiLeader.ArrowSize),
             _ => throw new NotSupportedException($"Entity DTO '{dto.GetType().Name}' cannot be deserialized."),
         };
 
