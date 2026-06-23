@@ -116,6 +116,8 @@ public partial class MainWindowViewModel : ViewModelBase
             ConvertConstructionCommand.NotifyCanExecuteChanged();
             GroupSelectionCommand.NotifyCanExecuteChanged();
             UngroupSelectionCommand.NotifyCanExecuteChanged();
+            SelectSimilarCommand.NotifyCanExecuteChanged();
+            SelectSameTypeCommand.NotifyCanExecuteChanged();
             ExplodeSelectionCommand.NotifyCanExecuteChanged();
             JoinSelectionCommand.NotifyCanExecuteChanged();
             ExtrudeSelectionCommand.NotifyCanExecuteChanged();
@@ -680,6 +682,27 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _commands.Execute(new PurgeCommand(Document, report));
         StatusMessage = $"Bereinigt: {report.Summary()}.";
+    }
+
+    /// <summary>Selects every visible object of the same type and layer as the first selected one (#230).</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void SelectSimilar() => SelectSimilarBy(SimilarityCriteria.TypeAndLayer);
+
+    /// <summary>Selects every visible object of the same type as the first selected one (#230).</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void SelectSameType() => SelectSimilarBy(SimilarityCriteria.Type);
+
+    private void SelectSimilarBy(SimilarityCriteria criteria)
+    {
+        if (Tools.Selection.IsEmpty)
+            return;
+
+        IEntity reference = Tools.Selection.Items[0];
+        IEnumerable<IEntity> candidates = Document.Entities.Where(Document.IsEntityVisible);
+        IReadOnlyList<IEntity> matches = SimilarMatcher.Match(reference, candidates, criteria, Document.ResolveStroke);
+
+        Tools.Selection.Set(matches);
+        StatusMessage = $"{matches.Count} ähnliche Objekt(e) ausgewählt.";
     }
 
     /// <summary>Removes the selected entities from their group.</summary>
