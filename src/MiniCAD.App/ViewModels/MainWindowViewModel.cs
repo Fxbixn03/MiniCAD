@@ -38,6 +38,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly CircleTool _circleTool = new();
     private readonly ArcTool _arcTool = new();
     private readonly EllipseTool _ellipseTool = new();
+    private readonly RegularPolygonTool _polygonTool = new();
+    private readonly DonutTool _donutTool = new();
     private readonly PolylineTool _polylineTool = new();
     private readonly SplineTool _splineTool = new();
     private readonly PointTool _pointTool = new();
@@ -84,6 +86,8 @@ public partial class MainWindowViewModel : ViewModelBase
         WallOptions = new WallOptionsViewModel(_wallTool, _beamTool);
         ArrayOptions = new ArrayOptionsViewModel(_arrayTool);
         ArcOptions = new ArcOptionsViewModel(_arcTool);
+        PolygonOptions = new PolygonOptionsViewModel(_polygonTool);
+        DonutOptions = new DonutOptionsViewModel(_donutTool);
         PointOptions = new PointOptionsViewModel(_pointTool);
         TextOptions = new TextOptionsViewModel(_textTool, Document);
         LeaderOptions = new LeaderOptionsViewModel(_leaderTool);
@@ -210,6 +214,8 @@ public partial class MainWindowViewModel : ViewModelBase
             Btn("circle", "Kreis", "Kreis  ·  C", "Icon.Circle", ActivateCircleCommand, () => IsCircleActive),
             Btn("arc", "Bogen", "Bogen  ·  A", "Icon.Arc", ActivateArcCommand, () => IsArcActive),
             Btn("ellipse", "Ellipse", "Ellipse  ·  E", "Icon.Ellipse", ActivateEllipseCommand, () => IsEllipseActive),
+            Btn("polygon", "Vieleck", "Regelmäßiges n-Eck", "M12,3 L20,7.5 L20,16.5 L12,21 L4,16.5 L4,7.5 Z", ActivatePolygonCommand, () => IsPolygonActive),
+            Btn("donut", "Donut", "Donut / Ring", "M3,12 a9,9 0 1 0 18,0 a9,9 0 1 0 -18,0 M8,12 a4,4 0 1 0 8,0 a4,4 0 1 0 -8,0", ActivateDonutCommand, () => IsDonutActive),
             Btn("polyline", "Polylinie", "Polylinie  ·  P", "Icon.Polyline", ActivatePolylineCommand, () => IsPolylineActive),
             Btn("spline", "Spline", "Spline  ·  K", "Icon.Spline", ActivateSplineCommand, () => IsSplineActive),
             Btn("point", "Punkt", "Punkt / Knoten  ·  N", "Icon.Point", ActivatePointCommand, () => IsPointActive),
@@ -318,6 +324,12 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Inline arc-mode selector, shown while the arc tool is active.</summary>
     public ArcOptionsViewModel ArcOptions { get; }
 
+    /// <summary>Inline polygon options (sides / inscribed), shown while the polygon tool is active.</summary>
+    public PolygonOptionsViewModel PolygonOptions { get; }
+
+    /// <summary>Inline donut options (inner radius), shown while the donut tool is active.</summary>
+    public DonutOptionsViewModel DonutOptions { get; }
+
     /// <summary>Inline marker style/size, shown while the point tool is active.</summary>
     public PointOptionsViewModel PointOptions { get; }
 
@@ -357,7 +369,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool IsCoordinateTool(ITool? tool)
         => tool == _lineTool || tool == _wallTool || tool == _openingTool
         || tool == _columnTool || tool == _slabTool || tool == _beamTool || tool == _rectangleTool || tool == _circleTool
-        || tool == _arcTool || tool == _ellipseTool || tool == _polylineTool || tool == _splineTool
+        || tool == _arcTool || tool == _ellipseTool || tool == _polygonTool || tool == _donutTool
+        || tool == _polylineTool || tool == _splineTool
         || tool == _pointTool || tool == _textTool || tool == _leaderTool
         || tool == _linearDimensionTool || tool == _angularDimensionTool
         || tool == _elevationDimensionTool || tool == _ordinateDimensionTool
@@ -471,6 +484,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsCircleActive => Tools.ActiveTool == _circleTool;
     public bool IsArcActive => Tools.ActiveTool == _arcTool;
     public bool IsEllipseActive => Tools.ActiveTool == _ellipseTool;
+    public bool IsPolygonActive => Tools.ActiveTool == _polygonTool;
+    public bool IsDonutActive => Tools.ActiveTool == _donutTool;
     public bool IsPolylineActive => Tools.ActiveTool == _polylineTool;
     public bool IsSplineActive => Tools.ActiveTool == _splineTool;
     public bool IsPointActive => Tools.ActiveTool == _pointTool;
@@ -508,6 +523,8 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsCircleActive));
         OnPropertyChanged(nameof(IsArcActive));
         OnPropertyChanged(nameof(IsEllipseActive));
+        OnPropertyChanged(nameof(IsPolygonActive));
+        OnPropertyChanged(nameof(IsDonutActive));
         OnPropertyChanged(nameof(IsPolylineActive));
         OnPropertyChanged(nameof(IsSplineActive));
         OnPropertyChanged(nameof(IsPointActive));
@@ -896,6 +913,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void ActivateEllipse() => ActivateDrawingTool(_ellipseTool);
+
+    [RelayCommand]
+    private void ActivatePolygon() => ActivateDrawingTool(_polygonTool);
+
+    [RelayCommand]
+    private void ActivateDonut() => ActivateDrawingTool(_donutTool);
 
     [RelayCommand]
     private void ActivatePolyline() => ActivateDrawingTool(_polylineTool);

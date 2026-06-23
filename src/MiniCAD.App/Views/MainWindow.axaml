@@ -341,6 +341,34 @@
             </StackPanel>
         </Border>
 
+        <!-- Inline polygon options (sides + inscribed/circumscribed), shown while the polygon tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsPolygonActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding PolygonOptions}" x:DataType="vm:PolygonOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="VIELECK" VerticalAlignment="Center" />
+                <TextBlock Text="Seiten" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                <TextBox Width="50" Text="{Binding SidesText}" FontFamily="{StaticResource Font.Mono}" />
+                <ToggleButton IsChecked="{Binding Circumscribed}" Content="{Binding ModeLabel}" MinWidth="120"
+                              ToolTip.Tip="Einbeschrieben (Eckpunkte auf dem Kreis) ⟷ Umschrieben (Kanten tangential)" />
+                <TextBlock Text="Mittelpunkt klicken, dann Radius/Ausrichtung" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Inline donut options (inner radius), shown while the donut tool is active. -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
+                BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsDonutActive}">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10,6" VerticalAlignment="Center"
+                        DataContext="{Binding DonutOptions}" x:DataType="vm:DonutOptionsViewModel">
+                <TextBlock Classes="eyebrow" Text="DONUT" VerticalAlignment="Center" />
+                <TextBlock Text="Innenradius" Foreground="{DynamicResource Brush.StatusInfo}" FontFamily="{StaticResource Font.Mono}" VerticalAlignment="Center" />
+                <TextBox Width="70" Text="{Binding InnerText}" FontFamily="{StaticResource Font.Mono}" />
+                <TextBlock Text="Mittelpunkt klicken, dann Außenradius" Foreground="{DynamicResource Brush.TextFaint}" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
+        </Border>
+
         <!-- Inline fillet/chamfer parameters, shown while that tool is active. -->
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource Brush.SurfaceChromeAlt}"
                 BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="0,1,0,0"
